@@ -14,7 +14,7 @@ namespace Sangki
         public float mouseX;
         public float mouseY;
         public float moveAmount;
-        public float cameraZoomSpeed;
+        public float cameraZoomSpeed = 0.02f;
 
         [Header("References")] 
         public Cinemachine.CinemachineFreeLook normalCamera;
@@ -29,11 +29,11 @@ namespace Sangki
         private PlayerInputAction _playerInputAction;
         [HideInInspector] 
         public LayerMask ignoreForGroundCheck;
-        [HideInInspector]
-        public readonly string locomotionId = "locomotion";
-        [HideInInspector]
-        public readonly string attackStateId = "attackState";
+        internal readonly string locomotionId = "locomotion";
+        internal readonly string attackStateId = "attackState";
+        internal readonly string rollingStateId = "rollingState";
 
+        internal bool isRolling;
         private float scrollY;
         
         public override void Init()
@@ -62,11 +62,23 @@ namespace Sangki
                 }, new List<StateAction>() //Late UPdate
                 {
                 });
+            
+            State rollingState = new State(
+                new List<StateAction>() //Fixed Update
+                {
+                }, new List<StateAction>() //Update
+                {
+                    new MonitorInteractingAnimation(this, "isInteracting", locomotionId),
+                }, new List<StateAction>() //Late UPdate
+                {
+                });
 
             attackState.onEnter = EnableRootMotion;
+            rollingState.onEnter = EnableRootMotion;
             
             RegisterState(locomotionId, locomotion);
             RegisterState(attackStateId, attackState);
+            RegisterState(rollingStateId, rollingState);
             
             ChangeState(locomotionId);
 
@@ -82,7 +94,7 @@ namespace Sangki
         {
             _playerInputAction = new PlayerInputAction();
             _playerInputAction.Enable();
-            _playerInputAction.GamePlay.MouseScrollY.performed += x => scrollY = x.ReadValue<float>() * 0.02f * -1;
+            _playerInputAction.GamePlay.MouseScrollY.performed += x => scrollY = x.ReadValue<float>() * cameraZoomSpeed * -1;
             
             normalCamera.m_Lens.FieldOfView = PlayerPrefs.GetFloat("ZoomAmount", 0);
         }
@@ -137,12 +149,12 @@ namespace Sangki
         #endregion
 
         #region Lock on
-        public override void OnAssignLookOverride(Transform target)
+        public override void OnAssignLookOverride(Transform lockTarget)
         {
-            base.OnAssignLookOverride(target);
+            base.OnAssignLookOverride(lockTarget);
             normalCamera.gameObject.SetActive(false);
             lockOnCamera.gameObject.SetActive(true);
-            lockOnCamera.m_LookAt = target;
+            lockOnCamera.m_LookAt = lockTarget;
         }
 
         public override void OnClearLookOverride()
