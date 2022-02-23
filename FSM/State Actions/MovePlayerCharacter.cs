@@ -1,5 +1,6 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Sangki
 {
@@ -10,7 +11,8 @@ namespace Sangki
         private RaycastHit _raycastHit;
         private Vector3 _currentVelocity, _targetVelocity, _origin, _targetDir;
         private Quaternion _targetRotation;
-        
+
+        private float frontY, speed;
         private bool isFixedRotating;
         private readonly int _animHash_Forward = Animator.StringToHash("Forward");
         private readonly int _animHash_Sideways = Animator.StringToHash("Sideways");
@@ -24,21 +26,22 @@ namespace Sangki
         {
             isFixedRotating = _states.isFixRotation;
             
-            float frontY = 0;
+            frontY = 0;
+            speed = _states.isRun ? _states.runSpeed : _states.movementsSpeed;
             
             if (_states.lockOn)
             {
-                _targetVelocity = _states.mTransform.forward * _states.vertical * _states.movementsSpeed;
-                _targetVelocity += _states.mTransform.right * _states.horizontal * _states.movementsSpeed;
+                _targetVelocity = _states.mTransform.forward * _states.vertical * speed * 0.8f;
+                _targetVelocity += _states.mTransform.right * _states.horizontal * speed * 0.8f;
             }
             else
             {
                 float m = _states.moveAmount;
                 if (_states.vertical < 0)
                 {
-                    m *= -0.65f; // Slow Backward
+                    m *= -0.85f; // Slow Backward
                 }
-                _targetVelocity = _states.mTransform.forward * m * _states.movementsSpeed;
+                _targetVelocity = _states.mTransform.forward * m * speed;
             }
             
             _origin = _states.mTransform.position + (_targetVelocity.normalized * _states.frontRayOffset);
@@ -63,7 +66,7 @@ namespace Sangki
                     _states.rigidbody.drag = 0;
                     if (Mathf.Abs(frontY) > 0.02f)
                     {
-                        _targetVelocity.y = ((frontY > 0) ? frontY + 0.2f : frontY - 0.2f) * _states.movementsSpeed;
+                        _targetVelocity.y = ((frontY > 0) ? frontY + 0.2f : frontY - 0.2f) * speed;
                     }
                 
                     HandleRotation();
@@ -171,6 +174,12 @@ namespace Sangki
                         f = 1;
 
                     if (_states.vertical < 0) f = -f;
+                    
+                    if (!_states.isRun)
+                    {
+                        if (f > 0.5f) f = 0.5f;
+                        else if (f < -0.5f) f = -0.5f;
+                    }
                 
                     _states.anim.SetFloat(_animHash_Forward, f, 0.2f, _states.delta);
                     
@@ -182,6 +191,12 @@ namespace Sangki
                         s = 1;
 
                     if (_states.horizontal < 0) s = -1;
+                    
+                    if (!_states.isRun)
+                    {
+                        if (s > 0.5f) s = 0.5f;
+                        else if (s < -0.5f) s = -0.5f;
+                    }
                 
                     _states.anim.SetFloat(_animHash_Sideways, s, 0.2f, _states.delta);
                 }
@@ -194,7 +209,12 @@ namespace Sangki
                     else if (m > 0.5f) 
                         f= 1;
                     if (_states.vertical < 0) f *= -1;
-                
+                    
+                    if (!_states.isRun)
+                    {
+                        if (f > 0.5f) f = 0.5f;
+                        else if (f < -0.5f) f = -0.5f;
+                    }
                     _states.anim.SetFloat(_animHash_Forward, f, 0.2f, _states.delta);
                     _states.anim.SetFloat(_animHash_Sideways, 0, 0.2f, _states.delta);
                 }

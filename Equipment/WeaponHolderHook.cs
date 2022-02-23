@@ -5,24 +5,24 @@ namespace Sangki
 {
     public class WeaponHolderHook : MonoBehaviour
     {
+        [HideInInspector]
+        public GameObject currentModel;
         public Transform parentOverride;
         public bool isLeftHook;
 
-        private GameObject _currentModel;
-
         public void UnloadWeapon()
         {
-            if (_currentModel != null)
+            if (currentModel != null)
             {
-                _currentModel.SetActive(false);
+                currentModel.SetActive(false);
             }
         }
 
         public void UnloadWeaponAndDestroy()
         {
-            if (_currentModel != null)
+            if (currentModel != null)
             {
-                Destroy(_currentModel);
+                Destroy(currentModel);
             }
         }
 
@@ -51,7 +51,7 @@ namespace Sangki
                 model.transform.localScale = weaponModel.modelPrefab.transform.localScale;
             }
 
-            _currentModel = model;
+            currentModel = model;
         }
     }
 }

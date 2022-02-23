@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Sanki;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,9 +12,9 @@ namespace Sangki
         [Header("Inputs")] 
         public bool debugLock;
         public bool isFixRotation;
-        public float mouseX;
-        public float mouseY;
-        public float moveAmount;
+        [ReadOnly] public float mouseX;
+        [ReadOnly] public float mouseY;
+        [ReadOnly] public float moveAmount;
         public float cameraZoomSpeed = 0.02f;
 
         [Header("References")] 
@@ -21,19 +22,23 @@ namespace Sangki
         public Cinemachine.CinemachineFreeLook lockOnCamera;
         
         [Header("Movement States")]
-        public float frontRayOffset = 0.5f;
-        public float movementsSpeed = 2;
+        public float frontRayOffset = 1;
+        public float movementsSpeed = 10;
+        public float runSpeed = 15;
         public float adaptSpeed = 10;
-        public float rotationSpeed;
+        public float rotationSpeed = 6;
+        public float jumpForce = 10;
+        public float jumpIntervalDelay = 3;
 
         private PlayerInputAction _playerInputAction;
-        [HideInInspector] 
-        public LayerMask ignoreForGroundCheck;
+        
+        internal LayerMask ignoreForGroundCheck;
+        
         internal readonly string locomotionId = "locomotion";
         internal readonly string attackStateId = "attackState";
         internal readonly string rollingStateId = "rollingState";
 
-        internal bool isRolling;
+        internal bool isRolling, isJump, isRun;
         private float scrollY;
         
         public override void Init()
@@ -93,6 +98,7 @@ namespace Sangki
         private void OnEnable()
         {
             _playerInputAction = new PlayerInputAction();
+            weaponHolderManager = GetComponent<WeaponHolderManager>();
             _playerInputAction.Enable();
             _playerInputAction.GamePlay.MouseScrollY.performed += x => scrollY = x.ReadValue<float>() * cameraZoomSpeed * -1;
             
@@ -135,7 +141,7 @@ namespace Sangki
             if (debugLock)
             {
                 debugLock = false;
-                OnAssignLookOverride(target);
+                if (target) OnAssignLookOverride(target);
             }
             
             delta = Time.deltaTime;
@@ -164,6 +170,11 @@ namespace Sangki
             lockOnCamera.gameObject.SetActive(false);
         }
         #endregion
+        
+        public void Land()
+        {
+            // Land Sound
+        }
 
         #region State Events
         private void DisableRootMotion() => useRootMotion = false;

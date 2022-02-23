@@ -48,6 +48,33 @@ namespace Sanki
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""f358463c-8f64-449d-80c4-ccea749bda97"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Rolling_Horizontal"",
+                    ""type"": ""Value"",
+                    ""id"": ""0e553f6a-4c41-4478-afe7-029df0bc4b26"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Rolling_Vertical"",
+                    ""type"": ""Value"",
+                    ""id"": ""336950d3-0cef-4fe5-9cba-1f2beb0f34e1"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""Interact"",
                     ""type"": ""Button"",
                     ""id"": ""243461f2-26a4-480c-8b11-5f7d5a7a1a30"",
@@ -64,24 +91,6 @@ namespace Sanki
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""Rolling"",
-                    ""type"": ""Button"",
-                    ""id"": ""0e553f6a-4c41-4478-afe7-029df0bc4b26"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": ""MultiTap"",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Jump"",
-                    ""type"": ""Button"",
-                    ""id"": ""f358463c-8f64-449d-80c4-ccea749bda97"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -230,50 +239,6 @@ namespace Sanki
                 },
                 {
                     ""name"": """",
-                    ""id"": ""c8968484-0b68-4875-82a5-0037ec834977"",
-                    ""path"": ""<Keyboard>/w"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Rolling"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""6f40365f-8ecf-46b1-8f3a-151aab1e6862"",
-                    ""path"": ""<Keyboard>/a"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Rolling"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""28d2e6cb-33a6-4234-89c4-07b20703c2db"",
-                    ""path"": ""<Keyboard>/d"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Rolling"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""c7be295c-b20a-4390-9531-76c4d81f065c"",
-                    ""path"": ""<Keyboard>/s"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Rolling"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""05e5808c-28db-40ad-b09f-ceede3e91e05"",
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
@@ -282,6 +247,72 @@ namespace Sanki
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""AD"",
+                    ""id"": ""eef785eb-3063-411d-8912-a453f2d65808"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": ""MultiTap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Rolling_Horizontal"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""3fc2e9a3-149c-49ce-bf35-fc105e024c82"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Rolling_Horizontal"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""d880b54e-e323-42da-8791-aa774a94c3a3"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Rolling_Horizontal"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""WS"",
+                    ""id"": ""65865abb-653f-4b59-a222-8df25943aba9"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": ""MultiTap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Rolling_Vertical"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""e58cd445-44dd-46c2-8db5-ea4e32a912fc"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Rolling_Vertical"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""06fd26e1-d013-4e73-911b-4d894e2d8393"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Rolling_Vertical"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -836,10 +867,11 @@ namespace Sanki
             m_GamePlay = asset.FindActionMap("GamePlay", throwIfNotFound: true);
             m_GamePlay_Move = m_GamePlay.FindAction("Move", throwIfNotFound: true);
             m_GamePlay_Rotate = m_GamePlay.FindAction("Rotate", throwIfNotFound: true);
+            m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
+            m_GamePlay_Rolling_Horizontal = m_GamePlay.FindAction("Rolling_Horizontal", throwIfNotFound: true);
+            m_GamePlay_Rolling_Vertical = m_GamePlay.FindAction("Rolling_Vertical", throwIfNotFound: true);
             m_GamePlay_Interact = m_GamePlay.FindAction("Interact", throwIfNotFound: true);
             m_GamePlay_MouseScrollY = m_GamePlay.FindAction("MouseScrollY", throwIfNotFound: true);
-            m_GamePlay_Rolling = m_GamePlay.FindAction("Rolling", throwIfNotFound: true);
-            m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -913,20 +945,22 @@ namespace Sanki
         private IGamePlayActions m_GamePlayActionsCallbackInterface;
         private readonly InputAction m_GamePlay_Move;
         private readonly InputAction m_GamePlay_Rotate;
+        private readonly InputAction m_GamePlay_Jump;
+        private readonly InputAction m_GamePlay_Rolling_Horizontal;
+        private readonly InputAction m_GamePlay_Rolling_Vertical;
         private readonly InputAction m_GamePlay_Interact;
         private readonly InputAction m_GamePlay_MouseScrollY;
-        private readonly InputAction m_GamePlay_Rolling;
-        private readonly InputAction m_GamePlay_Jump;
         public struct GamePlayActions
         {
             private @PlayerInputAction m_Wrapper;
             public GamePlayActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
             public InputAction @Move => m_Wrapper.m_GamePlay_Move;
             public InputAction @Rotate => m_Wrapper.m_GamePlay_Rotate;
+            public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
+            public InputAction @Rolling_Horizontal => m_Wrapper.m_GamePlay_Rolling_Horizontal;
+            public InputAction @Rolling_Vertical => m_Wrapper.m_GamePlay_Rolling_Vertical;
             public InputAction @Interact => m_Wrapper.m_GamePlay_Interact;
             public InputAction @MouseScrollY => m_Wrapper.m_GamePlay_MouseScrollY;
-            public InputAction @Rolling => m_Wrapper.m_GamePlay_Rolling;
-            public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
             public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -942,18 +976,21 @@ namespace Sanki
                     @Rotate.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRotate;
                     @Rotate.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRotate;
                     @Rotate.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRotate;
+                    @Jump.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
+                    @Jump.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
+                    @Jump.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
+                    @Rolling_Horizontal.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
+                    @Rolling_Horizontal.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
+                    @Rolling_Horizontal.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
+                    @Rolling_Vertical.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Vertical;
+                    @Rolling_Vertical.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Vertical;
+                    @Rolling_Vertical.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Vertical;
                     @Interact.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
                     @Interact.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
                     @Interact.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
                     @MouseScrollY.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMouseScrollY;
                     @MouseScrollY.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMouseScrollY;
                     @MouseScrollY.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMouseScrollY;
-                    @Rolling.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling;
-                    @Rolling.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling;
-                    @Rolling.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling;
-                    @Jump.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
-                    @Jump.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
-                    @Jump.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
                 }
                 m_Wrapper.m_GamePlayActionsCallbackInterface = instance;
                 if (instance != null)
@@ -964,18 +1001,21 @@ namespace Sanki
                     @Rotate.started += instance.OnRotate;
                     @Rotate.performed += instance.OnRotate;
                     @Rotate.canceled += instance.OnRotate;
+                    @Jump.started += instance.OnJump;
+                    @Jump.performed += instance.OnJump;
+                    @Jump.canceled += instance.OnJump;
+                    @Rolling_Horizontal.started += instance.OnRolling_Horizontal;
+                    @Rolling_Horizontal.performed += instance.OnRolling_Horizontal;
+                    @Rolling_Horizontal.canceled += instance.OnRolling_Horizontal;
+                    @Rolling_Vertical.started += instance.OnRolling_Vertical;
+                    @Rolling_Vertical.performed += instance.OnRolling_Vertical;
+                    @Rolling_Vertical.canceled += instance.OnRolling_Vertical;
                     @Interact.started += instance.OnInteract;
                     @Interact.performed += instance.OnInteract;
                     @Interact.canceled += instance.OnInteract;
                     @MouseScrollY.started += instance.OnMouseScrollY;
                     @MouseScrollY.performed += instance.OnMouseScrollY;
                     @MouseScrollY.canceled += instance.OnMouseScrollY;
-                    @Rolling.started += instance.OnRolling;
-                    @Rolling.performed += instance.OnRolling;
-                    @Rolling.canceled += instance.OnRolling;
-                    @Jump.started += instance.OnJump;
-                    @Jump.performed += instance.OnJump;
-                    @Jump.canceled += instance.OnJump;
                 }
             }
         }
@@ -1107,10 +1147,11 @@ namespace Sanki
         {
             void OnMove(InputAction.CallbackContext context);
             void OnRotate(InputAction.CallbackContext context);
+            void OnJump(InputAction.CallbackContext context);
+            void OnRolling_Horizontal(InputAction.CallbackContext context);
+            void OnRolling_Vertical(InputAction.CallbackContext context);
             void OnInteract(InputAction.CallbackContext context);
             void OnMouseScrollY(InputAction.CallbackContext context);
-            void OnRolling(InputAction.CallbackContext context);
-            void OnJump(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {

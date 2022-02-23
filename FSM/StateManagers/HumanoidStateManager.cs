@@ -1,4 +1,5 @@
-﻿using  UnityEngine;
+﻿using Unity.Collections;
+using UnityEngine;
 
 namespace Sangki
 {
@@ -12,20 +13,21 @@ namespace Sangki
         public Transform mainCamera;
         
         [Header("States")] 
-        public bool isGrounded;
-        public bool useRootMotion;
-        public bool lockOn;
+        [ReadOnly] public bool isGrounded;
+        [ReadOnly] public bool useRootMotion;
+        [ReadOnly] public bool lockOn;
         public Transform target;
 
         [Header("Controller Values")] 
-        public float horizontal;
-        public float vertical;
-        public float delta;
-        public Vector3 rootMovement;
+        [ReadOnly] public float horizontal;
+        [ReadOnly] public float vertical;
+        [ReadOnly] public float delta;
 
         [Header("Equipments")] 
         public Weapon rightWeapon;
         public Weapon leftWeapon;
+
+        private readonly string animString_isInteracting = "isInteracting";
         
         public override void Init()
         {
@@ -46,7 +48,7 @@ namespace Sangki
 
         public void PlayerTargetAnimation(string targetAnim, bool isInteracting)
         {
-            anim.SetBool("isInteracting", isInteracting);
+            anim.SetBool(animString_isInteracting, isInteracting);
             anim.CrossFade(targetAnim, 0.2f);
         }
 
