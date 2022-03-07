@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Sangki
+namespace SK
 {
     public class MovePlayerCharacter : StateAction
     {
@@ -13,7 +13,6 @@ namespace Sangki
         private Quaternion _targetRotation;
 
         private float frontY, speed;
-        private bool isFixedRotating;
         private readonly int _animHash_Forward = Animator.StringToHash("Forward");
         private readonly int _animHash_Sideways = Animator.StringToHash("Sideways");
 
@@ -24,15 +23,15 @@ namespace Sangki
 
         public override bool Execute()
         {
-            isFixedRotating = _states.isFixRotation;
             
             frontY = 0;
             speed = _states.isRun ? _states.runSpeed : _states.movementsSpeed;
             
             if (_states.lockOn)
             {
-                _targetVelocity = _states.mTransform.forward * _states.vertical * speed * 0.8f;
-                _targetVelocity += _states.mTransform.right * _states.horizontal * speed * 0.8f;
+                speed *= 0.8f;
+                _targetVelocity = _states.mTransform.forward * _states.vertical * speed;
+                _targetVelocity += _states.mTransform.right * _states.horizontal * speed;
             }
             else
             {
@@ -47,7 +46,7 @@ namespace Sangki
             _origin = _states.mTransform.position + (_targetVelocity.normalized * _states.frontRayOffset);
             _origin.y += 0.5f;
             
-            Debug.DrawRay(_origin, -Vector3.up, Color.red, 0.01f, false);
+            //Debug.DrawRay(_origin, -Vector3.up, Color.red, 0.01f, false);
             if (Physics.Raycast(_origin, -Vector3.up, out _raycastHit, 1, _states.ignoreForGroundCheck))
             {
                 float y = _raycastHit.point.y;
@@ -92,7 +91,7 @@ namespace Sangki
             
             HandleAnimations();
             
-            Debug.DrawRay((_states.mTransform.position + Vector3.up * 0.2f), _targetVelocity, Color.green, 0.01f, false);
+            //Debug.DrawRay((_states.mTransform.position + Vector3.up * 0.2f), _targetVelocity, Color.green, 0.01f, false);
             _states.rigidbody.velocity = Vector3.Lerp(_currentVelocity, _targetVelocity, _states.delta * _states.adaptSpeed);
             
             return false;
@@ -104,19 +103,24 @@ namespace Sangki
             float forward = _states.vertical;
             float sideways = _states.horizontal;
 
-            if (!isFixedRotating)
+            if (_states.lockOn)
             {
-                if (_states.lockOn)
-                {
-                    _targetDir = _states.target.position - _states.mTransform.position;
-                    moveOverride = 1;
-                }
-                else
-                {
+                _targetDir = _states.target.position - _states.mTransform.position;
+                moveOverride = 1;
                 
-                    _targetDir = _states.mTransform.forward * forward;
-                    _targetDir += _states.mTransform.right * sideways;
-                }
+                _targetDir.Normalize();
+                _targetDir.y = 0;
+                if (_targetDir == Vector3.zero)
+                    _targetDir = _states.transform.forward;
+        
+                _targetRotation = Quaternion.LookRotation(_targetDir);
+            }
+            else
+            {
+                
+                _targetDir = _states.mainCamera.forward * forward;
+                _targetDir += _states.mainCamera.right * sideways;
+                if (forward < 0) _targetDir *= -1;
             
                 _targetDir.Normalize();
                 _targetDir.y = 0;
@@ -125,35 +129,7 @@ namespace Sangki
             
                 _targetRotation = Quaternion.LookRotation(_targetDir);
             }
-            else
-            {
-                if (_states.lockOn)
-                {
-                    _targetDir = _states.target.position - _states.mTransform.position;
-                    moveOverride = 1;
-                    
-                    _targetDir.Normalize();
-                    _targetDir.y = 0;
-                    if (_targetDir == Vector3.zero)
-                        _targetDir = _states.transform.forward;
             
-                    _targetRotation = Quaternion.LookRotation(_targetDir);
-                }
-                else
-                {
-                    
-                    _targetDir = _states.mainCamera.forward * forward;
-                    _targetDir += _states.mainCamera.right * sideways;
-                    if (forward < 0) _targetDir *= -1;
-                
-                    _targetDir.Normalize();
-                    _targetDir.y = 0;
-                    if (_targetDir == Vector3.zero)
-                        _targetDir = _states.transform.forward;
-                
-                    _targetRotation = Quaternion.LookRotation(_targetDir);
-                }
-            }
             
             _states.mTransform.rotation = Quaternion.Slerp(
                                         _states.mTransform.rotation, _targetRotation,

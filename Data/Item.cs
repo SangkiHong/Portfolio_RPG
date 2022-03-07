@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Sangki
+namespace SK
 {
     public enum ItemType
     { 

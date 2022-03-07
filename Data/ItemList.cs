@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Sangki
+namespace SK
 {
     [CreateAssetMenu(menuName = "Game Data/Item List", fileName = "ItemList_")]
     public class ItemList : ScriptableObject

@@ -48,9 +48,27 @@ namespace Sanki
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""Run"",
+                    ""type"": ""Button"",
+                    ""id"": ""e25a43e1-bf91-45c9-ab79-dc28df7e566d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Jump"",
                     ""type"": ""Button"",
                     ""id"": ""f358463c-8f64-449d-80c4-ccea749bda97"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Attack"",
+                    ""type"": ""Button"",
+                    ""id"": ""9e89b11e-df0b-4e5b-bc46-acfb1fa6b0bc"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -84,13 +102,40 @@ namespace Sanki
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""MouseScrollY"",
+                    ""name"": ""CameraZoom"",
                     ""type"": ""PassThrough"",
                     ""id"": ""bab13608-906c-4042-aeeb-0718e0907e96"",
                     ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""TargetLockOn"",
+                    ""type"": ""Button"",
+                    ""id"": ""11143495-c114-4711-b5af-ce9f4b0722b9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Shield"",
+                    ""type"": ""Button"",
+                    ""id"": ""9a8ef6b8-225f-4ebc-9fc4-d16dcea61f1b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SwitchFightMode"",
+                    ""type"": ""Button"",
+                    ""id"": ""0ca2d6c4-bc2a-4866-b571-9bd083e4ac11"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -221,7 +266,7 @@ namespace Sanki
                     ""path"": ""<Keyboard>/r"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -233,7 +278,7 @@ namespace Sanki
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""MouseScrollY"",
+                    ""action"": ""CameraZoom"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -313,6 +358,61 @@ namespace Sanki
                     ""action"": ""Rolling_Vertical"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7560cb33-ede1-411d-8e72-ab67887d14f0"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""TargetLockOn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dfde2f89-948c-48c9-9f26-779ab7416150"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Shield"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0bdb28c1-7109-44fb-ac54-694903c9d3f7"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Run"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c9e28fa9-3619-44e3-afbe-3a2d9902c549"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""SwitchFightMode"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1617f937-8757-43f4-a909-8ee3bc49e448"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -867,11 +967,16 @@ namespace Sanki
             m_GamePlay = asset.FindActionMap("GamePlay", throwIfNotFound: true);
             m_GamePlay_Move = m_GamePlay.FindAction("Move", throwIfNotFound: true);
             m_GamePlay_Rotate = m_GamePlay.FindAction("Rotate", throwIfNotFound: true);
+            m_GamePlay_Run = m_GamePlay.FindAction("Run", throwIfNotFound: true);
             m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
+            m_GamePlay_Attack = m_GamePlay.FindAction("Attack", throwIfNotFound: true);
             m_GamePlay_Rolling_Horizontal = m_GamePlay.FindAction("Rolling_Horizontal", throwIfNotFound: true);
             m_GamePlay_Rolling_Vertical = m_GamePlay.FindAction("Rolling_Vertical", throwIfNotFound: true);
             m_GamePlay_Interact = m_GamePlay.FindAction("Interact", throwIfNotFound: true);
-            m_GamePlay_MouseScrollY = m_GamePlay.FindAction("MouseScrollY", throwIfNotFound: true);
+            m_GamePlay_CameraZoom = m_GamePlay.FindAction("CameraZoom", throwIfNotFound: true);
+            m_GamePlay_TargetLockOn = m_GamePlay.FindAction("TargetLockOn", throwIfNotFound: true);
+            m_GamePlay_Shield = m_GamePlay.FindAction("Shield", throwIfNotFound: true);
+            m_GamePlay_SwitchFightMode = m_GamePlay.FindAction("SwitchFightMode", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -945,22 +1050,32 @@ namespace Sanki
         private IGamePlayActions m_GamePlayActionsCallbackInterface;
         private readonly InputAction m_GamePlay_Move;
         private readonly InputAction m_GamePlay_Rotate;
+        private readonly InputAction m_GamePlay_Run;
         private readonly InputAction m_GamePlay_Jump;
+        private readonly InputAction m_GamePlay_Attack;
         private readonly InputAction m_GamePlay_Rolling_Horizontal;
         private readonly InputAction m_GamePlay_Rolling_Vertical;
         private readonly InputAction m_GamePlay_Interact;
-        private readonly InputAction m_GamePlay_MouseScrollY;
+        private readonly InputAction m_GamePlay_CameraZoom;
+        private readonly InputAction m_GamePlay_TargetLockOn;
+        private readonly InputAction m_GamePlay_Shield;
+        private readonly InputAction m_GamePlay_SwitchFightMode;
         public struct GamePlayActions
         {
             private @PlayerInputAction m_Wrapper;
             public GamePlayActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
             public InputAction @Move => m_Wrapper.m_GamePlay_Move;
             public InputAction @Rotate => m_Wrapper.m_GamePlay_Rotate;
+            public InputAction @Run => m_Wrapper.m_GamePlay_Run;
             public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
+            public InputAction @Attack => m_Wrapper.m_GamePlay_Attack;
             public InputAction @Rolling_Horizontal => m_Wrapper.m_GamePlay_Rolling_Horizontal;
             public InputAction @Rolling_Vertical => m_Wrapper.m_GamePlay_Rolling_Vertical;
             public InputAction @Interact => m_Wrapper.m_GamePlay_Interact;
-            public InputAction @MouseScrollY => m_Wrapper.m_GamePlay_MouseScrollY;
+            public InputAction @CameraZoom => m_Wrapper.m_GamePlay_CameraZoom;
+            public InputAction @TargetLockOn => m_Wrapper.m_GamePlay_TargetLockOn;
+            public InputAction @Shield => m_Wrapper.m_GamePlay_Shield;
+            public InputAction @SwitchFightMode => m_Wrapper.m_GamePlay_SwitchFightMode;
             public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -976,9 +1091,15 @@ namespace Sanki
                     @Rotate.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRotate;
                     @Rotate.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRotate;
                     @Rotate.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRotate;
+                    @Run.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRun;
+                    @Run.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRun;
+                    @Run.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRun;
                     @Jump.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
                     @Jump.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
                     @Jump.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
+                    @Attack.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
+                    @Attack.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
+                    @Attack.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
                     @Rolling_Horizontal.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
                     @Rolling_Horizontal.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
                     @Rolling_Horizontal.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
@@ -988,9 +1109,18 @@ namespace Sanki
                     @Interact.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
                     @Interact.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
                     @Interact.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
-                    @MouseScrollY.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMouseScrollY;
-                    @MouseScrollY.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMouseScrollY;
-                    @MouseScrollY.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnMouseScrollY;
+                    @CameraZoom.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
+                    @CameraZoom.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
+                    @CameraZoom.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnCameraZoom;
+                    @TargetLockOn.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnTargetLockOn;
+                    @TargetLockOn.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnTargetLockOn;
+                    @TargetLockOn.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnTargetLockOn;
+                    @Shield.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnShield;
+                    @Shield.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnShield;
+                    @Shield.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnShield;
+                    @SwitchFightMode.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchFightMode;
+                    @SwitchFightMode.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchFightMode;
+                    @SwitchFightMode.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchFightMode;
                 }
                 m_Wrapper.m_GamePlayActionsCallbackInterface = instance;
                 if (instance != null)
@@ -1001,9 +1131,15 @@ namespace Sanki
                     @Rotate.started += instance.OnRotate;
                     @Rotate.performed += instance.OnRotate;
                     @Rotate.canceled += instance.OnRotate;
+                    @Run.started += instance.OnRun;
+                    @Run.performed += instance.OnRun;
+                    @Run.canceled += instance.OnRun;
                     @Jump.started += instance.OnJump;
                     @Jump.performed += instance.OnJump;
                     @Jump.canceled += instance.OnJump;
+                    @Attack.started += instance.OnAttack;
+                    @Attack.performed += instance.OnAttack;
+                    @Attack.canceled += instance.OnAttack;
                     @Rolling_Horizontal.started += instance.OnRolling_Horizontal;
                     @Rolling_Horizontal.performed += instance.OnRolling_Horizontal;
                     @Rolling_Horizontal.canceled += instance.OnRolling_Horizontal;
@@ -1013,9 +1149,18 @@ namespace Sanki
                     @Interact.started += instance.OnInteract;
                     @Interact.performed += instance.OnInteract;
                     @Interact.canceled += instance.OnInteract;
-                    @MouseScrollY.started += instance.OnMouseScrollY;
-                    @MouseScrollY.performed += instance.OnMouseScrollY;
-                    @MouseScrollY.canceled += instance.OnMouseScrollY;
+                    @CameraZoom.started += instance.OnCameraZoom;
+                    @CameraZoom.performed += instance.OnCameraZoom;
+                    @CameraZoom.canceled += instance.OnCameraZoom;
+                    @TargetLockOn.started += instance.OnTargetLockOn;
+                    @TargetLockOn.performed += instance.OnTargetLockOn;
+                    @TargetLockOn.canceled += instance.OnTargetLockOn;
+                    @Shield.started += instance.OnShield;
+                    @Shield.performed += instance.OnShield;
+                    @Shield.canceled += instance.OnShield;
+                    @SwitchFightMode.started += instance.OnSwitchFightMode;
+                    @SwitchFightMode.performed += instance.OnSwitchFightMode;
+                    @SwitchFightMode.canceled += instance.OnSwitchFightMode;
                 }
             }
         }
@@ -1147,11 +1292,16 @@ namespace Sanki
         {
             void OnMove(InputAction.CallbackContext context);
             void OnRotate(InputAction.CallbackContext context);
+            void OnRun(InputAction.CallbackContext context);
             void OnJump(InputAction.CallbackContext context);
+            void OnAttack(InputAction.CallbackContext context);
             void OnRolling_Horizontal(InputAction.CallbackContext context);
             void OnRolling_Vertical(InputAction.CallbackContext context);
             void OnInteract(InputAction.CallbackContext context);
-            void OnMouseScrollY(InputAction.CallbackContext context);
+            void OnCameraZoom(InputAction.CallbackContext context);
+            void OnTargetLockOn(InputAction.CallbackContext context);
+            void OnShield(InputAction.CallbackContext context);
+            void OnSwitchFightMode(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {

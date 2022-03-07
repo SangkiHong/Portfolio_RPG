@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Sangki
+namespace SK
 {
     public class GameManager : MonoBehaviour
     {

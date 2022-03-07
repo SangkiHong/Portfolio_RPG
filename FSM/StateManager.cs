@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-namespace Sangki
+namespace SK.FSM
 {
     public abstract class StateManager : MonoBehaviour
     {

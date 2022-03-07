@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Sangki
+namespace SK
 {
     public class Item_Default : Item
     {

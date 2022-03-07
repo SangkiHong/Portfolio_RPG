@@ -1,4 +1,4 @@
-﻿namespace Sangki
+﻿namespace SK
 {
     public abstract class StateAction
     {

@@ -2,26 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Sangki
+namespace SK
 {
     public class MonitorInteractingAnimation : StateAction
     {
-        private HumanoidStateManager states;
+        private CharacterStateManager states;
         private string targetBool;
         private string targetState;
 
-        public MonitorInteractingAnimation(HumanoidStateManager humanoidStateManager, string targetBool, string targetState)
+        public MonitorInteractingAnimation(CharacterStateManager characterStateManager, string targetBool, string targetState)
         {
-            states = humanoidStateManager;
+            states = characterStateManager;
             this.targetBool = targetBool;
             this.targetState = targetState;
         }
 
         public override bool Execute()
         {
-            bool isInteracting = states.anim.GetBool(targetBool);
-
-            if (isInteracting)
+            if (states.anim.GetBool(targetBool))
             {
                 return false;
             }

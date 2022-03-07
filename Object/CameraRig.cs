@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Sangki
+namespace SK
 {
     public class CameraRig : MonoBehaviour
     {

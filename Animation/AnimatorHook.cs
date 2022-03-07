@@ -3,15 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Sangki
+namespace SK
 {
     public class AnimatorHook : MonoBehaviour
     {
-        private HumanoidStateManager states;
+        private CharacterStateManager states;
 
-        public virtual void Init(HumanoidStateManager stateManager)
+        public virtual void Init(CharacterStateManager stateManager)
         {
-            states = (HumanoidStateManager)stateManager;
+            states = (CharacterStateManager)stateManager;
         }
 
         public void OnAnimatorMove() => OnAnimatorMoveOverride();
@@ -27,5 +27,9 @@ namespace Sangki
                 states.rigidbody.velocity = v;
             }
         }
+
+        public void OpenDamageCollider() => states.HandleDamageCollider(true);
+        
+        public void CloseDamageCollider() => states.HandleDamageCollider(false);
     }
 }

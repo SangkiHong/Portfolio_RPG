@@ -2,7 +2,7 @@
 using UnityEditor;
 using System.IO;
 
-namespace Sangki
+namespace SK
 {
     public class CreateItemList
     {

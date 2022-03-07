@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 
-namespace Sangki
+namespace SK
 {
     [CustomEditor(typeof(ItemList))]
     public class ItemLIstEditor : EditorWindow
@@ -337,9 +337,9 @@ namespace Sangki
 
             if (ItemLIstEditor.Instance.popupIndex == 0)
             {
-                ItemLIstEditor.Instance.listName = EditorGUILayout.TextField("¸®½ºÆ® ÀÌ¸§À» ÀÔ·ÂÇÏ¼¼¿ä: ", ItemLIstEditor.Instance.listName);
+                ItemLIstEditor.Instance.listName = EditorGUILayout.TextField("ë¦¬ìŠ¤íŠ¸ ì´ë¦„ì„ ì…ë ¥í•˜ì„¸ìš”: ", ItemLIstEditor.Instance.listName);
                 
-                if (GUILayout.Button("»õ·Î¿î ¸®½ºÆ® »ı¼º", GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("ìƒˆë¡œìš´ ë¦¬ìŠ¤íŠ¸ ìƒì„±", GUILayout.ExpandWidth(false)))
                 {
                     if (ItemLIstEditor.Instance.listName.Length > 0)
                     {
@@ -348,22 +348,22 @@ namespace Sangki
                         editorWindow.Close();
                     }
                     else
-                        Debug.Log("¸®½ºÆ®ÀÇ ÀÌ¸§À» ÀÔ·ÂÇÏ¼¼¿ä.");
+                        Debug.Log("ë¦¬ìŠ¤íŠ¸ì˜ ì´ë¦„ì„ ì…ë ¥í•˜ì„¸ìš”.");
                 }
             }
             else
             {
-                ItemLIstEditor.Instance.findItemText = EditorGUILayout.TextField("°Ë»öÇÒ ¾ÆÀÌÅÛ : ", ItemLIstEditor.Instance.findItemText);
+                ItemLIstEditor.Instance.findItemText = EditorGUILayout.TextField("ê²€ìƒ‰í•  ì•„ì´í…œ : ", ItemLIstEditor.Instance.findItemText);
 
-                if (GUILayout.Button("°Ë»ö", GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("ê²€ìƒ‰", GUILayout.ExpandWidth(false)))
                 {
                     if (ItemLIstEditor.Instance.findItemText.Length > 0)
                     {
                         if (!FindItem(ItemLIstEditor.Instance.findItemText))
-                            Debug.Log("¸®½ºÆ®¿¡ ÇØ´ç ¾ÆÀÌÅÛÀÌ °Ë»öµÇÁö ¾Ê½À´Ï´Ù.");
+                            Debug.Log("ë¦¬ìŠ¤íŠ¸ì— í•´ë‹¹ ì•„ì´í…œì´ ê²€ìƒ‰ë˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
                     }
                     else
-                        Debug.Log("°Ë»öÇÒ ¾ÆÀÌÅÛ ÀÌ¸§À» ÀÔ·ÂÇÏ¼¼¿ä.");
+                        Debug.Log("ê²€ìƒ‰í•  ì•„ì´í…œ ì´ë¦„ì„ ì…ë ¥í•˜ì„¸ìš”.");
                 }
             }
             if (GUI.changed)
@@ -387,7 +387,7 @@ namespace Sangki
         {
             for (int i = 0; i < ItemLIstEditor.Instance.selectedItemList.itemList.Count; i++)
             {
-                // °ª ºñ±³¸¦ À§ÇØ ¾çÂÊ ¸ğµÎ Lower·Î º¯È¯ÇÏ¿© ºñ±³ ¿¬»ê
+                // ê°’ ë¹„êµë¥¼ ìœ„í•´ ì–‘ìª½ ëª¨ë‘ Lowerë¡œ ë³€í™˜í•˜ì—¬ ë¹„êµ ì—°ì‚°
                 if (ItemLIstEditor.Instance.selectedItemList.itemList[i].itemName.ToLower().Contains(itemName.ToLower()))
                 {
                     editorWindow.Close();

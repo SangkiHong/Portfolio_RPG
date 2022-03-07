@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Sanki;
-using Unity.Collections;
+using SK.FSM;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-namespace Sangki
+namespace SK
 {
-    public class PlayerStateManager : HumanoidStateManager
+    public class PlayerStateManager : CharacterStateManager
     {
+        public static PlayerStateManager Instance;
+        
         [Header("Inputs")] 
-        public bool debugLock;
-        public bool isFixRotation;
-        [ReadOnly] public float mouseX;
-        [ReadOnly] public float mouseY;
-        [ReadOnly] public float moveAmount;
+        public float mouseX;
+        public float mouseY;
+        public float moveAmount;
         public float cameraZoomSpeed = 0.02f;
 
         [Header("References")] 
@@ -30,20 +28,31 @@ namespace Sangki
         public float jumpForce = 10;
         public float jumpIntervalDelay = 3;
 
+        [Header("Attack")]
+        public bool canComboAttack;
+        public float canComboDuration = 1.5f;
+        public ComboAttack[] currentCombo;
+
         private PlayerInputAction _playerInputAction;
         
         internal LayerMask ignoreForGroundCheck;
-        
-        internal readonly string locomotionId = "locomotion";
-        internal readonly string attackStateId = "attackState";
-        internal readonly string rollingStateId = "rollingState";
 
-        internal bool isRolling, isJump, isRun;
-        private float scrollY;
+        internal const string LocomotionId = "locomotion";
+        internal const string AttackStateId = "attackState";
+        internal const string RollingStateId = "rollingState";
+
+        [HideInInspector]
+        public bool isChangingWeight;
+        
+        internal bool isJump, isRun;
+        
+        private int _targetLayer;
+        private float _targetWeight, _comboTimer, _scrollY;
         
         public override void Init()
         {
             base.Init();
+            Instance = this;
             
             State locomotion = new State(
                 new List<StateAction>() //Fixed Update
@@ -63,7 +72,7 @@ namespace Sangki
                 {
                 }, new List<StateAction>() //Update
                 {
-                    new MonitorInteractingAnimation(this, "isInteracting", locomotionId),
+                    new MonitorInteractingAnimation(this, "isInteracting", LocomotionId),
                 }, new List<StateAction>() //Late UPdate
                 {
                 });
@@ -73,34 +82,38 @@ namespace Sangki
                 {
                 }, new List<StateAction>() //Update
                 {
-                    new MonitorInteractingAnimation(this, "isInteracting", locomotionId),
-                }, new List<StateAction>() //Late UPdate
+                    new MonitorInteractingAnimation(this, "isInteracting", LocomotionId),
+                }, new List<StateAction>() //Late Update
                 {
                 });
 
             attackState.onEnter = EnableRootMotion;
             rollingState.onEnter = EnableRootMotion;
             
-            RegisterState(locomotionId, locomotion);
-            RegisterState(attackStateId, attackState);
-            RegisterState(rollingStateId, rollingState);
+            RegisterState(LocomotionId, locomotion);
+            RegisterState(AttackStateId, attackState);
+            RegisterState(RollingStateId, rollingState);
             
-            ChangeState(locomotionId);
+            ChangeState(LocomotionId);
 
             ignoreForGroundCheck = ~(1 << 9 | 1 << 10);
             
-            weaponHolderManager.Init();
-            weaponHolderManager.LoadWeaponOnHook(leftWeapon, true);
-            weaponHolderManager.LoadWeaponOnHook(rightWeapon, false);
+            equipmentHolderManager.Init();
+            equipmentHolderManager.LoadEquipmentOnHook(primaryEquipment, true);
+            equipmentHolderManager.LoadEquipmentOnHook(secondaryEquipment, false);
+            if (primaryEquipment.GetType() == typeof(Weapon))
+                AssignCurrentWeapon(primaryEquipment);
+            if (secondaryEquipment.GetType() == typeof(Weapon))
+                AssignCurrentWeapon(secondaryEquipment);
         }
 
         #region Unity Update
         private void OnEnable()
         {
             _playerInputAction = new PlayerInputAction();
-            weaponHolderManager = GetComponent<WeaponHolderManager>();
+            equipmentHolderManager = GetComponent<EquipmentHolderManager>();
             _playerInputAction.Enable();
-            _playerInputAction.GamePlay.MouseScrollY.performed += x => scrollY = x.ReadValue<float>() * cameraZoomSpeed * -1;
+            _playerInputAction.GamePlay.CameraZoom.performed += x => _scrollY = x.ReadValue<float>() * cameraZoomSpeed * -1;
             
             normalCamera.m_Lens.FieldOfView = PlayerPrefs.GetFloat("ZoomAmount", 0);
         }
@@ -120,30 +133,62 @@ namespace Sangki
             delta = Time.fixedDeltaTime;
             base.FixedTick();
 
+            // Camera Zoom Control
             if (!lockOn)
             {
-                if (scrollY < 0 && normalCamera.m_Lens.FieldOfView <= 15)
+                if (_scrollY < 0 && normalCamera.m_Lens.FieldOfView <= 15)
                 {
                     normalCamera.m_Lens.FieldOfView = 15;
                 }
-                else if (scrollY > 0 && normalCamera.m_Lens.FieldOfView >= 60)
+                else if (_scrollY > 0 && normalCamera.m_Lens.FieldOfView >= 60)
                 {
                     normalCamera.m_Lens.FieldOfView = 60;
                 }
                 else
                 {
-                    normalCamera.m_Lens.FieldOfView += scrollY;
+                    normalCamera.m_Lens.FieldOfView += _scrollY;
                 }
             }
+            
+            // Attack Combo Timer
+            if (canComboAttack)
+            {
+                if (_comboTimer > 0) _comboTimer -= delta;
+                else
+                {
+                    canComboAttack = false;
+                }
+            }
+
+            // Change Animator Layer Weight
+            if (isChangingWeight)
+            {
+                float currentWeight = anim.GetLayerWeight(_targetLayer);
+
+                if (_targetWeight > 0.5f)
+                {
+                    if (currentWeight < 0.99f) currentWeight += delta * 3f;
+                    else
+                    {
+                        currentWeight = 1;
+                        isChangingWeight = false;
+                    }
+                }
+                else
+                {
+                    if (currentWeight > 0.01f) currentWeight -= delta * 3f;
+                    else
+                    {
+                        currentWeight = 0;
+                        isChangingWeight = false;
+                    }
+                }
+                anim.SetLayerWeight(_targetLayer, currentWeight);
+            }
         }
+        
         private void Update()
         {
-            if (debugLock)
-            {
-                debugLock = false;
-                if (target) OnAssignLookOverride(target);
-            }
-            
             delta = Time.deltaTime;
             base.Tick();
         }
@@ -171,14 +216,27 @@ namespace Sangki
         }
         #endregion
         
-        public void Land()
-        {
-            // Land Sound
-        }
-
         #region State Events
         private void DisableRootMotion() => useRootMotion = false;
         private void EnableRootMotion() => useRootMotion = true;
+        #endregion
+        
+        #region Animation Event
+        public void AbleCombo()
+        {
+            canComboAttack = true;
+            _comboTimer = canComboDuration;
+        }
+
+        public void ChangeLayerWeight(int targetLayerIndex, float targetWeight)
+        {
+            _targetLayer = targetLayerIndex;
+            _targetWeight = targetWeight;
+            isChangingWeight = true;
+        }
+        
+        // Land Sound
+        public void Land(){}
         #endregion
     }
 }

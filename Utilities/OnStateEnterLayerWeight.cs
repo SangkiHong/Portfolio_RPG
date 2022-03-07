@@ -1,13 +1,18 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
-namespace Sangki
+namespace SK
 {
     public class OnStateEnterLayerWeight : StateMachineBehaviour
     {
         [SerializeField] private int targetLayer;
         [SerializeField] private float targetWeight;
 
+
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-            => animator.SetLayerWeight(targetLayer, targetWeight);
+        {
+            if (animator.GetLayerWeight(targetLayer) != targetWeight) PlayerStateManager.Instance.ChangeLayerWeight(targetLayer, targetWeight);
+        }
     }
 }
