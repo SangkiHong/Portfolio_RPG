@@ -19,21 +19,6 @@ namespace SK {
         private readonly InputAction _inputTargeting;
         private readonly InputAction _inputShield;
         private readonly InputAction _inputSwitchFightMode;
-
-        private readonly string animBool_FightMode = "FightMode";
-        private readonly string animBool_isShield = "isShield";
-        private readonly string animBool_isShielding = "isShielding";
-        private readonly string animTrigger_Jump = "Jump";
-        private readonly string animTrigger_Land = "Land";
-        private readonly string animName_Roll = "Roll_Forward";
-        private readonly string animName_RollBack = "Roll_Backward";
-        private readonly string animName_DodgeRight = "Dodge_Right";
-        private readonly string animName_DodgeLeft = "Dodge_Left";
-        private readonly string animName_Equip_Sword = "Equip_Sword";
-        private readonly string animName_Unequip_Sword = "Unequip_Sword";
-        private readonly string animName_Equip_Shield = "Equip_Shield";
-        private readonly string animName_Unequip_Shield = "Unequip_Shield";
-        private readonly string animName_Shielding = "Shielding";
         
         private float _jumpTimer, _jumpIntervalTimer;
         private bool _inputY;
@@ -79,7 +64,7 @@ namespace SK {
                 if (_jumpTimer < 0.03f) _jumpTimer += s.delta;
                 else
                 {
-                    s.anim.SetTrigger(animTrigger_Land);
+                    s.anim.SetTrigger(AnimParas.AnimPara_Land);
                     s.isJump = false;
                 }
             }
@@ -130,7 +115,7 @@ namespace SK {
             if (_Input_Jump.triggered)
             {
                 // Animation
-                s.anim.SetTrigger(animTrigger_Jump);
+                s.anim.SetTrigger(AnimParas.AnimPara_Jump);
                 s.isJump = true;
                 s.isGrounded = false;
                 s.rigidbody.isKinematic = false;
@@ -158,13 +143,13 @@ namespace SK {
                 // Rolling Forward
                 if (isPositiveVert)
                 {
-                    s.PlayerTargetAnimation(animName_Roll, true);
+                    s.PlayerTargetAnimation(AnimParas.AnimName_Roll, true);
                     isPressed = true;
                 }
                 // Rolling Backward
                 else
                 {
-                    s.PlayerTargetAnimation(animName_RollBack, true);
+                    s.PlayerTargetAnimation(AnimParas.AnimName_RollBack, true);
                     isPressed = true;
                 }
             }
@@ -178,13 +163,13 @@ namespace SK {
                 // Rolling Right
                 if (isPositiveHori)
                 {
-                    s.PlayerTargetAnimation(animName_DodgeRight, true);
+                    s.PlayerTargetAnimation(AnimParas.AnimName_DodgeRight, true);
                     isPressed = true;
                 }
                 // Rolling Left
                 else
                 {
-                    s.PlayerTargetAnimation(animName_DodgeLeft, true);
+                    s.PlayerTargetAnimation(AnimParas.AnimName_DodgeLeft, true);
                     isPressed = true;
                 }
             }
@@ -253,27 +238,27 @@ namespace SK {
                 if (_isFightMode)
                 {
                     // Sheath Weapon
-                    s.PlayerTargetAnimation(animName_Equip_Sword, false);
+                    s.PlayerTargetAnimation(AnimParas.AnimName_Equip_Sword, false);
                 }
                 else
                 {
                     // Unsheath Weapon
-                    s.PlayerTargetAnimation(animName_Unequip_Sword, false);
+                    s.PlayerTargetAnimation(AnimParas.AnimName_Unequip_Sword, false);
                 }
                     
                 // Unsheath or Sheath Shield
                 if (s.secondaryEquipment)
                 {
-                    s.anim.SetBool(animBool_isShield, _isFightMode);
+                    s.anim.SetBool(AnimParas.AnimPara_isShield, _isFightMode);
                     s.anim.SetLayerWeight(3, 1);
                     
                     if (_isFightMode)
-                        s.PlayerTargetAnimation(animName_Equip_Shield, false);
+                        s.PlayerTargetAnimation(AnimParas.AnimName_Equip_Shield, false);
                     else
-                        s.PlayerTargetAnimation(animName_Unequip_Shield, false);
+                        s.PlayerTargetAnimation(AnimParas.AnimName_Unequip_Shield, false);
                 }
                 
-                s.anim.SetBool(animBool_FightMode, _isFightMode);
+                s.anim.SetBool(AnimParas.AnimPara_isFight, _isFightMode);
             }
             
             return _isFightMode;
@@ -289,8 +274,8 @@ namespace SK {
                 {
                     _isShield = true;
                     s.anim.SetLayerWeight(2, 1);
-                    s.PlayerTargetAnimation(animName_Shielding, false);
-                    s.anim.SetBool(animBool_isShielding, true);
+                    s.PlayerTargetAnimation(AnimParas.AnimName_Shielding, false);
+                    s.anim.SetBool(AnimParas.AnimPara_isShielding, true);
                 }
             }
             else
@@ -299,7 +284,7 @@ namespace SK {
                 {
                     _isShield = false;
                     s.anim.SetLayerWeight(2, 0);
-                    s.anim.SetBool(animBool_isShielding, false);
+                    s.anim.SetBool(AnimParas.AnimPara_isShielding, false);
                 }
             }
             

@@ -31,16 +31,19 @@ namespace SK
         [SerializeField]
         private float angleOffset2D;
 
-        public GameObject TargetObject { get; private set; }
+        public GameObject targetObject;
         
         private Transform _thisTransform;
 
         private NavMeshHit _navHit;
         private Collider[] _overlapColliders;
+
+        private Vector3 _originPos;
         
         private void Awake()
         {
             _thisTransform = transform;
+            _originPos = _thisTransform.position;
             _overlapColliders = new Collider[20];
         }
         
@@ -48,13 +51,13 @@ namespace SK
         public bool FindTarget()
         {
             // Target is in ViewDistance then return True
-            if (TargetObject && Vector3.Distance(_thisTransform.position, TargetObject.transform.position) <= viewDistance)
+            if (targetObject && Vector3.Distance(_thisTransform.position, targetObject.transform.position) <= viewDistance)
                 return true;
             
-            TargetObject = null;
+            targetObject = null;
             
             // ReSharper disable once AssignmentInConditionalExpression
-            if (TargetObject = WithinSight(offset, fieldOfViewAngle, viewDistance, _overlapColliders, objectLayerMask, ignoreLayerMask, targetOffset))
+            if (targetObject = WithinSight(offset, fieldOfViewAngle, viewDistance, _overlapColliders, objectLayerMask, ignoreLayerMask, targetOffset))
                 return true;
             
             return false;
@@ -65,7 +68,7 @@ namespace SK
         {
             Vector3 randomDirection = Random.insideUnitSphere * distance;
 
-            randomDirection += _thisTransform.position;
+            randomDirection += _originPos;
 
             NavMesh.SamplePosition(randomDirection, out _navHit, distance, NavMesh.AllAreas);
 

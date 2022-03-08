@@ -36,9 +36,6 @@ namespace SK
         private LayerMask targetLayer;
         private Collider[] _targetColliders;
         
-        
-        private readonly string animString_isInteracting = "isInteracting";
-        
         public override void Init()
         {
             if (!anim) anim = GetComponentInChildren<Animator>();
@@ -60,7 +57,7 @@ namespace SK
 
         public void PlayerTargetAnimation(string targetAnim, bool isInteracting)
         {
-            anim.SetBool(animString_isInteracting, isInteracting);
+            anim.SetBool(AnimParas.animPara_isInteracting, isInteracting);
             anim.CrossFade(targetAnim, 0.2f);
         }
 

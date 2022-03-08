@@ -5,6 +5,8 @@ namespace SK.FSM
     public class StatePatrol : EnemyState
     {
         private readonly Enemy _enemy;
+
+        private Vector3 _randomPos;
         private float _seekIdleTimer;
         
         public StatePatrol(Enemy enemyControl)
@@ -20,29 +22,36 @@ namespace SK.FSM
                 return;
             }
             
+            // NavAgent 재가동
             if (_enemy.NavAgent.isStopped)
             {
                 _enemy.NavAgent.isStopped = false;
                 _enemy.NavAgent.updatePosition = true;
                 _enemy.NavAgent.updateRotation = true;
             }
-            
-            if (!_enemy.NavAgent.hasPath)
+
+            // 이동중이면 리턴
+            if (_enemy.NavAgent.velocity.magnitude > 0.1f) return;
+            // 순찰 타이머
+            if (_seekIdleTimer < _enemy.searchRadar.SeekIdleDuration)
             {
-                if (_seekIdleTimer > _enemy.searchRadar.SeekIdleDuration)
-                {
-                    Vector3 randomPos = _enemy.searchRadar.SeekAndWonder(_enemy.searchRadar.SeekDistance);
-                    _enemy.NavAgent.SetDestination(randomPos);
-                    _seekIdleTimer = 0;
-                    _enemy.NavAgent.speed = 2;
-                    _enemy.NavAgent.stoppingDistance = 0;
-                }
-                else
-                {
-                    _enemy.Anim.SetFloat(_enemy.AnimPara_MoveBlend, 0);
-                    _seekIdleTimer += _enemy.fixedDelta;
-                }
+                _enemy.Anim.SetBool(AnimParas.animPara_isInteracting, true);
+                _seekIdleTimer += _enemy.fixedDelta;
             }
+            else
+            {
+                _enemy.Anim.SetBool(AnimParas.animPara_isInteracting, false);
+                _randomPos = _enemy.searchRadar.SeekAndWonder(_enemy.searchRadar.SeekDistance);
+                _enemy.NavAgent.SetDestination(_randomPos);
+                _seekIdleTimer = 0;
+                _enemy.NavAgent.speed = 2;
+                _enemy.NavAgent.stoppingDistance = 0;
+            }
+        }
+
+        public override void StateExit()
+        {
+            _enemy.Anim.SetBool(AnimParas.animPara_isInteracting, false);
         }
     }
 }

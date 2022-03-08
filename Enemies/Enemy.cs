@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SK.Behavior;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
@@ -11,6 +12,8 @@ namespace SK
     [RequireComponent(typeof(Animator))]
     public abstract class Enemy : MonoBehaviour
     {
+        public string currentStateName;
+        
         #region Event
         public event UnityAction OnDied;
         #endregion
@@ -26,25 +29,6 @@ namespace SK
         [SerializeField]
         private float navMeshLinkSpeed = 0.5f;
         #endregion
-
-        #region Attack
-        [Header("Attack")]
-        public float AttackCooldown = 2.5f;
-        public Vector3 AttackColOffset;
-        public Vector3 AttackColScale;
-        public int AttackColSize;
-        public float AttackColInteval;
-        [SerializeField]
-        private float attackStepsize = 0.5f;
-        [SerializeField]
-        private float dodgeChance = 0.3f;
-        [SerializeField]
-        private float dodgeAngle = 30;
-        [SerializeField]
-        private float dodgeDistance = 5f;
-        [SerializeField]
-        private float counterattackChance = 0.3f;
-        #endregion
         
         #region Reference
         [Header("Reference")]
@@ -54,6 +38,10 @@ namespace SK
         private NavMeshAgent navAgent;
         [SerializeField] 
         internal SearchRadar searchRadar;
+        [SerializeField] 
+        internal Combat combat;
+        [SerializeField] 
+        internal Dodge dodge;
         #endregion
 
         #region Property
@@ -63,12 +51,11 @@ namespace SK
 
         #region Animation Parameter
         [NonSerialized] 
-        public int AnimPara_isFight, AnimPara_isInteracting,
-                   AnimPara_MoveBlend, AnimPara_Attack;
+        
         #endregion
         
         #region ETC
-        internal Transform mTransfrom;
+        internal Transform mTransform;
         internal Rigidbody mRigidbody;
         internal Collider mCollider;
         internal EnemyStatsUI enemyHealthBar;
@@ -77,6 +64,7 @@ namespace SK
         
         public EnemyState statePatrol;
         public EnemyState stateChase;
+        public EnemyState stateCombat;
         public EnemyState stateAttack;
         public EnemyState stateFlee;
 
@@ -86,22 +74,19 @@ namespace SK
 
         private void Awake()
         {
-            mTransfrom = transform;
+            mTransform = transform;
             if (!anim) anim = GetComponent<Animator>();
             if (!navAgent) navAgent = GetComponent<NavMeshAgent>();
             if (!mRigidbody) mRigidbody = GetComponent<Rigidbody>();
             if (!mCollider) mCollider = GetComponent<Collider>();
+            if (!combat) combat = GetComponent<Combat>();
             
-            stateMachine = new EnemyStateMachine();
+            stateMachine = new EnemyStateMachine(this);
             statePatrol = new StatePatrol(this);
             stateChase = new StateChase(this);
+            stateCombat = new StateCombat(this);
             stateAttack = new StateAttack(this);
             stateFlee = new StateFlee(this);
-            
-            AnimPara_isFight = Animator.StringToHash("isFight");
-            AnimPara_isInteracting = Animator.StringToHash("isInteracting");
-            AnimPara_MoveBlend = Animator.StringToHash("MoveBlend");
-            AnimPara_Attack = Animator.StringToHash("Attack 1");
             currentHP = enemyData.Hp;
         }
 
@@ -114,16 +99,6 @@ namespace SK
         {
             delta = Time.deltaTime;
             fixedDelta = Time.fixedDeltaTime;
-        }
-
-        void OnDrawGizmosSelected()
-        {
-            if (stateMachine != null && stateMachine.CurrentState == stateAttack)
-            {
-                Gizmos.matrix = mTransfrom.localToWorldMatrix;
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawWireCube(AttackColOffset, AttackColScale);
-            }
         }
     }
 }

@@ -696,7 +696,7 @@ namespace SK
                     }
 
                     // NavMesh의 길이 있는지 파악 후 위치로 닷지
-                    if (NavMesh.SamplePosition(GetDodgePoint(dodgeAngle), out navHit, dodgeChance, NavMesh.AllAreas))
+                    if (NavMesh.SamplePosition(GetDodgePoint(dodgeAngle), out navHit, dodgeDistance, NavMesh.AllAreas))
                     {
                         isDodge = true;
                         navAgent.isStopped = true;
