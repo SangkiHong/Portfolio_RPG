@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace SK
+namespace SK.Behavior
 {
     [System.Serializable]
     public class ComboAttack
     {
-        public string animName;
+        public AttackBase[] comboAttacks;
     }
 }

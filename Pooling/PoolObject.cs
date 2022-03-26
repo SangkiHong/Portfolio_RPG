@@ -17,6 +17,6 @@ public class PoolObject : MonoBehaviour
 		gameObject.transform.DOKill();
 
 		if (!isUI) PoolManager.instance.ReturnObjectToQueue(gameObject, this);
-		else UIPoolManager.instance.ReturnObjectToQueue(gameObject, this);
+		else UIPoolManager.Instance.ReturnObjectToQueue(gameObject, this);
 	}
 }

@@ -2,8 +2,13 @@
 
 namespace SK
 {
-    public interface ILockable
+    public interface IDamagable
     {
-        Transform GetLockOnTarget();
+        void OnDamage(int damageValue, Transform hitTransform, bool isCriticalHit);
+    }
+
+    public interface ITargetable
+    { 
+        
     }
 }

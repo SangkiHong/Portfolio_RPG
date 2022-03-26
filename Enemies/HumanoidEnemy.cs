@@ -1,60 +1,46 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using SK.FSM;
-using UnityEditorInternal;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SK
 {
     public class HumanoidEnemy : Enemy
     {
+        private float _moveBlend, _walkSpeed;
+        
         public override void Init()
         {
             base.Init();
             
-            stateMachine.ChangeState(statePatrol);
+            stateMachine.ChangeState(statePatrol); // 기본 상태로 변경
         }
 
-        private void Update()
+        public override void Update()
         {
-            stateMachine.CurrentState.Tick();
-
-            // Interacting 체크
-            if (!Anim.GetBool(AnimParas.animPara_isInteracting) && !dodge.isDodge)
-            {
-                // 애니메이션 MoveBlend 
-                AnimateMove();
+            base.Update();
             
-                // 움직임에 따른 회전
-                Rotate();
+            if (!isInteracting && !dodge.isDodge)
+            {
+                AnimateMove(); // 애니메이션 MoveBlend
+            
+                Rotate(); // 움직임에 따른 회전
             }
 
-            if (Anim.GetBool(AnimParas.AnimPara_isFight) && !searchRadar.targetObject)
+            if (Anim.GetBool(Strings.AnimPara_isFight) && !targetObject)
             {
-                Anim.SetBool(AnimParas.AnimPara_isFight, false);
+                Anim.SetBool(Strings.AnimPara_isFight, false);
                 stateMachine.ChangeState(statePatrol);
             }
         }
-
-        private void FixedUpdate()
-        {
-            stateMachine.CurrentState.FixedTick();
-        }
-
-        private void LateUpdate()
-        {
-            stateMachine.CurrentState.LateTick();
-        }
-
+        
         private void Rotate()
         {
             if (NavAgent.desiredVelocity.sqrMagnitude >= 0.01f)
             {
                 // 에이전트의 이동방향
                 Vector3 direction = NavAgent.desiredVelocity;
+
                 // 회전각도(쿼터니언) 산출
                 Quaternion targetAngle = Quaternion.LookRotation(direction);
+
                 // 선형보간 함수를 이용해 부드러운 회전
                 mTransform.rotation = Quaternion.Slerp(mTransform.rotation, targetAngle, delta * 8.0f);
             }
@@ -62,17 +48,18 @@ namespace SK
 
         private void AnimateMove()
         {
+            _walkSpeed = NavAgent.velocity.magnitude/NavAgent.speed;
+            
             if (NavAgent.velocity.sqrMagnitude >= 0.01f && NavAgent.remainingDistance <= 0.1f)
             {
                 // 목표지점에 도달 시 애니메이션 중지
-                Anim.SetFloat(AnimParas.AnimPara_MoveBlend, 0); 
+                if (Anim.GetFloat(Strings.AnimPara_MoveBlend) != 0)                
+                    Anim.SetFloat(Strings.AnimPara_MoveBlend, 0);                
             }
-            else
-            {
-                var moveBlend = Mathf.Clamp01(NavAgent.velocity.magnitude * 0.5f);
-                if (moveBlend < 0.1f) moveBlend = 0;
-                Anim.SetFloat(AnimParas.AnimPara_MoveBlend, moveBlend);
-            }
+            else            
+                _moveBlend = walkAnimSpeed * _walkSpeed + delta;            
+                
+            Anim.SetFloat(Strings.AnimPara_MoveBlend, _moveBlend);
         }
     }
 }

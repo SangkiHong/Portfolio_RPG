@@ -39,9 +39,6 @@ namespace SK
             assignedEquipment = loadWeapon;
             GameObject model = Instantiate(assignedEquipment.modelPrefab);
             
-            if (assignedEquipment.GetType() == typeof(Weapon))
-                ((Weapon)assignedEquipment).weaponHook = model.GetComponent<WeaponHook>();
-            
             if (model != null)
             {
                 if (parentOverride != null)

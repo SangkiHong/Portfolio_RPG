@@ -6,6 +6,7 @@ namespace SK
 {
     public class CreateItemList
     {
+        #if UNITY_EDITOR
         [MenuItem("Assets/Create/Item List")]
         public static ItemList Create(string listName)
         { 
@@ -19,5 +20,6 @@ namespace SK
             AssetDatabase.SaveAssets();
             return asset;
         }
+        #endif
     }
 }

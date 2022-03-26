@@ -6,8 +6,8 @@ namespace SK
     {
         public GameObject modelPrefab;
         
-        public virtual void ExcuteAction()
-        {
-        }
+        public virtual void ExecuteAction() { }
+
+        public virtual void ExecuteAction(Animator anim, bool setDefault = false) { }
     }
 }

@@ -1,20 +1,19 @@
-﻿using Unity.Mathematics;
-using UnityEngine;
-using UnityEngine.InputSystem;
+﻿using UnityEngine;
 
-namespace SK
+namespace SK.FSM
 {
     public class MovePlayerCharacter : StateAction
     {
-        PlayerStateManager _states;
+        private readonly PlayerStateManager _states;
         
         private RaycastHit _raycastHit;
         private Vector3 _currentVelocity, _targetVelocity, _origin, _targetDir;
         private Quaternion _targetRotation;
 
-        private float frontY, speed;
-        private readonly int _animHash_Forward = Animator.StringToHash("Forward");
-        private readonly int _animHash_Sideways = Animator.StringToHash("Sideways");
+        private bool _isJumpPeek;
+        private float _frontY, _speed;
+        private readonly int _animHashForward = Animator.StringToHash("Forward");
+        private readonly int _animHashSideways = Animator.StringToHash("Sideways");
 
         public MovePlayerCharacter(PlayerStateManager playerStateManager)
         {
@@ -23,77 +22,101 @@ namespace SK
 
         public override bool Execute()
         {
-            
-            frontY = 0;
-            speed = _states.isRun ? _states.runSpeed : _states.movementsSpeed;
-            
-            if (_states.lockOn)
+            Debug.Log("MovePlayerCHaracter Called");
+            // Jump Landing & Ground Check
+            if (_states.isGrounded && _states.isJumping)
             {
-                speed *= 0.8f;
-                _targetVelocity = _states.mTransform.forward * _states.vertical * speed;
-                _targetVelocity += _states.mTransform.right * _states.horizontal * speed;
+                _isJumpPeek = false;
+                _states.isJumping = false;
+                _states.anim.SetTrigger(Strings.AnimPara_Land);
             }
-            else
+
+            _frontY = 0;
+            _speed = _states.isRunning ? _states.runSpeed : _states.movementsSpeed; // Change Speed on Running
+
+            // Normal Movement
+            if (!_states.lockOn)
             {
-                float m = _states.moveAmount;
+                float moveAmount = _states.moveAmount;
                 if (_states.vertical < 0)
                 {
-                    m *= -0.85f; // Slow Backward
+                    moveAmount *= -0.85f; // 뒷걸음 시 뒤로 85%로 감속
                 }
-                _targetVelocity = _states.mTransform.forward * m * speed;
+                _targetVelocity = _states.mTransform.forward * moveAmount * _speed;
+            }
+            // Lock on Movement
+            else
+            {
+                _speed *= 0.8f; // 움직임 스피드 80%로 감속
+                _targetVelocity = _states.mTransform.forward * _states.vertical * _speed;
+                _targetVelocity += _states.mTransform.right * _states.horizontal * _speed;
             }
             
             _origin = _states.mTransform.position + (_targetVelocity.normalized * _states.frontRayOffset);
-            _origin.y += 0.5f;
+            _origin.y += _states.frontRayOffsetHeight;
             
-            //Debug.DrawRay(_origin, -Vector3.up, Color.red, 0.01f, false);
-            if (Physics.Raycast(_origin, -Vector3.up, out _raycastHit, 1, _states.ignoreForGroundCheck))
-            {
-                float y = _raycastHit.point.y;
-                frontY = y - _states.mTransform.position.y;
-            }
+            Debug.DrawRay(_origin, -Vector3.up * (_states.frontRayOffsetHeight + 1), Color.red);
+            if (Physics.Raycast(_origin, -Vector3.up, out _raycastHit, _states.frontRayOffsetHeight + 1, _states.groundLayerMask))            
+                _frontY = _raycastHit.point.y - _states.mTransform.position.y;
 
-            _currentVelocity = _states.rigidbody.velocity;
+            //_currentVelocity = _states.thisRigidbody.velocity; //deprecated::Don't use Rigidbody
 
+            // Idle, Move, on Air State
             if (_states.isGrounded)
             {
                 float moveAmount = _states.moveAmount;
-                
+                float absY = Mathf.Abs(_frontY);
+
+                // Move State
                 if (moveAmount > 0.1f)
                 {
-                    _states.rigidbody.isKinematic = false;
-                    _states.rigidbody.drag = 0;
-                    if (Mathf.Abs(frontY) > 0.02f)
-                    {
-                        _targetVelocity.y = ((frontY > 0) ? frontY + 0.2f : frontY - 0.2f) * speed;
-                    }
-                
+                    //_states.thisRigidbody.isKinematic = false; //deprecated::Don't use Rigidbody
+                    //_states.thisRigidbody.drag = 0; //deprecated::Don't use Rigidbody
+
                     HandleRotation();
                 }
+                // Stop State
                 else
                 {
-                    float abs = Mathf.Abs(frontY);
+                    //_states.thisRigidbody.isKinematic = true; //deprecated::Don't use Rigidbody
+                    //_states.thisRigidbody.drag = 4; //deprecated::Don't use Rigidbody
+                }
 
-                    if (abs > 0.02f)
+                // Slope
+                if (absY < 0.2f)
+                {
+                    if (moveAmount > 0)
                     {
-                        _states.rigidbody.isKinematic = true;
-                        _targetVelocity.y = 0;
-                        _states.rigidbody.drag = 4;
+                        if (absY > 0.02f)
+                            _targetVelocity.y = _frontY * 2f * _speed;
+                    }
+                }
+                else if (absY < 1f) // 높이 차 1 미만의 경사 지형에 대한 계산
+                {
+                    var dir = _raycastHit.point - _states.mTransform.position;
+                    var angle = Vector3.Angle(dir, _states.mTransform.forward);
+                    if (angle > _states.slopeLimitAngle)
+                    {
+                        _states.isSlipping = true;
                     }
                 }
             }
-            else
+
+            // Jump Velocity
+            if (_states.isJumping)
             {
-                _states.rigidbody.isKinematic = false;
-                _states.rigidbody.drag = 0;
-                _targetVelocity.y = _currentVelocity.y;
+                //deprecated::Don't use Rigidbody
+                /*if (!_isJumpPeek && _states.thisRigidbody.velocity.y < _states.jumpForce)
+                    _targetVelocity.y = _states.jumpForce; //deprecated::Don't use Rigidbody
+                else
+                    _isJumpPeek = true;*/
             }
-            
+
             HandleAnimations();
             
-            //Debug.DrawRay((_states.mTransform.position + Vector3.up * 0.2f), _targetVelocity, Color.green, 0.01f, false);
-            _states.rigidbody.velocity = Vector3.Lerp(_currentVelocity, _targetVelocity, _states.delta * _states.adaptSpeed);
-            
+            Debug.DrawRay((_states.mTransform.position + Vector3.up * 0.2f), _targetVelocity, Color.green, 0.01f, false);
+            //_states.thisRigidbody.velocity = Vector3.Lerp(_currentVelocity, _targetVelocity, _states.fixedDelta * _states.adaptSpeed); //deprecated::Don't use Rigidbody
+
             return false;
         }
         
@@ -105,7 +128,7 @@ namespace SK
 
             if (_states.lockOn)
             {
-                _targetDir = _states.target.position - _states.mTransform.position;
+                _targetDir = _states.targetEnemy.position - _states.mTransform.position;
                 moveOverride = 1;
                 
                 _targetDir.Normalize();
@@ -133,7 +156,7 @@ namespace SK
             
             _states.mTransform.rotation = Quaternion.Slerp(
                                         _states.mTransform.rotation, _targetRotation,
-                                        _states.delta * moveOverride * _states.rotationSpeed);
+                                        _states.fixedDelta * moveOverride * _states.rotationSpeed);
         }
 
         private void HandleAnimations()
@@ -151,13 +174,13 @@ namespace SK
 
                     if (_states.vertical < 0) f = -f;
                     
-                    if (!_states.isRun)
+                    if (!_states.isRunning)
                     {
                         if (f > 0.5f) f = 0.5f;
                         else if (f < -0.5f) f = -0.5f;
                     }
                 
-                    _states.anim.SetFloat(_animHash_Forward, f, 0.2f, _states.delta);
+                    _states.anim.SetFloat(_animHashForward, f, 0.2f, _states.fixedDelta);
                     
                     float h = Mathf.Abs(_states.horizontal);
                     float s = 0;
@@ -168,13 +191,13 @@ namespace SK
 
                     if (_states.horizontal < 0) s = -1;
                     
-                    if (!_states.isRun)
+                    if (!_states.isRunning)
                     {
                         if (s > 0.5f) s = 0.5f;
                         else if (s < -0.5f) s = -0.5f;
                     }
                 
-                    _states.anim.SetFloat(_animHash_Sideways, s, 0.2f, _states.delta);
+                    _states.anim.SetFloat(_animHashSideways, s, 0.2f, _states.fixedDelta);
                 }
                 else
                 {
@@ -186,13 +209,13 @@ namespace SK
                         f= 1;
                     if (_states.vertical < 0) f *= -1;
                     
-                    if (!_states.isRun)
+                    if (!_states.isRunning)
                     {
                         if (f > 0.5f) f = 0.5f;
                         else if (f < -0.5f) f = -0.5f;
                     }
-                    _states.anim.SetFloat(_animHash_Forward, f, 0.2f, _states.delta);
-                    _states.anim.SetFloat(_animHash_Sideways, 0, 0.2f, _states.delta);
+                    _states.anim.SetFloat(_animHashForward, f, 0.2f, _states.fixedDelta);
+                    _states.anim.SetFloat(_animHashSideways, 0, 0.2f, _states.fixedDelta);
                 }
             }
             

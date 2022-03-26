@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SK
+namespace SK.FSM
 {
     public class MonitorInteractingAnimation : StateAction
     {
-        private CharacterStateManager states;
+        private readonly CharacterStateManager states;
         private string targetBool;
         private string targetState;
 

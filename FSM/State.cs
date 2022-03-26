@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 namespace SK.FSM
 {
     public class State
     {
-        public delegate void OnEnter();
-        public OnEnter onEnter;
-        
+        public UnityAction onEnter;
+        //public UnityAction onExit;
+
         private bool forceExit;
         List<StateAction> _fixedUpdateActions = new List<StateAction>();
         List<StateAction> _updateActions = new List<StateAction>();

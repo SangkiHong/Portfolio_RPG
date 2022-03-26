@@ -1,35 +1,30 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace SK
+namespace SK.FSM
 {
     public class AnimatorHook : MonoBehaviour
     {
-        private CharacterStateManager states;
+        private CharacterStateManager _states;
+        private Vector3 animDelta;
 
-        public virtual void Init(CharacterStateManager stateManager)
+        public void Init(CharacterStateManager stateManager)
         {
-            states = (CharacterStateManager)stateManager;
+            _states = stateManager;
         }
 
         public void OnAnimatorMove() => OnAnimatorMoveOverride();
         
         protected virtual void OnAnimatorMoveOverride()
         {
-            if (!states.useRootMotion) return;
+            if (!_states.useRootMotion) return;
             
-            if (states.isGrounded && states.delta > 0)
+            if (_states.isGrounded && _states.fixedDelta > 0)
             {
-                Vector3 v = (states.anim.deltaPosition) / states.delta;
-                v.y = states.rigidbody.velocity.y;
-                states.rigidbody.velocity = v;
+                animDelta = _states.anim.deltaPosition / _states.fixedDelta;
+                var pos = _states.mTransform.position;
+                Vector3.MoveTowards(pos, pos + animDelta, _states.fixedDelta);
+                //_states.thisRigidbody.velocity = animDelta; //deprecated::Don't use Rigidbody
             }
         }
-
-        public void OpenDamageCollider() => states.HandleDamageCollider(true);
-        
-        public void CloseDamageCollider() => states.HandleDamageCollider(false);
     }
 }

@@ -1,34 +1,35 @@
 ﻿using UnityEngine;
+using SK.Behavior;
 
 namespace SK
 {
     [CreateAssetMenu(fileName = "Weapon_", menuName = "Equipments/Weapon", order = 0)]
     public class Weapon : Equipments
     {
-        [SerializeField] 
-        private string defaultAim;
-        
-        [System.NonSerialized]
-        public WeaponHook weaponHook;
-        
-        private int animIndex;
-        
-        public override void ExcuteAction()
+        [Header("Stat")]
+        public int attackMinPower;
+        public int attackMaxPower;
+
+        [Header("Combo")]
+        public int selectedComboIndex;
+        public int currentAttackIndex;
+        public ComboAttack[] attackCombo;
+
+        private int _prevIndex;
+
+
+        public override void ExecuteAction(Animator anim, bool isDefault)
         {
-            if (PlayerStateManager.Instance.canComboAttack)
-            {
-                PlayerStateManager.Instance.PlayerTargetAnimation(PlayerStateManager.Instance.currentCombo[animIndex].animName, true);
-            }
-            else
-            {
-                PlayerStateManager.Instance.PlayerTargetAnimation(defaultAim, true);
-            }
+            if (isDefault) currentAttackIndex = 0;
+            _prevIndex = currentAttackIndex;
 
-            PlayerStateManager.Instance.ChangeState(PlayerStateManager.AttackStateId);
+            anim.SetBool(Strings.animPara_isInteracting, true);
+            anim.CrossFade(attackCombo[selectedComboIndex].comboAttacks[currentAttackIndex++].animName, 0.15f);
 
-            animIndex++;
-
-            if (animIndex > PlayerStateManager.Instance.currentCombo.Length - 1) animIndex = 0;
+            if (currentAttackIndex > attackCombo[selectedComboIndex].comboAttacks.Length - 1) 
+                currentAttackIndex = 0;
         }
+
+        public int GetAttackAngle() => attackCombo[selectedComboIndex].comboAttacks[_prevIndex].attackAngle;
     }
 }

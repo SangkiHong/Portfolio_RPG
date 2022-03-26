@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-namespace Sanki
+namespace SK
 {
     public partial class @PlayerInputAction : IInputActionCollection2, IDisposable
     {

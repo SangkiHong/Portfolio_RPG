@@ -4,7 +4,7 @@ namespace SK.FSM
 {
     public class EnemyStateMachine
     {
-        private Enemy _enemy;
+        private readonly Enemy _enemy;
         public EnemyStateMachine(Enemy enemy)
         {
             _enemy = enemy;
@@ -19,6 +19,19 @@ namespace SK.FSM
             CurrentState = state;
             CurrentState.StateInit();
             _enemy.currentStateName = state.GetType().Name;
+        }
+
+        public void OnIdleness()
+        {
+            CurrentState = null;
+            
+            // Stop NavAgent
+            if (!_enemy.NavAgent.isStopped)
+            {
+                _enemy.NavAgent.isStopped = true;
+                _enemy.NavAgent.updatePosition = false;
+                _enemy.NavAgent.updateRotation = false;
+            }
         }
     }
 }

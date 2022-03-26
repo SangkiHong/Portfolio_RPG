@@ -43,17 +43,19 @@ namespace SK.FSM
 
         public void ChangeState(string targetId)
         {
-            if (currentState != null)
-            {
-                //Run on exit actions of currentState
-            }
+            //if (currentState != null)            
+            //    currentState.onExit?.Invoke();
+            
             State targetState = GetState(targetId);
+            if (currentState == targetState) return;
             
             //run on enter actions
             currentState = targetState;
             currentState.onEnter?.Invoke();
         }
-        
+
+        public State CurrentState() => currentState;
+
         State GetState(string targetId)
         {
             allStates.TryGetValue(targetId, out State retVal);
