@@ -1,8 +1,3 @@
-
-ListExample.cs
-ListExample.cs
-ListExample.cs
-ListExample.cs.meta
 Practice.meta
 Practice/Bullet.cs
 Practice/Bullet.cs.meta
@@ -11,8 +6,11 @@ Practice/Gun.cs.meta
 Practice/ListExample.cs.meta
 Practice/PracticePlayer.cs
 Practice/PracticePlayer.cs.meta
+<<<<<<< HEAD
 ListExample.cs.meta
 ListExample.cs
 ListExample.cs.meta
 ListExample.cs
 ListExample.cs.meta
+=======
+>>>>>>> c8772c44271949be91f08c255d7d8dba9540afd5
