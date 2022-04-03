@@ -7,15 +7,19 @@ namespace SK
     public class Weapon : Equipments
     {
         [Header("Stat")]
-        public int attackMinPower;
-        public int attackMaxPower;
+        [SerializeField] private int attackMinPower;
+        [SerializeField] private int attackMaxPower;
 
         [Header("Combo")]
-        public int selectedComboIndex;
-        public int currentAttackIndex;
-        public ComboAttack[] attackCombo;
+        [SerializeField] private int selectedComboIndex;
+        [SerializeField] private int currentAttackIndex;
+        [SerializeField] private ComboAttack[] attackCombo;
 
         private int _prevIndex;
+
+        //Property
+        public int AttackMinPower => attackMinPower;
+        public int AttackMaxPower => attackMaxPower;
 
 
         public override void ExecuteAction(Animator anim, bool isDefault)

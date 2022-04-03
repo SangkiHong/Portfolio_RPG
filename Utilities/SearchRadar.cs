@@ -30,10 +30,11 @@ namespace SK.Utilities
         private void Awake()
         {
             _thisTransform = transform;
-            _originPos = _thisTransform.position;
             searchUtility = new SearchUtility(_thisTransform);
         }
-        
+
+        private void Start() => _originPos = _thisTransform.position;
+
         // Find Target
         public GameObject FindTarget()
         {
@@ -51,6 +52,8 @@ namespace SK.Utilities
 
             return _navHit.position;
         }
+
+        public void ResetOriginPos() => _originPos = _thisTransform.position;
 
         #region Debug Sight
         private void DrawLineOfSight(Vector3 positionOffset, float fieldOfViewAngle, float viewDistance)

@@ -13,7 +13,7 @@ namespace SK.Behavior
         
         [Header("Debug")]
         public bool debugAttackRange;
-        
+
         [Header("Attack")]
         public bool canComboAttack;
         public float combatDistance = 3.5f;
@@ -26,22 +26,22 @@ namespace SK.Behavior
         [SerializeField] private float attackDistance = 15;
         [SerializeField] private Vector3 offset;
 
-        [Space]
-
-        //public Vector3 attackColScale; // deprecated::Use OverlapBoxNonAlloc
-        //public Vector3[] attackColsOffset; // deprecated::Use OverlapBoxNonAlloc
-
         [Header("Equipments")]
         public Equipments primaryEquipment;
         public Equipments secondaryEquipment;
         public EquipmentHolderManager equipmentHolderManager;
 
-        private SearchUtility searchUtility;
+        [Header("Combat Behavior")]
+        [SerializeField] internal Alert alert;
+
+        private GameObject targetObject;
+        public GameObject TargetObject => targetObject;
+
         private Transform _transform;
         private Animator _anim;
+        private SearchUtility searchUtility;
+
         private List<GameObject> _targetBuff;
-        //private Collider[] _colliderBuff; // deprecated::Use OverlapBoxNonAlloc
-        //private List<Collider> _colliderList; // deprecated::Use OverlapBoxNonAlloc
 
         [System.NonSerialized] public Weapon currentUseWeapon;
         [System.NonSerialized] public int calculatedDamage;
@@ -61,15 +61,12 @@ namespace SK.Behavior
             if (secondaryEquipment) // 장비 착용(보조 장비)
                 equipmentHolderManager.LoadEquipmentOnHook(secondaryEquipment, false);
 
-            //_colliderBuff = new Collider[10]; // deprecated::Use OverlapBoxNonAlloc
-            //_colliderList = new List<Collider>(); // deprecated::Use OverlapBoxNonAlloc
             searchUtility = new SearchUtility(_transform);
         }
 
         public void ExecuteAttack()
         {
             primaryEquipment.ExecuteAction(_anim, !canComboAttack);
-            // TODO: Implement Dual Weapon Execution..
             //...
         }
 
@@ -98,6 +95,8 @@ namespace SK.Behavior
                 }
             }
         }
+
+        public void SetTarget(GameObject target) => targetObject = target;
 
         // deprecated::Use OverlapBoxNonAlloc
         /*public void Attack(int isLeft) // 0 = Right Weapon, 1 = Left Weapon
@@ -213,7 +212,7 @@ namespace SK.Behavior
             }
         }*/
 
-        #region Debug Sight
+        #region Debug
         private void DrawAttackRange(Vector3 positionOffset, float fieldOfViewAngle, float viewDistance)
         {
 #if UNITY_EDITOR

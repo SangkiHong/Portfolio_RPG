@@ -25,6 +25,9 @@ namespace SK
                         primaryHook = hook;
                 }
             }
+
+            // Subscribe Event
+            GetComponent<Health>().onDead += UnloadEquipment;
         }
 
         public void LoadEquipmentOnHook(Equipments equipment, bool isPrimary)
@@ -33,6 +36,12 @@ namespace SK
                 primaryHook.LoadModel(equipment);
             else
                 secondaryHook.LoadModel(equipment);
+        }
+
+        public void UnloadEquipment()
+        {
+            primaryHook?.UnloadWeapon();
+            secondaryHook?.UnloadWeapon();
         }
 
         public void Equip(int isPrimary)

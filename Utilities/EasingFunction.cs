@@ -362,8 +362,6 @@
         // The easing functions all work with a normalized time (0 to 1) and the returned value here
         // reflects that. Values returned here should be divided by the actual time.
         //
-        // TODO: These functions have not had the testing they deserve. If there is odd behavior around
-        //       dash speeds then this would be the first place I'd look.
 
         public static float LinearD(float start, float end, float value)
         {
@@ -696,7 +694,6 @@
             end -= start;
 
             // Damn... Thanks http://www.derivative-calculator.net/
-            // TODO: And it's a little bit wrong
             return end * (6f * (1f - value) / 5f + 1f) * (-2.2f * Mathf.Pow(1f - value, 1.2f) *
                 Mathf.Sin(Mathf.PI * value * (2.5f * value * value * value + 0.2f)) + Mathf.Pow(1f - value, 2.2f) *
                 (Mathf.PI * (2.5f * value * value * value + 0.2f) + 7.5f * Mathf.PI * value * value * value) *

@@ -55,18 +55,18 @@ namespace SK
         public bool DoDodge()
         {
             if (!_canDodge) return false;
-            if (!_enemy.targetObject) return false;
+            if (!_enemy.combat.TargetObject) return false;
             
             LookAtTarget();
             
             // NavMesh의 길이 있는지 파악 후 위치로 닷지
             if (NavMesh.SamplePosition(GetDodgePoint(dodgeAngle), out _navHit, dodgeDistance, NavMesh.AllAreas))
             {
-                _enemy.NavAgent.isStopped = true;
+                _enemy.navAgent.isStopped = true;
                 _timer = 0;
                 _startPos = _transform.position;
-                _enemy.Anim.SetBool(Strings.animPara_isInteracting, true);
-                _enemy.Anim.CrossFade(Strings.AnimName_RollBack, 0.2f);
+                _enemy.anim.SetBool(Strings.animPara_isInteracting, true);
+                _enemy.anim.CrossFade(Strings.AnimName_RollBack, 0.2f);
                 isDodge = true;
                 return true;
             }
@@ -86,9 +86,9 @@ namespace SK
             if (_timer >= dodgeTime)
             {
                 isDodge = false;
-                _enemy.NavAgent.velocity = Vector3.zero;
-                _enemy.NavAgent.Warp(_transform.position);
-                _enemy.NavAgent.isStopped = false;
+                _enemy.navAgent.velocity = Vector3.zero;
+                _enemy.navAgent.Warp(_transform.position);
+                _enemy.navAgent.isStopped = false;
 
                 // 이동 완료 후 타격 반응 가능
                 _enemy.health.canDamage = true;
@@ -102,14 +102,14 @@ namespace SK
         {
             if (UnityEngine.Random.value < CAChance)
             {
-                _enemy.Anim.SetBool(Strings.animPara_isInteracting, true);
-                _enemy.Anim.SetInteger(Strings.AnimPara_ComboIndex, 10); // Jump Attack Index : 10
-                _enemy.Anim.SetTrigger(Strings.AnimPara_Attack);
-                _enemy.stateMachine.ChangeState(_enemy.stateAttack);
+                _enemy.anim.SetBool(Strings.animPara_isInteracting, true);
+                _enemy.anim.SetInteger(Strings.AnimPara_ComboIndex, 10); // Jump Attack Index : 10
+                _enemy.anim.SetTrigger(Strings.AnimPara_Attack);
+                _enemy.stateMachine.ChangeState(_enemy.stateMachine.stateAttack);
                     
                 _timer = 0;
                 _startPos = _transform.position;
-                _destPos = _enemy.targetObject.transform.position;
+                _destPos = _enemy.combat.TargetObject.transform.position;
                 _canDodge = false;
                 _counterAttack = true;
                 LookAtTarget();
@@ -134,7 +134,7 @@ namespace SK
 
         private void LookAtTarget()
         {
-            _transform.rotation = Quaternion.LookRotation(_enemy.targetObject.transform.position - _transform.position);
+            _transform.rotation = Quaternion.LookRotation(_enemy.combat.TargetObject.transform.position - _transform.position);
         }
         #endregion
     }

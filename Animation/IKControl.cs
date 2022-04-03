@@ -10,8 +10,6 @@ namespace SK.Animation
         [SerializeField] private LayerMask groundLayerMask;
         [SerializeField] [Range(0f, 1f)] 
         private float distanceToGround = 0.05f;
-        [SerializeField] private Transform leftFoot;
-        [SerializeField] private Transform rightFoot;
         void Start()
         {
             if (!anim) anim = GetComponent<Animator>();

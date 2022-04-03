@@ -37,21 +37,19 @@ namespace SK
             }
 
             assignedEquipment = loadWeapon;
-            GameObject model = Instantiate(assignedEquipment.modelPrefab);
+            currentModel = Instantiate(assignedEquipment.modelPrefab);
             
-            if (model != null)
+            if (currentModel != null)
             {
                 if (parentOverride != null)
-                    model.transform.parent = parentOverride;
+                    currentModel.transform.parent = parentOverride;
                 else
-                    model.transform.parent = transform;
-                
-                model.transform.localPosition = assignedEquipment.modelPrefab.transform.localPosition;
-                model.transform.localRotation = assignedEquipment.modelPrefab.transform.localRotation;
-                model.transform.localScale = assignedEquipment.modelPrefab.transform.localScale;
-            }
+                    currentModel.transform.parent = transform;
 
-            currentModel = model;
+                currentModel.transform.localPosition = assignedEquipment.modelPrefab.transform.localPosition;
+                currentModel.transform.localRotation = assignedEquipment.modelPrefab.transform.localRotation;
+                currentModel.transform.localScale = assignedEquipment.modelPrefab.transform.localScale;
+            }
         }
     }
 }

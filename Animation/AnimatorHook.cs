@@ -4,10 +4,10 @@ namespace SK.FSM
 {
     public class AnimatorHook : MonoBehaviour
     {
-        private CharacterStateManager _states;
+        private PlayerStateManager _states;
         private Vector3 animDelta;
 
-        public void Init(CharacterStateManager stateManager)
+        public void Init(PlayerStateManager stateManager)
         {
             _states = stateManager;
         }
@@ -20,9 +20,11 @@ namespace SK.FSM
             
             if (_states.isGrounded && _states.fixedDelta > 0)
             {
-                animDelta = _states.anim.deltaPosition / _states.fixedDelta;
+                transform.position = _states.anim.rootPosition;
+
+                /*animDelta = _states.anim.deltaPosition / _states.fixedDelta;
                 var pos = _states.mTransform.position;
-                Vector3.MoveTowards(pos, pos + animDelta, _states.fixedDelta);
+                Vector3.MoveTowards(pos, pos + animDelta, _states.fixedDelta);*/
                 //_states.thisRigidbody.velocity = animDelta; //deprecated::Don't use Rigidbody
             }
         }
