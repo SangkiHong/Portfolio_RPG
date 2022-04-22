@@ -2,6 +2,6 @@
 {
     public abstract class StateAction
     {
-        public abstract bool Execute();
+        public abstract void Execute();
     }
 }

@@ -1,12 +1,10 @@
-using System.Collections;
-
 namespace SK.FSM
 {
-    public class MonitorAnimationBool : StateAction
+    public class MonitorAnimationBool
     {
         private readonly PlayerStateManager states;
-        private StateBase targetState;
-        private int targetBool;
+        private readonly StateBase targetState;
+        private readonly int targetBool;
 
         public MonitorAnimationBool(PlayerStateManager characterStateManager, int targetBool, StateBase targetState)
         {
@@ -15,7 +13,7 @@ namespace SK.FSM
             this.targetState = targetState;
         }
 
-        public override bool Execute()
+        public bool Execute()
         {
             if (states.anim.GetBool(targetBool))
             {

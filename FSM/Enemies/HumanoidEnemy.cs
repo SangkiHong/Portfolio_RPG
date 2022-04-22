@@ -4,8 +4,8 @@ namespace SK
 {
     public class HumanoidEnemy : Enemy
     {
-        private float _moveBlend, _walkSpeed;
-
+        private float _moveBlend, _sideways, _walkSpeed;
+        [SerializeField] Vector3 moveDir;
         public override void Update()
         {
             base.Update();
@@ -25,7 +25,7 @@ namespace SK
         
         private void Rotate()
         {
-            if (navAgent.desiredVelocity.sqrMagnitude >= 0.01f)
+            if (navAgent.updateRotation && navAgent.desiredVelocity.sqrMagnitude >= 0.01f)
             {
                 // 에이전트의 이동방향
                 Vector3 direction = navAgent.desiredVelocity;
@@ -41,16 +41,44 @@ namespace SK
         private void AnimateMove()
         {
             _walkSpeed = navAgent.velocity.magnitude/navAgent.speed;
-            
-            if (navAgent.velocity.sqrMagnitude >= 0.01f && navAgent.remainingDistance <= 0.1f)
+
+            // 전투 상황이 아닐 경우
+            if (stateMachine.CurrentState != stateMachine.stateCombat)
             {
-                // 목표지점에 도달 시 애니메이션 중지
-                if (anim.GetFloat(Strings.AnimPara_MoveBlend) != 0)                
-                    anim.SetFloat(Strings.AnimPara_MoveBlend, 0);                
+                if (navAgent.velocity.sqrMagnitude <= 0.03f || navAgent.remainingDistance <= 0.15f)
+                {
+                    var moveBlend = anim.GetFloat(Strings.AnimPara_MoveBlend);
+                    // 목표지점에 도달 시 애니메이션 중지
+                    _moveBlend = moveBlend > 0 ? moveBlend - 0.07f : 0;
+                }
+                else
+                {
+                    _moveBlend = walkAnimSpeed * _walkSpeed + delta;
+                }
             }
-            else            
-                _moveBlend = walkAnimSpeed * _walkSpeed + delta;            
-                
+            // 전투 상황인 경우
+            else
+            {
+                if (navAgent.velocity.sqrMagnitude <= 0.03f || navAgent.remainingDistance <= 0.15f)
+                {
+                    var moveBlend = anim.GetFloat(Strings.AnimPara_MoveBlend);
+                    _moveBlend = moveBlend > 0.02f ? moveBlend - 0.07f : 0;
+
+                    var sideways = anim.GetFloat(Strings.AnimPara_Sideways);
+                    _sideways = sideways > 0.02f ? sideways - 0.07f : 0;
+                }
+                else
+                {
+                    moveDir = stateMachine.stateCombat.moveDirection;
+                    _moveBlend = stateMachine.stateCombat.moveDirection.normalized.z;
+                    var sideway = -stateMachine.stateCombat.moveDirection.y / 90;
+                    if (sideway > 1) sideway -= (int)sideway; // 정수부 제거
+                    _sideways = sideway;
+                }
+
+                anim.SetFloat(Strings.AnimPara_Sideways, _sideways);
+            }
+
             anim.SetFloat(Strings.AnimPara_MoveBlend, _moveBlend);
         }
     }

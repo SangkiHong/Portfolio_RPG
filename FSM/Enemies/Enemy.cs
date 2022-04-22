@@ -16,7 +16,7 @@ namespace SK
     #endregion
     public abstract class Enemy : MonoBehaviour, ITargetable
     {
-        public string currentStateName;
+        [ReadOnly] public string currentStateName;
 
         #region Stats
         [Header("Stats")]
@@ -52,6 +52,8 @@ namespace SK
         #endregion
 
         #region etc
+        public Transform targetingPoint;
+
         internal Transform mTransform;
         internal Rigidbody mRigidbody;
         internal Collider mCollider;
@@ -59,9 +61,11 @@ namespace SK
         internal PlayerStateManager targetState;
         internal EnemyStateMachine stateMachine;
 
+        internal float targetDistance;
         internal float walkAnimSpeed = 0.5f;
-        internal float delta, fixedDelta, _comboTimer;
-        internal bool isDead, isFlee, isInteracting;
+        internal float delta, fixedDelta;
+        [SerializeField]
+        internal bool isDead, isFlee, isInteracting, uninterruptibleState;
         #endregion
 
         #region Unity Events
@@ -72,7 +76,9 @@ namespace SK
             mCollider = GetComponent<Collider>();
             if (!anim) anim = GetComponent<Animator>();
             if (!navAgent) navAgent = GetComponent<NavMeshAgent>();
+            if (!searchRadar) searchRadar = GetComponent<SearchRadar>();
             if (!combat) combat = GetComponent<Behavior.Combat>();
+            if (!dodge) dodge = GetComponent<Dodge>();
             if (!health) health = GetComponent<Health>();
             
             stateMachine = new EnemyStateMachine(this);
@@ -104,17 +110,12 @@ namespace SK
             fixedDelta = Time.fixedDeltaTime;
             stateMachine.CurrentState?.FixedTick();
 
-            // Attack Combo Timer
-            if (combat && combat.canComboAttack)
-            {
-                if (_comboTimer > 0)
-                    _comboTimer -= fixedDelta;
-                else
-                    combat.canComboAttack = false;
-            }
-
             // Target Check
-            TargetCheck();
+            if (combat.TargetObject && TargetCheck())
+            {
+                // 타겟과의 거리
+                targetDistance = Vector3.Distance(combat.TargetObject.transform.position, mTransform.position);
+            }
 
             // Nav Control
             if (isInteracting && !navAgent.isStopped) navAgent.isStopped = true;
@@ -151,20 +152,21 @@ namespace SK
             if (combat) combat.onAttack += CalculateDamage; // 공격 시 공격력 계산 event등록
         }
 
-        private void TargetCheck()
+        private bool TargetCheck()
         {
-            if (targetState != null && targetState.isDead)            
-                UnassignTarget();            
+            if (targetState != null && targetState.isDead)
+            {
+                UnassignTarget();
+                return false;
+            }
+            return true;
         }
 
         internal void UnassignTarget()
         {
-            if (combat.TargetObject)
-            {
-                combat.SetTarget(null);
-                anim.SetBool(Strings.AnimPara_isFight, false);
-                stateMachine.ChangeState(stateMachine.statePatrol);
-            }
+            combat.SetTarget(null);
+            anim.SetBool(Strings.AnimPara_isFight, false);
+            stateMachine.ChangeState(stateMachine.statePatrol);
         }
         #endregion
 
@@ -177,14 +179,12 @@ namespace SK
         #endregion
 
         #region Event Func
-        public void AbleCombo() // Animation Event
-        {
-            combat.canComboAttack = true;
-            _comboTimer = combat.canComboDuration;
-        }
+        public void AbleCombo() { }        
 
         private void OnDamageEvent()
         {
+            if (isDead) return;
+
             // Synchronize Hit Object to Target
             if (!combat.TargetObject) combat.SetTarget(health.hitTransform.gameObject);
 
@@ -193,7 +193,7 @@ namespace SK
                 combat.alert.SendAlert(combat.TargetObject);
 
             // Dodge
-            if (dodge && dodge.dodgeChance > 0 && Random.value < dodge.dodgeChance)
+            if (dodge && !uninterruptibleState && dodge.dodgeChance > 0 && Random.value < dodge.dodgeChance)
             {
                 if (dodge.DoDodge())
                 {
@@ -202,17 +202,24 @@ namespace SK
                 }
             }
 
+            // Take damage
+            health.Damaged();
+
+            if (health.CurrentHp <= 0) return;
+
+            // Receive damage but can't be interrupted State
+            if (uninterruptibleState) return;
+
             navAgent.velocity = Vector3.zero;
             navAgent.isStopped = true;
             anim.SetTrigger(Strings.AnimPara_Damaged);
             anim.SetBool(Strings.animPara_isInteracting, true);
-            health.Damaged();
             
             // fleeHpPercent 아래로 Hp가 내려갔을 시 일정 확률에 따라 도주 상태로 변경 
             // fleeHpPercent가 0이면 도주 시도 없음
             if (!isFlee && fleeChance > 0 && health.CurrentHp <= enemyData.Hp * fleeHpPercent * 0.01f)
             {
-                isFlee = true; // 1회만 시도
+                isFlee = true; // 1회만 도주 시도
                 if (Random.value * 100 < fleeChance)
                 {
                     stateMachine.ChangeState(stateMachine.stateFlee);
@@ -220,7 +227,9 @@ namespace SK
                 }
             }
             
-            if (stateMachine.CurrentState == null || stateMachine.CurrentState == stateMachine.statePatrol || stateMachine.CurrentState == stateMachine.stateFlee)
+            if (stateMachine.CurrentState == null || 
+                stateMachine.CurrentState == stateMachine.statePatrol || 
+                stateMachine.CurrentState == stateMachine.stateFlee)
                 stateMachine.ChangeState(stateMachine.stateChase); // 피해를 입을 시 상태 변경
         }
 
@@ -231,7 +240,9 @@ namespace SK
             health.enabled = false;
             mRigidbody.isKinematic = true;
             mCollider.isTrigger = true;
-            stateMachine.StopMachine();
+            navAgent.velocity = Vector3.zero;
+            navAgent.isStopped = true;
+            stateMachine.StopMachine(true);
             UnassignTarget();
             anim.Rebind();
             anim.SetTrigger(Strings.AnimPara_Dead);
@@ -241,18 +252,8 @@ namespace SK
         private void CalculateDamage()
         {
             // Calculate Damage
-            var level = enemyData.Level;
-            int weaponPower = Random.Range(combat.currentUseWeapon.AttackMinPower, combat.currentUseWeapon.AttackMaxPower + 1);
-            var damage = (level * 0.5f) + (enemyData.Str * 0.5f) + (weaponPower * 0.5f) + (level + 9);
-
-            // Critical Chance
-            if (Random.value < enemyData.CriticalChance)
-            { 
-                damage *= enemyData.CriticalMultiplier;
-                combat.isCriticalHit = true;
-            }
-
-            combat.calculatedDamage = (int)damage;
+            combat.calculatedDamage = 
+                combat.CalculateDamage(enemyData.Level, enemyData.Str, enemyData.CriticalChance, enemyData.CriticalMultiplier);
         }
         #endregion
     }

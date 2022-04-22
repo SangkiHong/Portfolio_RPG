@@ -11,6 +11,8 @@ namespace SK
 
         public int CurrentHp => _currentHp;
         private int _currentHp;
+
+        public bool canDamage = true;
         [SerializeField] private bool canHitFx;
         [SerializeField] private bool canDeadFx;
         [SerializeField] private float hitColorDuration = 0.8f;
@@ -20,7 +22,6 @@ namespace SK
         [SerializeField] private int bonusHpPerDEX;
         [SerializeField] private int bonusHpPerINT;
 
-        [System.NonSerialized] public bool canDamage = true;
         [System.NonSerialized] public Transform hitTransform;
 
         private Transform _transform;
@@ -68,7 +69,19 @@ namespace SK
             _damageValue = damageValue;
             hitTransform = tr;
             _isCriticalHit = isCriticalHit;
+            onDamaged?.Invoke();
+        }
 
+        // 타격 입을 지에 대한 판정에 따라 호출됨
+        public void Damaged()
+        {
+            _currentHp -= _damageValue;
+
+            // 데미지 수치 UI 표시
+            UIPoolManager.Instance.GetObject(Strings.PoolName_DamagePoint, Vector3.zero).GetComponent<DamageUI>().
+                Assign(_transform.position, _damageValue, _isCriticalHit);
+
+            // 피격 시 Emission 효과 발동
             if (canHitFx)
             {
                 _timer = hitColorDuration;
@@ -78,16 +91,7 @@ namespace SK
                     StartCoroutine(HitColorChange());
             }
 
-            onDamaged?.Invoke();
-        }
-
-        // 타격 입을 지에 대한 판정에 따라 호출됨
-        public void Damaged()
-        {
-            _currentHp += _damageValue;
-            UIPoolManager.Instance.GetObject(Strings.PoolName_DamagePoint, Vector3.zero).GetComponent<DamageUI>().
-                Assign(_transform.position, _damageValue, _isCriticalHit); // Pop UI PoolObject
-
+            // HP가 0이 되었을 경우 죽음
             if (CurrentHp <= 0) 
             {
                 onDead?.Invoke(); 

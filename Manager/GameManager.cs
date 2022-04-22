@@ -8,6 +8,8 @@ namespace SK
 
         [SerializeField] private bool cursorVisible;
 
+        public bool CusorVisible => cursorVisible;
+
         public PlayerStateManager player;
         
         private void Awake()
@@ -21,6 +23,19 @@ namespace SK
             Cursor.visible = cursorVisible;
             if (!cursorVisible)
                 Cursor.lockState = CursorLockMode.Locked;
+        }
+
+        public bool SwitchMouseState()
+        {
+            cursorVisible = !cursorVisible;
+            Cursor.visible = cursorVisible;
+
+            if (cursorVisible)
+                Cursor.lockState = CursorLockMode.Confined;
+            else
+                Cursor.lockState = CursorLockMode.Locked;
+
+            return !cursorVisible; // Unvisible 상태 시 카메라 회전 가능하기 위해 반전 값 리턴
         }
     }
 }

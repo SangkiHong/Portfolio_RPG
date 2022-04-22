@@ -16,27 +16,13 @@ namespace SK.FSM
 
         public MoveCharacter(PlayerStateManager psm) => _state = psm;        
 
-        public override bool Execute()
+        public override void Execute()
         {
-            if (_state.isRolling) 
-            {
-                if (_state.monitorInteracting.Execute())
-                {
-                    _state.DisableRootMotion();
-                    _state.isRolling = false;
-                    _state.health.canDamage = true;
-                }
-
-                return false;
-            }
-
             _moveAmount = _state.moveAmount;
 
             HandleMovement();
             HandleRotation();
-            HandleAnimations();       
-
-            return false;
+            HandleAnimations();
         }
 
         private void HandleMovement()
@@ -53,7 +39,7 @@ namespace SK.FSM
 
             if (_moveAmount > 0.1f) // Move
             {
-                _speed = _state.isRunning ? _state.runSpeed : _state.movementsSpeed; // Change Speed on Running
+                _speed = _state.isRunning ? _state.runSpeed : _state.movementsSpeed; // 달릴 시 속도 변경
 
                 // Normal Movement
                 if (!_state.isTargeting)
@@ -61,7 +47,7 @@ namespace SK.FSM
                     float overrideMove = _moveAmount;
                     if (_state.vertical < 0)
                     {
-                        overrideMove *= -0.85f; // 뒷걸음 시 뒤로 85%로 감속
+                        overrideMove *= -0.7f; // 뒷걸음 시 뒤로 70%로 감속
                     }
                     _targetVelocity = _state.mTransform.forward * overrideMove * _speed;
                 }
@@ -113,7 +99,8 @@ namespace SK.FSM
             else Gravity();
 
             Debug.DrawRay((tranformPos + Vector3.up * 0.2f), _targetVelocity, Color.green, 0.01f, false);
-            _state.mTransform.position = Vector3.MoveTowards(tranformPos, tranformPos + _targetVelocity, _state.fixedDelta * _state.adaptSpeed);
+            //_state.mTransform.position = Vector3.MoveTowards(tranformPos, tranformPos + _targetVelocity, _state.fixedDelta * _state.adaptSpeed);
+            _state.characterController.Move(_targetVelocity);
         }
         
         private void HandleRotation()

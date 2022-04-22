@@ -2,11 +2,11 @@
 {
     public class EnemyStateMachine : StateMachineBase
     {
-        public StateBase statePatrol;
-        public StateBase stateChase;
-        public StateBase stateCombat;
-        public StateBase stateAttack;
-        public StateBase stateFlee;
+        public StatePatrol statePatrol;
+        public StateChase stateChase;
+        public StateCombat stateCombat;
+        public StateAttack stateAttack;
+        public StateFlee stateFlee;
 
         internal readonly Enemy enemy;
 
@@ -26,12 +26,12 @@
             enemy.currentStateName = state.GetType().Name;
         }
 
-        public void StopMachine()
+        public void StopMachine(bool withNavAgent = false)
         {
             base.CurrentState = null;
             
             // Stop NavAgent
-            if (!enemy.navAgent.isStopped)
+            if (withNavAgent && !enemy.navAgent.isStopped)
             {
                 enemy.navAgent.isStopped = true;
                 enemy.navAgent.updatePosition = false;

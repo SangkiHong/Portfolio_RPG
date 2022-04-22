@@ -44,14 +44,14 @@ namespace SK
             secondaryHook?.UnloadWeapon();
         }
 
-        public void Equip(int isPrimary)
+        public void Equip(int isSecondary)
         {
-            if (isPrimary == 1)
+            if (isSecondary == 0) // 주무기
             {
                 targetTransform = primaryHook.currentModel.transform;
                 targetTransform.parent = primaryHook.transform;
             }
-            else
+            else // 보조 무기
             {
                 targetTransform = secondaryHook.currentModel.transform;
                 targetTransform.parent = secondaryHook.transform;
@@ -62,9 +62,9 @@ namespace SK
             targetTransform.localScale = Vector3.one;
         }
 
-        public void Unequip(int isPrimary)
+        public void Unequip(int isSecondary)
         {
-            if (isPrimary == 1)
+            if (isSecondary == 0)
             {
                 targetTransform = primaryHook.currentModel.transform;
                 targetTransform.parent = sheathPrimary;

@@ -42,8 +42,7 @@ namespace SK.FSM
         {
             if (_enemy.navAgent.remainingDistance < 3)
             {
-                float distanceTarget = Vector3.Distance(_enemy.mTransform.position, _enemy.combat.TargetObject.transform.position);
-                if (distanceTarget < _enemy.fleeDistance) // Continue Flee
+                if (_enemy.targetDistance < _enemy.fleeDistance) // Continue Flee
                     _enemy.navAgent.SetDestination(GetFleePosition());
                 else // End Flee
                 {

@@ -8,27 +8,44 @@ namespace SK.FSM
         private readonly Enemy _enemy;
         private readonly EnemyStateMachine _stateMachine;
 
-        private Vector3 _randomPoint;
-        private float _targetDist, _attackTimer;
+        internal Vector3 moveDirection;
+
+        private Vector3 _movePoint;
+        private float _combatDist, _attackDist, _attackElapsed;
 
         public StateCombat(Enemy enemyControl, EnemyStateMachine stateMachine)
         {
             _enemy = enemyControl;
             _stateMachine = stateMachine;
+            _combatDist = enemyControl.combat.combatDistance;
+            _attackDist = enemyControl.combat.attackDistance;
         }
 
         public override void StateInit()
         {
-            _attackTimer = _enemy.AttackCooldown;
+            // Init Enemy State
+            _enemy.uninterruptibleState = false;
+
+            _attackElapsed = _enemy.AttackCooldown;
             _enemy.anim.SetBool(Strings.AnimPara_isFight, true);
 
-            if (_enemy.navAgent.isStopped) _enemy.navAgent.isStopped = false;
+            _enemy.navAgent.Warp(_enemy.mTransform.position);
+            _enemy.navAgent.isStopped = false;
+            _enemy.navAgent.updatePosition = true;
             _enemy.navAgent.updateRotation = false;
-            _enemy.navAgent.SetDestination(CombatRandomPos());
-            _enemy.walkAnimSpeed = 0.5f;
+            _enemy.navAgent.angularSpeed = 0;
+
+            // 30% 속도로 이동
+            _enemy.navAgent.speed = _enemy.enemyData.Speed * 0.3f; 
+            _enemy.walkAnimSpeed = 0.3f;
+
+            // 어택 콤보 시작 시에 위치 이동
+            if ((_enemy.combat.currentUseWeapon && _enemy.combat.currentUseWeapon.CurrentAttackIndex == 0) ||
+                _enemy.combat.primaryEquipment && _enemy.combat.primaryEquipment.CurrentAttackIndex == 0)
+                _enemy.navAgent.SetDestination(GetAroundPosition());
 
             // Assign Check
-            if (_enemy.targetState && _enemy.targetState.gameObject != _enemy.combat.TargetObject)
+            if (_enemy.targetState && _enemy.targetState.gameObject.Equals(_enemy.combat.TargetObject))
                 return;
 
             // Target Assign
@@ -40,60 +57,68 @@ namespace SK.FSM
             if (_enemy.isInteracting)
                 return;
 
-            FollowTarget();
+            RotateToTarget();
 
             // 타겟이 공격범위 밖으로 벗어난 경우 추적 상태(Chase State)로 전환
-            _targetDist = Vector3.Distance(_enemy.mTransform.position, _enemy.combat.TargetObject.transform.position);
-            if (_targetDist > _enemy.combat.combatDistance + 1)
+            if (_enemy.targetDistance > _combatDist + 0.5f)
             {
                 _enemy.stateMachine.ChangeState(_stateMachine.stateChase);
                 return;
             }
 
             // Attack Cooldown
-            if (_attackTimer > 0 && !_enemy.isInteracting)
+            if (_attackElapsed > 0)
             {
-                _attackTimer -= _enemy.fixedDelta;
+                _attackElapsed -= _enemy.fixedDelta;
             }
             else // Do Attack
             {
-                if (!_enemy.isInteracting)
+                if (!_enemy.isInteracting && _enemy.navAgent.velocity.sqrMagnitude <= 0.03f)
                 {
-                    _attackTimer = _enemy.AttackCooldown;
+                    _attackElapsed = _enemy.AttackCooldown;
+
+                    // Can't be Stop Attack Action
+                    _enemy.uninterruptibleState = true;
                     _enemy.stateMachine.ChangeState(_stateMachine.stateAttack);
+
                     if (_enemy.combat) _enemy.combat.ExecuteAttack();
                 }
             }
 
-            Debug.DrawRay(_randomPoint, Vector3.up * 3, Color.red);
+            Debug.DrawRay(_movePoint, Vector3.up * 3, Color.red);
+            Debug.DrawLine(_enemy.combat.TargetObject.transform.position, _movePoint, Color.yellow);
         }
+
+        public void ResetElapsed() => _attackElapsed = _enemy.AttackCooldown; 
         
         // 타겟 중심으로 180도 반경 내 위치 찾기
-        private Vector3 CombatRandomPos()
+        private Vector3 GetAroundPosition()
         {
-            if (NavMesh.SamplePosition(GetAroundPosition(90), out var navMeshHit, 3, NavMesh.AllAreas))
+            if (NavMesh.SamplePosition(GetAroundPosition(90), out var navMeshHit, 1, NavMesh.AllAreas))
             {
-                _randomPoint = navMeshHit.position;
+                _movePoint = navMeshHit.position;
+                moveDirection = _movePoint - _enemy.mTransform.position;
+                moveDirection.y = Vector3.SignedAngle(moveDirection, _enemy.mTransform.forward, Vector3.up); // y값에 각도 전달
                 return navMeshHit.position;
             }            
 
             return _enemy.mTransform.position;
         }
         
-        private Vector3 GetAroundPosition(float angle)
+        private Vector3 GetAroundPosition(float degree)
         {
             float randomVal = Random.Range(-1f, 1f); // 반원에서 방향을 랜덤 값으로 정함
-            angle = randomVal * angle; // 0 ~ angle 사이의 각을 구함
+            degree = randomVal * degree * 0.5f; // -degree ~ degree 사이의 각을 구함
 
-            return _enemy.combat.TargetObject.transform.position
-                   + _enemy.combat.TargetObject.transform.rotation
-                   * Quaternion.Euler(0, angle, 0) * (Vector3.forward * _enemy.combat.combatDistance);
+            var dir = (_enemy.mTransform.position - _enemy.combat.TargetObject.transform.position).normalized;
+
+            return _enemy.combat.TargetObject.transform.position + Quaternion.Euler(0, degree, 0) * (dir * _enemy.combat.attackDistance * 0.9f);
         }
         
-        // Targeting
-        private void FollowTarget()
+        private void RotateToTarget()
         {
             Vector3 dir = (_enemy.combat.TargetObject.transform.position - _enemy.mTransform.position).normalized;
+            dir.y = 0;
             _enemy.mTransform.rotation = Quaternion.Lerp(_enemy.mTransform.rotation, Quaternion.LookRotation(dir), _enemy.fixedDelta * _enemy.LookTargetSpeed);
         }
     }

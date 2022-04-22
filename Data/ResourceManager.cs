@@ -40,17 +40,17 @@ namespace SK
             using (StreamReader sr = new StreamReader(path))
             {
                 string line = string.Empty;
-                int lineNum = 0;
                 GameObject obj = null;
+
                 while ((line = sr.ReadLine()) != null)
                 {
                     string[] row = line.Split(new char[] { ',' }); // ,¥‹¿ß∑Œ Split
                     if (row[0] == "Index") continue;
 
-                    obj = Resources.Load(Path.Combine(prefabFolderName, row[1])) as GameObject;
+                    obj = Resources.Load(Path.Combine("Prefabs", prefabFolderName, row[1])) as GameObject;
                     obj = parentTransform != null ? Instantiate(obj, parentTransform) : Instantiate(obj);
-                    obj.transform.position = new Vector3(float.Parse(row[2]), float.Parse(row[3]), float.Parse(row[4]));
-                    obj.transform.rotation = Quaternion.Euler(float.Parse(row[5]), float.Parse(row[6]), float.Parse(row[7]));
+                    obj.transform.SetPositionAndRotation(new Vector3(float.Parse(row[2]), float.Parse(row[3]), float.Parse(row[4])), 
+                                                         Quaternion.Euler(float.Parse(row[5]), float.Parse(row[6]), float.Parse(row[7])));
                     obj.transform.localScale = new Vector3(float.Parse(row[8]), float.Parse(row[9]), float.Parse(row[10]));
 
                     // Enemy Information

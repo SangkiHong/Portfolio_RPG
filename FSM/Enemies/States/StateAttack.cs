@@ -16,34 +16,23 @@ namespace SK.FSM
         public override void StateInit()
         {
             _enemy.mRigidbody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
-            _enemy.anim.applyRootMotion = true;
-            
-            if (!_enemy.navAgent.isStopped)
-            {
-                _enemy.navAgent.isStopped = true;
-                _enemy.navAgent.updatePosition = false;
-                _enemy.navAgent.updateRotation = false;
-            }
+            //_enemy.anim.applyRootMotion = true;
+            _enemy.anim.SetBool(Strings.animPara_isInteracting, true);
+
+            if (!_enemy.navAgent.isStopped)            
+                _enemy.navAgent.isStopped = true;            
         }
 
         public override void Tick()
         {
-            if (!_enemy.anim.GetBool(id: Strings.animPara_isInteracting))
+            if (!_enemy.anim.GetBool(Strings.animPara_isInteracting))
                 _enemy.stateMachine.ChangeState(_stateMachine.stateCombat);
         }
 
         public override void StateExit()
         {
-            _enemy.anim.applyRootMotion = false;
+            //_enemy.anim.applyRootMotion = false;
             _enemy.mRigidbody.constraints = RigidbodyConstraints.FreezeAll;
-            
-            if (_enemy.navAgent.isStopped)
-            {
-                _enemy.navAgent.Warp(_enemy.mTransform.position);
-                _enemy.navAgent.isStopped = false;
-                _enemy.navAgent.updatePosition = true;
-                _enemy.navAgent.updateRotation = true;
-            }
         }
     }
 }

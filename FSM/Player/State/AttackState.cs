@@ -4,13 +4,15 @@ namespace SK.FSM
 {
     public class AttackState : StateBase
     {
-        PlayerStateManager _state;
+        private readonly PlayerStateManager _state;
         public AttackState(PlayerStateManager psm) => _state = psm;
+
         private Vector3 _targetDir;
         private Quaternion _lookRot;
 
-        public override void StateInit() 
-        { 
+        public override void StateInit()
+        {
+            _state.anim.SetBool(Strings.animPara_isInteracting, true);
             _state.EnableRootMotion();
 
             _targetDir = _state.cameraManager.transform.forward;
@@ -20,6 +22,10 @@ namespace SK.FSM
 
         public override void FixedTick()
         {
+            // Attack 실행되기 전까지 input 받기
+            if (!_state.combat.attackExcuted)
+                _state.inputManager.Execute();
+
             _state.mTransform.rotation = Quaternion.Lerp(_state.mTransform.rotation, _lookRot, _state.fixedDelta * _state.rotationSpeed);
         }
 
@@ -29,6 +35,6 @@ namespace SK.FSM
             _state.monitorInteracting.Execute();
         }
         public override void StateExit() => _state.DisableRootMotion();
-        
+
     }
 }

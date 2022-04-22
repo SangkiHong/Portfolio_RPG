@@ -7,13 +7,15 @@ namespace SK.FSM
 {
     public class PlayerStateManager : MonoBehaviour
     {
+        [SerializeField] private bool isDebugMode;
+
         public Data.PlayerData playerData;
 
         [Header("References")]
         public CameraManager cameraManager;
         public CinemachineImpulseSource impulseSource;
         public Animator anim;
-        public Rigidbody thisRigidbody; //deprecated::Don't use Rigidbody
+        public CharacterController characterController;
         public CapsuleCollider thisCollider;
         public AnimatorHook animHook;
         public Combat combat;
@@ -21,15 +23,14 @@ namespace SK.FSM
 
         [Header("States")] 
         public bool useRootMotion;
-        [SerializeField]
-        internal bool isDead, isGrounded, isRunning, isJumping, isRolling, isSlipping, isTargeting;
+        internal bool isDead, isGrounded, isRunning, isJumping, isDodge, isSlipping, isTargeting;
 
         [Header("Targeting")]
         [SerializeField] private Transform cameraTarget;
         [SerializeField] private float targetSearchRange = 20;
         [SerializeField] private LayerMask targetLayer;
         internal Transform targetEnemy;
-        private Collider[] _targetColliders; 
+        private Collider[] _targetColliders;
 
         [Header("Movement States")]
         public LayerMask groundLayerMask;
@@ -46,16 +47,18 @@ namespace SK.FSM
         public float jumpIntervalDelay = 2;
         public float slopeLimitAngle = 60;
 
-        [Header("Controller Values")]
-        public float horizontal;
-        public float vertical;
-        public float moveAmount;
-        public float cameraZoomSpeed = 0.02f;
+        [Header("Dodge")]
+        [SerializeField] internal float dodgeSpeed = 1;
+        [SerializeField] internal AnimationCurve animationCurve_Forward;
+        [SerializeField] internal AnimationCurve animationCurve_back;
+
+        //Controller Values
+        internal float horizontal;
+        internal float vertical;
+        internal float moveAmount;
 
         // States
         internal PlayerStateMachine stateMachine;
-        internal LocomotionState locomotionState;
-        internal AttackState attackState;
 
         // States Actions
         internal InputManager inputManager;
@@ -67,6 +70,7 @@ namespace SK.FSM
         private PlayerInputAction _playerInputAction;
         private Collider[] _groundCheckCols = new Collider[3];
 
+        internal bool canComboAttack;
         internal float delta, fixedDelta;
         private float _comboTimer, _scrollY;
         private int _environmentLayer;
@@ -84,7 +88,6 @@ namespace SK.FSM
             // Initialize References
             if (!anim) anim = GetComponent<Animator>();
             if (!animHook) animHook = GetComponentInChildren<AnimatorHook>();
-            if (!thisRigidbody) thisRigidbody = GetComponent<Rigidbody>();
             if (!impulseSource) impulseSource = GetComponent<CinemachineImpulseSource>();
             if (!combat) combat = GetComponent<Combat>();
             if (!health) health = GetComponent<Health>();
@@ -92,36 +95,28 @@ namespace SK.FSM
             // Initialize Input System
             _playerInputAction = new PlayerInputAction();
             _playerInputAction.Enable();
-            _playerInputAction.GamePlay.CameraZoom.performed += x => _scrollY = x.ReadValue<float>() * cameraZoomSpeed * -1;
 
-            // Initialize States & State Machine
-            locomotionState = new LocomotionState(this);
-            attackState = new AttackState(this);
+            // Initialize State Machine
             stateMachine = new PlayerStateMachine(this);
-            stateMachine.ChangeState(locomotionState);
 
             // Initialize State Actions
             inputManager = new InputManager(this, _playerInputAction);
             moveCharacter = new MoveCharacter(this);
-            monitorInteracting = new MonitorAnimationBool(this, Strings.animPara_isInteracting, locomotionState);
+            monitorInteracting = new MonitorAnimationBool(this, Strings.animPara_isInteracting, stateMachine.locomotionState);
 
             // Initialize Heath
             health.Init(playerData.Level, playerData.Str, playerData.Dex, playerData.Int);
 
-            // 저장된 줌 값 가져오기
+            // Initialize Camera Settings
             cameraManager.normalCamera.m_Lens.FieldOfView = PlayerPrefs.GetFloat("ZoomAmount", 0);
+            _playerInputAction.GamePlay.CameraZoom.performed += x => _scrollY = x.ReadValue<float>() * cameraManager.cameraZoomSpeed * -1;
 
             anim.applyRootMotion = false;
-            animHook.Init(this);
+            if (animHook) animHook.Init(this);
             _targetColliders = new Collider[5];
 
             // Init Variable
             _environmentLayer = LayerMask.NameToLayer("Environment");
-
-            //deprecated::Don't use Rigidbody
-            /*thisRigidbody.angularDrag = 999;
-            thisRigidbody.drag = 4;
-            thisRigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;*/
 
         }
 
@@ -147,29 +142,20 @@ namespace SK.FSM
 
             // Camera Zoom Control
             if (!isTargeting)
-            {
-                if (_scrollY < 0 && cameraManager.normalCamera.m_Lens.FieldOfView <= 15)
-                {
-                    cameraManager.normalCamera.m_Lens.FieldOfView = 15;
-                }
-                else if (_scrollY > 0 && cameraManager.normalCamera.m_Lens.FieldOfView >= 60)
-                {
-                    cameraManager.normalCamera.m_Lens.FieldOfView = 60;
-                }
-                else
-                {
-                    cameraManager.normalCamera.m_Lens.FieldOfView += _scrollY;
-                }
-            }
+                cameraManager.ZoomSetting(_scrollY);            
 
             // Attack Combo Timer
-            if (combat.canComboAttack)
+            if (canComboAttack)
             {
                 if (_comboTimer > 0)
                     _comboTimer -= fixedDelta;
                 else
-                    combat.canComboAttack = false;
+                    canComboAttack = false;
             }
+
+            // 
+            if (UnityEngine.InputSystem.Keyboard.current.leftCtrlKey.wasPressedThisFrame)
+                cameraManager.CameraRotateSwtich(GameManager.Instance.SwitchMouseState());
         }
 
         private void Update()
@@ -262,15 +248,26 @@ namespace SK.FSM
         #region Event Func
         public void AbleCombo() // Combo 가능 Animation Event
         {
-            combat.canComboAttack = true;
+            canComboAttack = true;
             _comboTimer = combat.canComboDuration;
         }
 
         private void OnDamageEvent()
         {
+            // Shield하고 있을 경우
+            if (anim.GetBool(Strings.AnimPara_isShielding))
+            { 
+                anim.CrossFade(Strings.AnimName_Shield_Hit, 0);
+                return;
+            }
+
             impulseSource.GenerateImpulse(10f);
             anim.SetTrigger(Strings.AnimPara_Damaged);
             anim.SetBool(Strings.animPara_isInteracting, true);
+
+            // Debug 시 데미지 받지 않음
+            if (isDebugMode) return;
+
             health.Damaged();
         }
 
@@ -292,18 +289,9 @@ namespace SK.FSM
         private void CalculateDamage()
         {
             // Calculate Damage
-            var level = playerData.Level;
-            int weaponPower = Random.Range(combat.currentUseWeapon.AttackMinPower, combat.currentUseWeapon.AttackMaxPower + 1);
-            var damage = (level * 0.5f) + (playerData.Str * 0.5f) + (weaponPower * 0.5f) + (level + 9);
 
-            // Critical Chance
-            if (Random.value < playerData.CriticalChance)
-            {
-                damage *= playerData.CriticalMultiplier;
-                combat.isCriticalHit = true;
-            }
-
-            combat.calculatedDamage = (int)damage;
+            combat.calculatedDamage = 
+                combat.CalculateDamage(playerData.Level, playerData.Str, playerData.CriticalChance, playerData.CriticalMultiplier);
         }
         #endregion
 
@@ -312,7 +300,7 @@ namespace SK.FSM
         {
             if (collision.gameObject.layer == _environmentLayer)
             {
-                thisRigidbody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+                //thisRigidbody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
             }
         }
 
@@ -320,27 +308,29 @@ namespace SK.FSM
         {
             if (collision.gameObject.layer == _environmentLayer)
             {
-                thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+                //thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
             }
         }
 
         private bool IsCheckGrounded()
         {
-            var maxDistance = 0.15f;
             var position = mTransform.position;
 
-            // 1차 Ray로 체크
-            var ray = new Ray(position + Vector3.up * 0.1f, Vector3.down * maxDistance);
-            Debug.DrawRay(position + Vector3.up * 0.1f, Vector3.down * maxDistance, Color.magenta);
-            if (Physics.Raycast(ray, maxDistance, groundLayerMask))
+            // 1차 Character Controller로 체크
+            if (characterController.isGrounded) return true;
+
+            // 2차 OverlapSphere로 체크
+            var size = thisCollider.bounds.size.x * 0.5f;
+            if (0 < Physics.OverlapSphereNonAlloc(position + Vector3.up * size, size, _groundCheckCols, groundLayerMask))
             {
                 isGrounded = true;
                 return true;
             }
 
-            // 2차 OverlapSphere로 체크
-            var size = thisCollider.bounds.size.x * 0.5f;
-            if (0 < Physics.OverlapSphereNonAlloc(position + Vector3.up * size, size, _groundCheckCols, groundLayerMask))
+            // 3차 Ray로 체크
+            var ray = new Ray(position + Vector3.up * 0.1f, Vector3.down);
+            Debug.DrawRay(position + Vector3.up * 0.1f, Vector3.down * groundDistance, Color.magenta);
+            if (Physics.Raycast(ray, groundDistance, groundLayerMask))
             {
                 isGrounded = true;
                 return true;

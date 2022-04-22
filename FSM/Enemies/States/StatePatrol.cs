@@ -7,13 +7,16 @@ namespace SK.FSM
         private readonly Enemy _enemy;
         private readonly EnemyStateMachine _stateMachine;
 
+
         private Vector3 _randomPos;
         private float _seekIdleTimer;
+        private float _seekDistance;
         
         public StatePatrol(Enemy enemyControl, EnemyStateMachine stateMachine)
         {
             _enemy = enemyControl;
             _stateMachine = stateMachine;
+            _seekDistance = enemyControl.searchRadar.SeekDistance;
         }
 
         public override void StateInit()
@@ -24,7 +27,7 @@ namespace SK.FSM
             if (!_enemy.isPatrol) return;
 
             // NavAgent 재가동
-            if (_enemy.navAgent.isOnNavMesh && _enemy.navAgent.isStopped)
+            if (_enemy.navAgent.isOnNavMesh)
             {
                 _enemy.navAgent.isStopped = false;
                 _enemy.navAgent.updatePosition = true;
@@ -54,10 +57,9 @@ namespace SK.FSM
             }
             else
             {
-                _randomPos = _enemy.searchRadar.SeekAndWonder(_enemy.searchRadar.SeekDistance);
+                _randomPos = _enemy.searchRadar.SeekAndWonder(_seekDistance);
                 _enemy.navAgent.SetDestination(_randomPos);
                 _seekIdleTimer = 0;
-                _enemy.navAgent.stoppingDistance = 0;
             }
         }
     }

@@ -12,9 +12,9 @@ namespace SK.Behavior
         [SerializeField] private bool canAlert;
         [SerializeField] private float alertRange = 10;
 
+        private Collider[] _colliderBuff;
         private Transform _transform;
-        [SerializeField] private Collider[] _colliderBuff;
-        [SerializeField] private int _enemyLayerMask;
+        private int _enemyLayerMask;
         private Enemy temp;
 
         private void Awake() => GetComponent<Combat>().alert = this;

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using SK.Utilities;
 
@@ -12,27 +12,25 @@ namespace SK.Behavior
         public UnityAction onAttack;
         
         [Header("Debug")]
+        public bool debugCombatRange;
         public bool debugAttackRange;
 
         [Header("Attack")]
-        public bool canComboAttack;
         public float combatDistance = 3.5f;
         public float canComboDuration = 1.5f;
+        [SerializeField] private float impactMotionTime = 1;
+        [SerializeField] private AnimationCurve impactMotionCurve;
 
         [Header("Attack Search")]
         [SerializeField] private LayerMask targetLayerMask;
-        [SerializeField] private LayerMask ignoreLayerMask;
         [SerializeField] private float attackAngle = 120;
-        [SerializeField] private float attackDistance = 15;
+        [SerializeField] internal float attackDistance = 15;
         [SerializeField] private Vector3 offset;
 
         [Header("Equipments")]
-        public Equipments primaryEquipment;
+        public Weapon primaryEquipment;
         public Equipments secondaryEquipment;
         public EquipmentHolderManager equipmentHolderManager;
-
-        [Header("Combat Behavior")]
-        [SerializeField] internal Alert alert;
 
         private GameObject targetObject;
         public GameObject TargetObject => targetObject;
@@ -40,17 +38,24 @@ namespace SK.Behavior
         private Transform _transform;
         private Animator _anim;
         private SearchUtility searchUtility;
-
+        [SerializeField]
         private List<GameObject> _targetBuff;
 
-        [System.NonSerialized] public Weapon currentUseWeapon;
-        [System.NonSerialized] public int calculatedDamage;
-        [System.NonSerialized] public bool isCriticalHit;
+        internal Alert alert;
+        internal Weapon currentUseWeapon;
+        internal int calculatedDamage;
+
+        internal bool attackExcuted;
+        private bool _isCriticalHit, _isImpact;
+        private float _elapsed;
 
         private void Awake()
         {
             _transform = transform;
+            _targetBuff = new List<GameObject>();
+
             _anim = GetComponent<Animator>();
+            
             if (!equipmentHolderManager) equipmentHolderManager = GetComponentInChildren<EquipmentHolderManager>();
 
             equipmentHolderManager?.Init(); // 장비 초기화
@@ -64,160 +69,103 @@ namespace SK.Behavior
             searchUtility = new SearchUtility(_transform);
         }
 
-        public void ExecuteAttack()
+        private void FixedUpdate()
         {
-            primaryEquipment.ExecuteAction(_anim, !canComboAttack);
-            //...
+            if (_isImpact)
+            {
+                _elapsed += Time.deltaTime;
+                if (_elapsed >= impactMotionTime)
+                {
+                    _elapsed = impactMotionTime;
+                    _isImpact = false;
+                }
+                _anim.SetFloat(Strings.AnimPara_AnimSpeed, impactMotionCurve.Evaluate(_elapsed / impactMotionTime));
+            }
+        }
+
+        public void ExecuteAttack(bool comboAttack = true)
+        {
+            attackExcuted = false;
+            primaryEquipment.ExecuteAction(_anim, comboAttack);
+            // Secondary Attack 구현 필요...
+        }
+
+        public void ExcuteSpecialAttack(AttackType attackType)
+        {
+            attackExcuted = false;
+            primaryEquipment.ExecuteAction(_anim, attackType);
         }
 
         // Use LineCast & OverlapSphereNonAlloc
         public void Attack()
         {
+            if (attackExcuted) return;
+
+            attackExcuted = true;
             // Using Secondary Weapon
             if (_anim.GetBool(Strings.AnimPara_isSecondEquip))
                 currentUseWeapon = (Weapon)secondaryEquipment;
             else
-                currentUseWeapon = (Weapon)primaryEquipment;
+                currentUseWeapon = primaryEquipment;
 
-            _targetBuff = searchUtility.FindTargets(offset, currentUseWeapon.GetAttackAngle(), attackDistance, targetLayerMask, ignoreLayerMask);
+            SearchAndInflictDamage(currentUseWeapon.GetAttackAngle());
+        }
+
+        public void GlobalAttack() => SearchAndInflictDamage(360);
+
+        private void ImpactMotion() 
+        {
+            _elapsed = 0;
+            _isImpact = true;
+        }
+
+        private void SearchAndInflictDamage(int degree)
+        {
+            _targetBuff.Clear();
+
+             searchUtility.FindTargets(offset, degree, attackDistance, ref _targetBuff, targetLayerMask);
 
             if (_targetBuff != null && _targetBuff.Count > 0)
             {
                 // 크리티컬 초기화
-                isCriticalHit = false;
+                _isCriticalHit = false;
 
                 // 치명타 확률, 배율 가져오기
                 onAttack?.Invoke();
 
                 for (int i = 0; i < _targetBuff.Count; i++)
                 {
-                    _targetBuff[i].GetComponent<IDamagable>()?.OnDamage(-calculatedDamage, _transform, isCriticalHit);
+                    _targetBuff[i].GetComponent<IDamagable>()?.OnDamage(calculatedDamage, _transform, _isCriticalHit);
+
+                    // 타격 효과
+                    ImpactMotion();
                 }
             }
         }
 
         public void SetTarget(GameObject target) => targetObject = target;
-
-        // deprecated::Use OverlapBoxNonAlloc
-        /*public void Attack(int isLeft) // 0 = Right Weapon, 1 = Left Weapon
+        
+        public int CalculateDamage(int level, int strength, float criticalChance, float criticalMultiplier)
         {
-            // 초기화
-            int size; // Using Collider Amount
-            if (isLeft == 0) // Right Weapon            
-                size = ((Weapon)primaryEquipment).GetAttackColliderAmount();
-            else // Left Weapon
-                size = ((Weapon)secondaryEquipment).GetAttackColliderAmount();
+            // Calculate Damage
+            int weaponPower = Random.Range(currentUseWeapon.AttackMinPower, currentUseWeapon.AttackMaxPower + 1);
+            var damage = (level * 0.5f) + (strength * 0.5f) + (weaponPower * 0.5f) + (level + 9);
 
-            // Clear Collider Array
-            for (int i = 0; i < _colliderBuff.Length; i++)
-                if (_colliderBuff[i]) _colliderBuff[i] = null;
-
-            // Clear List
-            _colliderList.RemoveRange(0, _colliderList.Count);
-
-            float v = 0;
-            float interval = size > 1 ? (size - 1) * 45 / (size - 1) : 0;
-
-            for (int i = 0; i < size; i++)
+            // Critical Chance
+            if (Random.value < criticalChance)
             {
-                if (i % 2 == 1)
-                {
-                    v += 1;
-                    v *= -interval;
-                }
-                else
-                    v *= -1;
-
-                var rotation = _transform.rotation;
-
-                rotation *= Quaternion.Euler(interval * v * Vector3.up);
-
-                if (Physics.OverlapBoxNonAlloc(_transform.position + _transform.TransformDirection(attackColsOffset[i]),
-                    attackColScale * 0.5f, _colliderBuff,
-                    rotation, targetLayer, QueryTriggerInteraction.Collide) > 0)
-                {
-                    for (int j = 0; j < _colliderBuff.Length; j++)
-                    {
-                        if (_colliderBuff[j] != null)
-                            _colliderList.Add(_colliderBuff[j]);
-                    }
-                }
+                damage *= criticalMultiplier;
+                _isCriticalHit = true;
             }
 
-            // Catch 된 콜라이더들에게 데미지 전달
-            if (_colliderList.Count > 0)
-            {
-                // 크리티컬 초기화
-                isCriticalHit = false;
-
-                // 치명타 확률, 배율 가져오기
-                onAttack?.Invoke();
-
-                // 중복 List 제거
-                _colliderList = _colliderList.Distinct(new ColliderComparer()).ToList();
-
-                for (int i = 0; i < _colliderList.Count; i++)
-                {
-                    _colliderList[i].GetComponent<IDamagable>()?.OnDamage(-calculatedDamage, _transform, isCriticalHit);
-                }
-            }
+            return (int)damage;
         }
-
-        // Collier 비교 함수
-        private class ColliderComparer : IEqualityComparer<Collider>
-        {
-            public bool Equals(Collider x, Collider y)
-            {
-                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
-                    return false;
-
-                return x.GetHashCode() == y.GetHashCode();
-            }
-
-            public int GetHashCode(Collider obj)
-            {
-                if (obj == null)
-                    return 0;
-
-                return obj.GetHashCode();
-            }
-        }
-
-        void OnDrawGizmosSelected()
-        {
-            if (attackColsOffset.Length > 0 && debugAttackCollier)
-            {
-                float interval = (attackColsOffset.Length - 1) * 45 / (attackColsOffset.Length - 1);
-                float v = 0;
-                for (int i = 0; i < attackColsOffset.Length; i++)
-                {
-                    var position = transform.position + transform.TransformDirection(attackColsOffset[i]);
-                    var rotation = transform.rotation;
-
-                    if (i % 2 == 1)
-                    {
-                        v += 1;
-                        v *= -interval;
-                    }
-                    else                    
-                        v *= -1;
-                    
-                    rotation *= Quaternion.Euler(v * Vector3.up);
-
-                    Matrix4x4 rotationMatrix = Matrix4x4.TRS(position, rotation, attackColScale);
-                    Gizmos.matrix = rotationMatrix;
-                    Gizmos.color = Color.yellow;
-                    Gizmos.DrawWireCube(Vector3.zero, attackColScale);
-                }
-            }
-        }*/
 
         #region Debug
-        private void DrawAttackRange(Vector3 positionOffset, float fieldOfViewAngle, float viewDistance)
+        private void DrawAttackRange(Vector3 positionOffset, float fieldOfViewAngle, float viewDistance, Color color)
         {
 #if UNITY_EDITOR
             var oldColor = UnityEditor.Handles.color;
-            var color = Color.red;
             color.a = 0.1f;
             UnityEditor.Handles.color = color;
 
@@ -232,7 +180,8 @@ namespace SK.Behavior
         // Draw the line of sight
         private void OnDrawGizmosSelected()
         {
-            if (debugAttackRange) DrawAttackRange(offset, attackAngle, attackDistance);
+            if (debugCombatRange) DrawAttackRange(offset, 360, combatDistance, Color.magenta);
+            if (debugAttackRange) DrawAttackRange(offset, attackAngle, attackDistance, Color.red);
         }
         #endregion
     }

@@ -35,9 +35,7 @@ public class UIPoolManager : MonoBehaviour
     public List<PoolList> poolLists;
 
     private void Awake()
-    {
-	    Debug.Assert(uiCanvas != null, "Main Camera is null");
-	    
+    {	    
         for (int i = 0; i < poolLists.Count; i++)
         {
 			CreatePool(poolLists[i].prefab.name, poolLists[i].prefab, poolLists[i].preLoadNum);

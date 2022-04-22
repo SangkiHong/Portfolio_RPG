@@ -75,7 +75,7 @@ namespace SK
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Rolling_Horizontal"",
+                    ""name"": ""Dodge_Left"",
                     ""type"": ""Value"",
                     ""id"": ""0e553f6a-4c41-4478-afe7-029df0bc4b26"",
                     ""expectedControlType"": ""Axis"",
@@ -84,7 +84,16 @@ namespace SK
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Rolling_Vertical"",
+                    ""name"": ""Dodge_Right"",
+                    ""type"": ""Value"",
+                    ""id"": ""f55dd584-9294-46df-b4b2-a980f9b7794f"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Dodge_Backward"",
                     ""type"": ""Value"",
                     ""id"": ""336950d3-0cef-4fe5-9cba-1f2beb0f34e1"",
                     ""expectedControlType"": ""Axis"",
@@ -294,68 +303,35 @@ namespace SK
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""AD"",
-                    ""id"": ""eef785eb-3063-411d-8912-a453f2d65808"",
-                    ""path"": ""1DAxis"",
+                    ""name"": ""A with Shift"",
+                    ""id"": ""29fb5628-6ddf-4804-9da2-aaca633a2062"",
+                    ""path"": ""OneModifier"",
                     ""interactions"": ""MultiTap"",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Rolling_Horizontal"",
+                    ""action"": ""Dodge_Left"",
                     ""isComposite"": true,
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""negative"",
-                    ""id"": ""3fc2e9a3-149c-49ce-bf35-fc105e024c82"",
+                    ""name"": ""modifier"",
+                    ""id"": ""34388fa7-3db9-4165-b94d-262b8755e9ed"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Dodge_Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""67492231-6a66-4868-86c9-3b534e9babcb"",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Rolling_Horizontal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""positive"",
-                    ""id"": ""d880b54e-e323-42da-8791-aa774a94c3a3"",
-                    ""path"": ""<Keyboard>/d"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Rolling_Horizontal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""WS"",
-                    ""id"": ""65865abb-653f-4b59-a222-8df25943aba9"",
-                    ""path"": ""1DAxis"",
-                    ""interactions"": ""MultiTap"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Rolling_Vertical"",
-                    ""isComposite"": true,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": ""negative"",
-                    ""id"": ""e58cd445-44dd-46c2-8db5-ea4e32a912fc"",
-                    ""path"": ""<Keyboard>/s"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Rolling_Vertical"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""positive"",
-                    ""id"": ""06fd26e1-d013-4e73-911b-4d894e2d8393"",
-                    ""path"": ""<Keyboard>/w"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Rolling_Vertical"",
+                    ""action"": ""Dodge_Left"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
@@ -413,6 +389,72 @@ namespace SK
                     ""action"": ""Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""S with Shift"",
+                    ""id"": ""8a31e1b4-366d-48bf-baea-8767224b5c75"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": ""MultiTap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dodge_Backward"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""c630ed34-5ebc-4a08-bddc-7598f10cbf8c"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dodge_Backward"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""701601b5-7eb5-4467-8f4b-0aed8055dfa5"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dodge_Backward"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""D with Shift"",
+                    ""id"": ""38d56714-6841-4793-a4b7-3ed0bbfdd5b9"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": ""MultiTap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dodge_Right"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""54631f24-60ae-4f75-b780-e371336264bb"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Dodge_Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""711f30b7-4763-4a8b-adfa-0215db3e3381"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Dodge_Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -970,8 +1012,9 @@ namespace SK
             m_GamePlay_Run = m_GamePlay.FindAction("Run", throwIfNotFound: true);
             m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
             m_GamePlay_Attack = m_GamePlay.FindAction("Attack", throwIfNotFound: true);
-            m_GamePlay_Rolling_Horizontal = m_GamePlay.FindAction("Rolling_Horizontal", throwIfNotFound: true);
-            m_GamePlay_Rolling_Vertical = m_GamePlay.FindAction("Rolling_Vertical", throwIfNotFound: true);
+            m_GamePlay_Dodge_Left = m_GamePlay.FindAction("Dodge_Left", throwIfNotFound: true);
+            m_GamePlay_Dodge_Right = m_GamePlay.FindAction("Dodge_Right", throwIfNotFound: true);
+            m_GamePlay_Dodge_Backward = m_GamePlay.FindAction("Dodge_Backward", throwIfNotFound: true);
             m_GamePlay_Interact = m_GamePlay.FindAction("Interact", throwIfNotFound: true);
             m_GamePlay_CameraZoom = m_GamePlay.FindAction("CameraZoom", throwIfNotFound: true);
             m_GamePlay_TargetLockOn = m_GamePlay.FindAction("TargetLockOn", throwIfNotFound: true);
@@ -1053,8 +1096,9 @@ namespace SK
         private readonly InputAction m_GamePlay_Run;
         private readonly InputAction m_GamePlay_Jump;
         private readonly InputAction m_GamePlay_Attack;
-        private readonly InputAction m_GamePlay_Rolling_Horizontal;
-        private readonly InputAction m_GamePlay_Rolling_Vertical;
+        private readonly InputAction m_GamePlay_Dodge_Left;
+        private readonly InputAction m_GamePlay_Dodge_Right;
+        private readonly InputAction m_GamePlay_Dodge_Backward;
         private readonly InputAction m_GamePlay_Interact;
         private readonly InputAction m_GamePlay_CameraZoom;
         private readonly InputAction m_GamePlay_TargetLockOn;
@@ -1069,8 +1113,9 @@ namespace SK
             public InputAction @Run => m_Wrapper.m_GamePlay_Run;
             public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
             public InputAction @Attack => m_Wrapper.m_GamePlay_Attack;
-            public InputAction @Rolling_Horizontal => m_Wrapper.m_GamePlay_Rolling_Horizontal;
-            public InputAction @Rolling_Vertical => m_Wrapper.m_GamePlay_Rolling_Vertical;
+            public InputAction @Dodge_Left => m_Wrapper.m_GamePlay_Dodge_Left;
+            public InputAction @Dodge_Right => m_Wrapper.m_GamePlay_Dodge_Right;
+            public InputAction @Dodge_Backward => m_Wrapper.m_GamePlay_Dodge_Backward;
             public InputAction @Interact => m_Wrapper.m_GamePlay_Interact;
             public InputAction @CameraZoom => m_Wrapper.m_GamePlay_CameraZoom;
             public InputAction @TargetLockOn => m_Wrapper.m_GamePlay_TargetLockOn;
@@ -1100,12 +1145,15 @@ namespace SK
                     @Attack.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
                     @Attack.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
                     @Attack.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
-                    @Rolling_Horizontal.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
-                    @Rolling_Horizontal.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
-                    @Rolling_Horizontal.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Horizontal;
-                    @Rolling_Vertical.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Vertical;
-                    @Rolling_Vertical.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Vertical;
-                    @Rolling_Vertical.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRolling_Vertical;
+                    @Dodge_Left.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Left;
+                    @Dodge_Left.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Left;
+                    @Dodge_Left.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Left;
+                    @Dodge_Right.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Right;
+                    @Dodge_Right.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Right;
+                    @Dodge_Right.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Right;
+                    @Dodge_Backward.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Backward;
+                    @Dodge_Backward.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Backward;
+                    @Dodge_Backward.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Backward;
                     @Interact.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
                     @Interact.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
                     @Interact.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnInteract;
@@ -1140,12 +1188,15 @@ namespace SK
                     @Attack.started += instance.OnAttack;
                     @Attack.performed += instance.OnAttack;
                     @Attack.canceled += instance.OnAttack;
-                    @Rolling_Horizontal.started += instance.OnRolling_Horizontal;
-                    @Rolling_Horizontal.performed += instance.OnRolling_Horizontal;
-                    @Rolling_Horizontal.canceled += instance.OnRolling_Horizontal;
-                    @Rolling_Vertical.started += instance.OnRolling_Vertical;
-                    @Rolling_Vertical.performed += instance.OnRolling_Vertical;
-                    @Rolling_Vertical.canceled += instance.OnRolling_Vertical;
+                    @Dodge_Left.started += instance.OnDodge_Left;
+                    @Dodge_Left.performed += instance.OnDodge_Left;
+                    @Dodge_Left.canceled += instance.OnDodge_Left;
+                    @Dodge_Right.started += instance.OnDodge_Right;
+                    @Dodge_Right.performed += instance.OnDodge_Right;
+                    @Dodge_Right.canceled += instance.OnDodge_Right;
+                    @Dodge_Backward.started += instance.OnDodge_Backward;
+                    @Dodge_Backward.performed += instance.OnDodge_Backward;
+                    @Dodge_Backward.canceled += instance.OnDodge_Backward;
                     @Interact.started += instance.OnInteract;
                     @Interact.performed += instance.OnInteract;
                     @Interact.canceled += instance.OnInteract;
@@ -1295,8 +1346,9 @@ namespace SK
             void OnRun(InputAction.CallbackContext context);
             void OnJump(InputAction.CallbackContext context);
             void OnAttack(InputAction.CallbackContext context);
-            void OnRolling_Horizontal(InputAction.CallbackContext context);
-            void OnRolling_Vertical(InputAction.CallbackContext context);
+            void OnDodge_Left(InputAction.CallbackContext context);
+            void OnDodge_Right(InputAction.CallbackContext context);
+            void OnDodge_Backward(InputAction.CallbackContext context);
             void OnInteract(InputAction.CallbackContext context);
             void OnCameraZoom(InputAction.CallbackContext context);
             void OnTargetLockOn(InputAction.CallbackContext context);

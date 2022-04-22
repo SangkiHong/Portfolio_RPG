@@ -5,11 +5,16 @@ namespace SK.FSM
     public class AnimatorHook : MonoBehaviour
     {
         private PlayerStateManager _states;
-        private Vector3 animDelta;
+
+        private Vector3 _animDelta;
+        private LayerMask _layerMask;
 
         public void Init(PlayerStateManager stateManager)
         {
             _states = stateManager;
+
+            _layerMask = 1 << _states.gameObject.layer;
+            _layerMask = ~_layerMask;
         }
 
         public void OnAnimatorMove() => OnAnimatorMoveOverride();
@@ -20,12 +25,14 @@ namespace SK.FSM
             
             if (_states.isGrounded && _states.fixedDelta > 0)
             {
-                transform.position = _states.anim.rootPosition;
+                _animDelta = _states.anim.deltaPosition / _states.fixedDelta;
 
-                /*animDelta = _states.anim.deltaPosition / _states.fixedDelta;
-                var pos = _states.mTransform.position;
-                Vector3.MoveTowards(pos, pos + animDelta, _states.fixedDelta);*/
-                //_states.thisRigidbody.velocity = animDelta; //deprecated::Don't use Rigidbody
+                Debug.DrawRay(_states.mTransform.position + Vector3.up * 0.5f, _animDelta.normalized);
+                Ray ray = new Ray(_states.mTransform.position + Vector3.up * 0.5f, _animDelta.normalized);
+                if (Physics.Raycast(ray, 0.5f, _layerMask, QueryTriggerInteraction.Ignore))
+                    return;
+               
+                _states.characterController.SimpleMove(_animDelta);
             }
         }
     }

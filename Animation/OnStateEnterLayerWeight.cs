@@ -8,6 +8,7 @@ namespace SK
     {
         [SerializeField] private int targetLayer;
         [SerializeField] private float targetWeight;
+        [SerializeField] private float changeSpeed;
 
         private bool isChangingWeight;
 
@@ -27,7 +28,7 @@ namespace SK
                 if (targetWeight > 0.5f)
                 {
                     if (currentWeight < 0.99f)
-                        currentWeight += Time.deltaTime * 3f;
+                        currentWeight += Time.deltaTime * changeSpeed;
                     else
                     {
                         currentWeight = 1;
@@ -37,7 +38,7 @@ namespace SK
                 else
                 {
                     if (currentWeight > 0.01f)
-                        currentWeight -= Time.deltaTime * 3f;
+                        currentWeight -= Time.deltaTime * changeSpeed;
                     else
                     {
                         currentWeight = 0;

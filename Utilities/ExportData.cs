@@ -9,7 +9,7 @@ namespace SK.Data
         public static void ExportCSVData(string fileName, int tagIndex)
         {
             string tagName = UnityEditorInternal.InternalEditorUtility.tags[tagIndex];
-            GameObject[] environments = GameObject.FindGameObjectsWithTag(tagName);
+            GameObject[] objects = GameObject.FindGameObjectsWithTag(tagName);
 
             // txt 파일 생성
             using (StreamWriter sr = new StreamWriter(fileName)) 
@@ -18,7 +18,7 @@ namespace SK.Data
                 if (tagName == "Enemy") sr.Write(",isPatrol");
                 sr.WriteLine();
                 int index = 0;
-                foreach (var obj in environments)
+                foreach (var obj in objects)
                 {
                     sr.Write(index++);
                     sr.Write("," + obj.name);

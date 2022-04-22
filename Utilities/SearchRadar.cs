@@ -11,14 +11,13 @@ namespace SK.Utilities
         private bool debugRader;
         
         [Header("Seek & Wonder")]
-        public float SeekDistance = 10f;
+        [SerializeField] internal float SeekDistance = 10f;
         public float SeekIdleDuration = 5f;
 
         [Header("Find Target")]
         public LayerMask objectLayerMask;
-        [SerializeField] private LayerMask ignoreLayerMask;
         [SerializeField] private float fieldOfViewAngle = 150;
-        [SerializeField] private float viewDistance = 15;
+        [SerializeField] internal float viewDistance = 15;
         [SerializeField] private Vector3 offset;
 
         private SearchUtility searchUtility;
@@ -38,7 +37,7 @@ namespace SK.Utilities
         // Find Target
         public GameObject FindTarget()
         {
-            return searchUtility.FindTarget(offset, fieldOfViewAngle, viewDistance, objectLayerMask, ignoreLayerMask);
+            return searchUtility.FindTarget(offset, fieldOfViewAngle, viewDistance, objectLayerMask);
         }
 
         // SEEK AND WONDER

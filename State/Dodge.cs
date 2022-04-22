@@ -19,11 +19,12 @@ namespace SK
         [Range(0, 1)]
         [SerializeField] private float CAChance = 0.3f;
         [SerializeField] private float CAJumpSpeed = 1.5f;
+        [SerializeField] private float CAJumpForce = 1;
         
         private Enemy _enemy;
         private Transform _transform;
         private NavMeshHit _navHit;
-        private Vector3 _startPos, _tempPos, _destPos;
+        private Vector3 _startPos, _tempPos, _destPos, _direction;
         
         [NonSerialized] public bool isDodge;
         private float _timer;
@@ -43,12 +44,6 @@ namespace SK
             if (_counterAttack)
             {
                 AttackJump();
-                
-                if (!_enemy.isInteracting)
-                {
-                    _canDodge = true;
-                    _counterAttack = false;
-                }
             }
         }
 
@@ -102,16 +97,24 @@ namespace SK
         {
             if (UnityEngine.Random.value < CAChance)
             {
-                _enemy.anim.SetBool(Strings.animPara_isInteracting, true);
-                _enemy.anim.SetInteger(Strings.AnimPara_ComboIndex, 10); // Jump Attack Index : 10
-                _enemy.anim.SetTrigger(Strings.AnimPara_Attack);
-                _enemy.stateMachine.ChangeState(_enemy.stateMachine.stateAttack);
+                // 방해 받지 않는 상태로 전환
+                _enemy.uninterruptibleState = true;
+
+                // Nav Agent 작동 정지
+                _enemy.navAgent.updatePosition = false;
+                _enemy.navAgent.isStopped = true;
+
+                // StateMachine 정지
+                _enemy.stateMachine.StopMachine();
+
+                _enemy.anim.CrossFade(Strings.AnimName_Attack_Jump, 0.15f);
                     
                 _timer = 0;
                 _startPos = _transform.position;
-                _destPos = _enemy.combat.TargetObject.transform.position;
+                
                 _canDodge = false;
                 _counterAttack = true;
+
                 LookAtTarget();
             }
         }
@@ -119,7 +122,37 @@ namespace SK
         private void AttackJump()
         {
             _timer += Time.deltaTime;
-            _transform.position = Vector3.Slerp(_startPos, _destPos, _timer * CAJumpSpeed);
+            var elapsed = _timer * CAJumpSpeed;
+            if (elapsed > 1) elapsed = 1;
+            var radian = Mathf.Deg2Rad * elapsed * 180;
+
+            if (elapsed < 0.5f)
+            {
+                // 공중에 높이 뜰 때까지 타겟 앞 위치 계산
+                _direction = _transform.position - _enemy.combat.TargetObject.transform.position;
+                _direction.y = 0;
+                _destPos = _enemy.combat.TargetObject.transform.position + _direction.normalized * _enemy.combat.attackDistance * 0.5f;
+            }
+
+            // 삼각함수 Sin을 통해 점프 구현
+            _transform.position = Vector3.Slerp(_startPos, _destPos + (Vector3.up * Mathf.Sin(radian) * CAJumpForce), elapsed);
+
+            // 디버깅::착지 위치
+            Debug.DrawRay(_destPos, Vector3.up, Color.red);
+
+            if (elapsed >= 1)
+            {
+                _canDodge = true;
+                _counterAttack = false;
+                _transform.position = _destPos;
+
+                // Nav Agent 작동 재개
+                _enemy.navAgent.isStopped = true;
+                _enemy.navAgent.Warp(_transform.position);
+                _enemy.navAgent.updatePosition = true;
+
+                _enemy.stateMachine.ChangeState(_enemy.stateMachine.stateAttack);
+            }
         }
         #endregion
 

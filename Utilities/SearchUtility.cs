@@ -5,19 +5,17 @@ namespace SK.Utilities
 {
     public class SearchUtility
     {
-        private Transform _thisTransform;
+        private readonly Transform _thisTransform;
+        private readonly Collider[] _overlapColliders;
         private GameObject _catchedObject;
-        private Collider[] _overlapColliders;
-        private List<GameObject> _catchedGameObjects;
 
         public SearchUtility(Transform _transform) 
         {
             _thisTransform = _transform;
             _overlapColliders = new Collider[20]; // Max Amount for Catched Collider Buffer
-            _catchedGameObjects = new List<GameObject>();
         }
         
-        public GameObject FindTarget(Vector3 positionOffset, float fov, float viewDist, LayerMask objectMask, LayerMask ignoreMask)
+        public GameObject FindTarget(Vector3 positionOffset, float fov, float viewDist, LayerMask objectMask)
         {
             GameObject objectFound;
             _catchedObject = null;
@@ -29,10 +27,9 @@ namespace SK.Utilities
                 for (int i = 0; i < hitCount; ++i)
                 {
                     float angle;
-                    // Call the WithinSight function to determine if this specific object is within sight
-                    if ((objectFound = SearchWithinSight(positionOffset, fov, viewDist, _overlapColliders[i].gameObject, out angle, ignoreMask)) != null)
+
+                    if ((objectFound = SearchWithinSight(positionOffset, fov, viewDist, _overlapColliders[i].gameObject, out angle, objectMask)) != null)
                     {
-                        // This object is within sight. Set it to the objectFound GameObject if the angle is less than any of the other objects
                         if (angle < minAngle)
                         {
                             minAngle = angle;
@@ -44,25 +41,26 @@ namespace SK.Utilities
             return _catchedObject;
         }
 
-        public List<GameObject> FindTargets(Vector3 positionOffset, float fov, float viewDist, LayerMask objectMask, LayerMask ignoreMask)
+        public void FindTargets(Vector3 positionOffset, float fov, float viewDist, ref List<GameObject> objects, LayerMask objectMask)
         {
-            _catchedGameObjects.Clear(); // Initialize List
-
             var hitCount = Physics.OverlapSphereNonAlloc(_thisTransform.TransformPoint(positionOffset), viewDist, _overlapColliders, objectMask, QueryTriggerInteraction.Ignore);
+
             if (hitCount > 0)
             {
                 for (int i = 0; i < hitCount; ++i)
                 {
                     float angle = 0;
-                    // Call the WithinSight function to determine if this specific object is within sight
-                    if ((_catchedObject = SearchWithinSight(positionOffset, fov, viewDist, _overlapColliders[i].gameObject, out angle, ignoreMask)) != null)                    
-                        _catchedGameObjects.Add(_catchedObject);                    
+
+                    if ((_catchedObject = SearchWithinSight(positionOffset, fov, viewDist, _overlapColliders[i].gameObject, out angle, objectMask)) != null)
+                    {
+                        if (!objects.Find(x => x.Equals(_catchedObject)))
+                            objects.Add(_catchedObject);
+                    }
                 }
             }
-            return _catchedGameObjects;
         }
 
-        private GameObject SearchWithinSight(Vector3 positionOffset, float fov, float viewDist, GameObject target, out float angle, int ignoreMask)
+        private GameObject SearchWithinSight(Vector3 positionOffset, float fov, float viewDist, GameObject target, out float angle, int objectMask)
         {
             if (target == null)
             {
@@ -70,34 +68,31 @@ namespace SK.Utilities
                 return null;
             }
 
-            // The target object needs to be within the field of view of the current object
-            var direction = target.transform.TransformPoint(positionOffset) - _thisTransform.TransformPoint(positionOffset);
+            var dir = target.transform.position - _thisTransform.position;
             
-            angle = Vector3.Angle(direction, _thisTransform.forward);
-            direction.y = 0;
+            angle = Vector3.Angle(dir, _thisTransform.forward);
+            dir.y = 0;
 
-            if (direction.magnitude < viewDist && angle < fov * 0.5f)
+            if (dir.magnitude < viewDist && angle < fov * 0.5f)
             {
-                // The hit agent needs to be within view of the current agent
-                if (LineOfSight(positionOffset, target, ignoreMask) != null)
+                if (LineOfSight(positionOffset, target, objectMask) != null)
                 {
-                    return target; // return the target object meaning it is within sight
+                    return target;
                 }
             }
 
             return null;
         }
 
-        private GameObject LineOfSight(Vector3 positionOffset, GameObject targetObject, int ignoreMask)
+        private GameObject LineOfSight(Vector3 positionOffset, GameObject targetObject, int objectMask)
         {
             RaycastHit hit;
             if (Physics.Linecast(_thisTransform.TransformPoint(positionOffset),
-                targetObject.transform.TransformPoint(positionOffset), out hit, ~ignoreMask, QueryTriggerInteraction.Ignore))
+                targetObject.transform.position + Vector3.up * positionOffset.y, out hit, objectMask, QueryTriggerInteraction.Ignore))
             {
-                if (hit.transform.IsChildOf(targetObject.transform) || targetObject.transform.IsChildOf(hit.transform))
-                    return targetObject; // return the target object meaning it is within sight
+                if (hit.transform.IsChildOf(targetObject.transform) || targetObject.transform.IsChildOf(hit.transform) || hit.transform == targetObject.transform)
+                    return targetObject; 
             }
-            
             return null;
         }
     }
