@@ -10,6 +10,7 @@ namespace SK
         [SerializeField] private Transform sheathPrimary;
         [SerializeField] private Transform sheathSecondary;
 
+        private bool isEquipPrimary, isEquipSecondary;
         private Transform targetTransform;
 
         public void Init()
@@ -44,17 +45,25 @@ namespace SK
             secondaryHook?.UnloadWeapon();
         }
 
-        public void Equip(int isSecondary)
+        public void Equip(int isPrimary = 0)
         {
-            if (isSecondary == 0) // 주무기
+            if (isPrimary == 0) // 주무기
             {
-                targetTransform = primaryHook.currentModel.transform;
-                targetTransform.parent = primaryHook.transform;
+                if (!isEquipPrimary)
+                {
+                    isEquipPrimary = true;
+                    targetTransform = primaryHook.currentModel.transform;
+                    targetTransform.parent = primaryHook.transform;
+                }
             }
             else // 보조 무기
             {
-                targetTransform = secondaryHook.currentModel.transform;
-                targetTransform.parent = secondaryHook.transform;
+                if (!isEquipSecondary)
+                {
+                    isEquipSecondary = true;
+                    targetTransform = secondaryHook.currentModel.transform;
+                    targetTransform.parent = secondaryHook.transform;
+                }
             }
             
             targetTransform.localPosition = Vector3.zero;
@@ -62,17 +71,25 @@ namespace SK
             targetTransform.localScale = Vector3.one;
         }
 
-        public void Unequip(int isSecondary)
+        public void Unequip(int isPrimary = 0)
         {
-            if (isSecondary == 0)
+            if (isPrimary == 0)
             {
-                targetTransform = primaryHook.currentModel.transform;
-                targetTransform.parent = sheathPrimary;
+                if (isEquipPrimary)
+                {
+                    isEquipPrimary = false;
+                    targetTransform = primaryHook.currentModel.transform;
+                    targetTransform.parent = sheathPrimary;
+                }
             }
             else
             {
-                targetTransform = secondaryHook.currentModel.transform;
-                targetTransform.parent = sheathSecondary;
+                if (isEquipSecondary)
+                {
+                    isEquipSecondary = false;
+                    targetTransform = secondaryHook.currentModel.transform;
+                    targetTransform.parent = sheathSecondary;
+                }
             }
             
             targetTransform.localPosition = Vector3.zero;

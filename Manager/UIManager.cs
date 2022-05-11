@@ -1,21 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace SK
+namespace SK.UI
 {
     public class UIManager : MonoBehaviour
     {
-        // Start is called before the first frame update
-        void Start()
-        {
-        
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
+        public CanvasGroup window_CharacterStatus;
+        public CanvasGroup window_Invenroty;
     }
 }

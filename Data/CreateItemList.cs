@@ -2,7 +2,7 @@
 using UnityEditor;
 using System.IO;
 
-namespace SK
+namespace SK.Data
 {
     public class CreateItemList
     {

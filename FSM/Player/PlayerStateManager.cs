@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Linq;
+using UnityEngine.Events;
 using Cinemachine;
 using SK.Behavior;
 
@@ -10,6 +10,7 @@ namespace SK.FSM
         [SerializeField] private bool isDebugMode;
 
         public Data.PlayerData playerData;
+        public Data.PlayerItemData playerItemData;
 
         [Header("References")]
         public CameraManager cameraManager;
@@ -17,20 +18,22 @@ namespace SK.FSM
         public Animator anim;
         public CharacterController characterController;
         public CapsuleCollider thisCollider;
+        public EquipmentHolderManager equipmentHolder;
         public AnimatorHook animHook;
         public Combat combat;
         public Health health;
 
         [Header("States")] 
         public bool useRootMotion;
-        internal bool isDead, isGrounded, isRunning, isJumping, isDodge, isSlipping, isTargeting;
+        [SerializeField]
+        internal bool isDead, isGrounded, isRunning, isJumping, isDamaged, isDodge, isSlipping, isTargeting;
 
         [Header("Targeting")]
-        [SerializeField] private Transform cameraTarget;
+        [SerializeField] internal Transform cameraTarget;
         [SerializeField] private float targetSearchRange = 20;
         [SerializeField] private LayerMask targetLayer;
+        [SerializeField] private Collider[] _targetColliders;
         internal Transform targetEnemy;
-        private Collider[] _targetColliders;
 
         [Header("Movement States")]
         public LayerMask groundLayerMask;
@@ -61,16 +64,19 @@ namespace SK.FSM
         internal PlayerStateMachine stateMachine;
 
         // States Actions
-        internal InputManager inputManager;
+        internal PlayerInputActions playerInputActions;
         internal MoveCharacter moveCharacter;
         internal MonitorAnimationBool monitorInteracting;
+
+        // Unity Action
+        internal UnityAction<float, float> OnKnockBack;
 
         internal Transform mTransform;
 
         private PlayerInputAction _playerInputAction;
         private Collider[] _groundCheckCols = new Collider[3];
 
-        internal bool canComboAttack;
+        internal bool canComboAttack, isInteracting;
         internal float delta, fixedDelta;
         private float _comboTimer, _scrollY;
         private int _environmentLayer;
@@ -79,14 +85,11 @@ namespace SK.FSM
         private void Awake()
         {
             mTransform = this.transform;
-            GameManager.Instance.player = this;
-
-            // Initialize Camera
-            if (!cameraManager) cameraManager = Camera.main.GetComponent<CameraManager>();            
-            if (cameraManager) cameraManager.Init(cameraTarget);
+            GameManager.Instance.Player = this;
 
             // Initialize References
             if (!anim) anim = GetComponent<Animator>();
+            if (!equipmentHolder) equipmentHolder = GetComponent<EquipmentHolderManager>();
             if (!animHook) animHook = GetComponentInChildren<AnimatorHook>();
             if (!impulseSource) impulseSource = GetComponent<CinemachineImpulseSource>();
             if (!combat) combat = GetComponent<Combat>();
@@ -100,16 +103,18 @@ namespace SK.FSM
             stateMachine = new PlayerStateMachine(this);
 
             // Initialize State Actions
-            inputManager = new InputManager(this, _playerInputAction);
+            playerInputActions = new PlayerInputActions(this, _playerInputAction);
             moveCharacter = new MoveCharacter(this);
-            monitorInteracting = new MonitorAnimationBool(this, Strings.animPara_isInteracting, stateMachine.locomotionState);
+            monitorInteracting = new MonitorAnimationBool(this, Strings.animPara_isInteracting);
 
             // Initialize Heath
             health.Init(playerData.Level, playerData.Str, playerData.Dex, playerData.Int);
 
             // Initialize Camera Settings
+            if (!cameraManager) cameraManager = Camera.main.GetComponent<CameraManager>();
             cameraManager.normalCamera.m_Lens.FieldOfView = PlayerPrefs.GetFloat("ZoomAmount", 0);
-            _playerInputAction.GamePlay.CameraZoom.performed += x => _scrollY = x.ReadValue<float>() * cameraManager.cameraZoomSpeed * -1;
+            cameraManager.Init(cameraTarget);
+            _playerInputAction.GamePlay.CameraZoom.performed += x => _scrollY = x.ReadValue<float>() * cameraManager.cameraZoomSpeed;
 
             anim.applyRootMotion = false;
             if (animHook) animHook.Init(this);
@@ -126,6 +131,9 @@ namespace SK.FSM
             health.onDamaged += OnDamageEvent;
             health.onDead += OnDeadEvent;
             if (combat) combat.onAttack += CalculateDamage;
+
+            // Input 해제
+            _playerInputAction.Disable();
         }
 
         private void FixedUpdate()
@@ -140,11 +148,11 @@ namespace SK.FSM
             // Ground Check
             isGrounded = IsCheckGrounded();
 
-            // Camera Zoom Control
+            // 카메라 줌 업데이트
             if (!isTargeting)
-                cameraManager.ZoomSetting(_scrollY);            
+                cameraManager.ZoomUpdate(_scrollY);
 
-            // Attack Combo Timer
+            // 콤보 어택 타이머
             if (canComboAttack)
             {
                 if (_comboTimer > 0)
@@ -153,9 +161,15 @@ namespace SK.FSM
                     canComboAttack = false;
             }
 
-            // 
-            if (UnityEngine.InputSystem.Keyboard.current.leftCtrlKey.wasPressedThisFrame)
-                cameraManager.CameraRotateSwtich(GameManager.Instance.SwitchMouseState());
+            // 피격 상태 업데이트
+            if (isDamaged && !isInteracting)
+                isDamaged = false;
+
+            // 타겟팅 포인트 회전 값 초기화
+            if (isTargeting && cameraTarget.localRotation != Quaternion.identity)
+                cameraTarget.localRotation = Quaternion.Slerp(cameraTarget.localRotation, 
+                                                              Quaternion.identity,
+                                                              fixedDelta * rotationSpeed);
         }
 
         private void Update()
@@ -163,6 +177,9 @@ namespace SK.FSM
             if (isDead) return;
 
             delta = Time.deltaTime;
+
+            // Interacting 상태 Check
+            isInteracting = anim.GetBool(Strings.animPara_isInteracting);
 
             if (stateMachine.isAssigned())
                 stateMachine.CurrentState.Tick();
@@ -222,53 +239,92 @@ namespace SK.FSM
         {
             if (Physics.OverlapSphereNonAlloc(mTransform.position, targetSearchRange, _targetColliders, targetLayer) > 0)
             {
-                _targetColliders
-                    .Where(x => Vector3.Distance(mTransform.position, x.transform.position) < 30)
-                    .OrderBy(x => Vector3.Distance(mTransform.position, x.transform.position));
+                float minDegree = 360;
+                int selectedIndex = 0;
 
-                if (_targetColliders.Length > 0)
-                    return _targetColliders[0].transform;
+                // 카메라 각도 비교 후 가장 작은 각의 target을 return
+                for (int i = 0; i < _targetColliders.Length; i++)
+                {
+                    if (_targetColliders[i] != null)
+                    {
+                        var dir = (_targetColliders[i].transform.position - mTransform.position).normalized;
+                        var degree = Vector3.Angle(cameraManager.mainCameraTr.forward, dir);
+
+                        if (minDegree > degree)
+                        {
+                            minDegree = degree;
+                            selectedIndex = i;
+                        }
+                    }
+                    else
+                        break;
+                }
+                return _targetColliders[selectedIndex].transform;
             }
             
             return null;
         }
         #endregion
 
-        #region State Events
+        #region State
         internal void EnableRootMotion()
         {
             useRootMotion = true;
         }
+
         internal void DisableRootMotion()
         {
             useRootMotion = false;
         }
-        #endregion
-
-        #region Event Func
         public void AbleCombo() // Combo 가능 Animation Event
         {
             canComboAttack = true;
             _comboTimer = combat.canComboDuration;
         }
+        #endregion
 
+        #region Event Func
         private void OnDamageEvent()
         {
-            // Shield하고 있을 경우
-            if (anim.GetBool(Strings.AnimPara_isShielding))
-            { 
-                anim.CrossFade(Strings.AnimName_Shield_Hit, 0);
-                return;
-            }
+            float impulse;
 
-            impulseSource.GenerateImpulse(10f);
-            anim.SetTrigger(Strings.AnimPara_Damaged);
             anim.SetBool(Strings.animPara_isInteracting, true);
 
-            // Debug 시 데미지 받지 않음
-            if (isDebugMode) return;
+            // 약 공격 피해
+            if (!health.IsStrongAttack)
+            {
+                // 방패로 막아냄
+                if (anim.GetBool(Strings.AnimPara_isShielding))
+                {
+                    // 넉백 효과
+                    OnKnockBack?.Invoke(0.15f, 0.1f);
 
-            health.Damaged();
+                    // 카메라 Impulse
+                    impulseSource.GenerateImpulse(5);
+                    return;
+                }
+
+                anim.SetTrigger(Strings.AnimPara_Damaged);
+                impulse = 10f;
+            }
+            // 강 공격 피해
+            else
+            {
+                // 넉백 효과
+                OnKnockBack?.Invoke(0.3f, 0.1f);
+
+                anim.SetTrigger(Strings.AnimPara_StrongDamaged);
+                anim.CrossFade(Strings.AnimName_Shield_Hit, 0);
+                impulse = 20f;
+            }
+
+            // 카메라 Impulse
+            impulseSource.GenerateImpulse(impulse);
+            isDamaged = true;
+
+            // Debug 시 데미지 받지 않음
+            if (!isDebugMode)
+                health.Damaged();
         }
 
         private void OnDeadEvent()
@@ -286,13 +342,9 @@ namespace SK.FSM
             anim.SetTrigger(Strings.AnimPara_Dead);
         }
 
+        // 공격 시점에 공격력을 계산하여 Combat 컴포넌트에 전달
         private void CalculateDamage()
-        {
-            // Calculate Damage
-
-            combat.calculatedDamage = 
-                combat.CalculateDamage(playerData.Level, playerData.Str, playerData.CriticalChance, playerData.CriticalMultiplier);
-        }
+            => combat.CalculateDamage(playerData.Level, playerData.Str, playerData.CriticalChance, playerData.CriticalMultiplier);
         #endregion
 
         #region Collision Check

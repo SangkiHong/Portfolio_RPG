@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 using SK.FSM;
 using SK.Utilities;
 using Random = UnityEngine.Random;
@@ -18,6 +19,7 @@ namespace SK
     {
         [ReadOnly] public string currentStateName;
 
+        #region Variables
         #region Stats
         [Header("Stats")]
         public bool isPatrol;
@@ -61,11 +63,14 @@ namespace SK
         internal PlayerStateManager targetState;
         internal EnemyStateMachine stateMachine;
 
+        internal UnityAction<float, float> OnKnockBack;
+
         internal float targetDistance;
         internal float walkAnimSpeed = 0.5f;
         internal float delta, fixedDelta;
         [SerializeField]
         internal bool isDead, isFlee, isInteracting, uninterruptibleState;
+        #endregion
         #endregion
 
         #region Unity Events
@@ -99,14 +104,15 @@ namespace SK
             if (isDead) return;
             
             delta = Time.deltaTime;
+
+            isInteracting = anim.GetBool(Strings.animPara_isInteracting);
+
             stateMachine.CurrentState?.Tick();
         }
 
         public virtual void FixedUpdate()
         {
             if (isDead) return;
-
-            isInteracting = anim.GetBool(Strings.animPara_isInteracting);
             fixedDelta = Time.fixedDeltaTime;
             stateMachine.CurrentState?.FixedTick();
 
@@ -165,7 +171,7 @@ namespace SK
         internal void UnassignTarget()
         {
             combat.SetTarget(null);
-            anim.SetBool(Strings.AnimPara_isFight, false);
+            anim.SetBool(Strings.AnimPara_onCombat, false);
             stateMachine.ChangeState(stateMachine.statePatrol);
         }
         #endregion
@@ -178,42 +184,55 @@ namespace SK
         }
         #endregion
 
-        #region Event Func
+        #region Event Function
         public void AbleCombo() { }        
 
         private void OnDamageEvent()
         {
             if (isDead) return;
 
-            // Synchronize Hit Object to Target
+            // 전투 타겟 동기화
             if (!combat.TargetObject) combat.SetTarget(health.hitTransform.gameObject);
 
-            // Alert Alliance
+            // 주위 적들에게 전투 상태 알림
             if (combat.alert)
                 combat.alert.SendAlert(combat.TargetObject);
 
-            // Dodge
+            // 회피 기동 판정
             if (dodge && !uninterruptibleState && dodge.dodgeChance > 0 && Random.value < dodge.dodgeChance)
             {
                 if (dodge.DoDodge())
                 {
-                    health.canDamage = false; // 회피 시 데미지 판정 없기 떄문에 False
+                    health.CanDamage = false; // 회피 시 데미지 판정 없기 떄문에 False
                     return;
                 }
             }
 
-            // Take damage
+            // 피해 입음
             health.Damaged();
 
             if (health.CurrentHp <= 0) return;
 
-            // Receive damage but can't be interrupted State
+            // Uninterruptible 상태에서 움직임 정지 없이 return
             if (uninterruptibleState) return;
 
             navAgent.velocity = Vector3.zero;
             navAgent.isStopped = true;
-            anim.SetTrigger(Strings.AnimPara_Damaged);
             anim.SetBool(Strings.animPara_isInteracting, true);
+
+            // 약 공격 피해
+            if (!health.IsStrongAttack)
+            {
+                anim.SetTrigger(Strings.AnimPara_Damaged);
+            }
+            // 강 공격 피해
+            else
+            {
+                anim.SetTrigger(Strings.AnimPara_StrongDamaged);
+
+                // 넉백 효과
+                OnKnockBack?.Invoke(0.25f, 0.1f);
+            }
             
             // fleeHpPercent 아래로 Hp가 내려갔을 시 일정 확률에 따라 도주 상태로 변경 
             // fleeHpPercent가 0이면 도주 시도 없음
@@ -226,11 +245,9 @@ namespace SK
                     return;
                 }
             }
-            
-            if (stateMachine.CurrentState == null || 
-                stateMachine.CurrentState == stateMachine.statePatrol || 
-                stateMachine.CurrentState == stateMachine.stateFlee)
-                stateMachine.ChangeState(stateMachine.stateChase); // 피해를 입을 시 상태 변경
+            // 전투 상태로 전환
+            if (stateMachine.CurrentState != stateMachine.stateCombat && stateMachine.CurrentState != stateMachine.stateAttack)
+                stateMachine.ChangeState(stateMachine.stateCombat);
         }
 
         private void OnDeadEvent()
@@ -249,12 +266,9 @@ namespace SK
             health.PlayDeadFx();
         }
 
+        // 공격 시점에 공격력을 계산하여 Combat 컴포넌트에 전달
         private void CalculateDamage()
-        {
-            // Calculate Damage
-            combat.calculatedDamage = 
-                combat.CalculateDamage(enemyData.Level, enemyData.Str, enemyData.CriticalChance, enemyData.CriticalMultiplier);
-        }
+            => combat.CalculateDamage(enemyData.Level, enemyData.Str, enemyData.CriticalChance, enemyData.CriticalMultiplier);
         #endregion
     }
 }

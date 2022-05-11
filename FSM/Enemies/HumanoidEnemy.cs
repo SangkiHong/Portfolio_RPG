@@ -17,7 +17,7 @@ namespace SK
                 Rotate(); // 움직임에 따른 회전
             }
 
-            if (anim.GetBool(Strings.AnimPara_isFight) && !combat.TargetObject)
+            if (anim.GetBool(Strings.AnimPara_onCombat) && !combat.TargetObject)
             {
                 UnassignTarget();
             }

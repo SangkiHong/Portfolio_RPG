@@ -1,4 +1,4 @@
-using System.IO;
+
 using UnityEngine;
 
 namespace SK
@@ -13,58 +13,35 @@ namespace SK
             public string prefabFolderName;
             public Transform parent;
         }
-
         public static ResourceManager Instance { get; private set; }
 
-        public ResourceList[] resourceList;
+        [SerializeField] private GameObject tempManagers;
 
-        private readonly string _enemyTag = "Enemy";
+        public ResourceList[] resourceList;
 
         void Awake()
         {
             Instance = this;
+
+            if (GameManager.Instance == null)
+                Instantiate(tempManagers);
+
+            GameManager.Instance.SetMainScene();
+
+            // 씬 정보 테이블로부터 읽어들인 데이터에 맞추어 리소스를 로드하여 배치
             if (resourceList != null && resourceList.Length > 0)
             {
-                foreach (var item in resourceList)
+                foreach (var resource in resourceList)
                 {
-                    if (item.onLoad)
-                        LoadResource(item.dataName, item.prefabFolderName, item.parent);
+                    if (resource.onLoad)
+                        GameManager.Instance.DataManager.LoadResource(resource.dataName, resource.prefabFolderName, resource.parent);
                 }
             }
         }
 
-        private GameObject LoadResource(string dataName, string prefabFolderName, Transform parentTransform = null)
+        private void Start()
         {
-            string path = Path.Combine(Application.dataPath, Path.Combine("Resources", "Data", dataName)) + ".csv";
-
-            using (StreamReader sr = new StreamReader(path))
-            {
-                string line = string.Empty;
-                GameObject obj = null;
-
-                while ((line = sr.ReadLine()) != null)
-                {
-                    string[] row = line.Split(new char[] { ',' }); // ,단위로 Split
-                    if (row[0] == "Index") continue;
-
-                    obj = Resources.Load(Path.Combine("Prefabs", prefabFolderName, row[1])) as GameObject;
-                    obj = parentTransform != null ? Instantiate(obj, parentTransform) : Instantiate(obj);
-                    obj.transform.SetPositionAndRotation(new Vector3(float.Parse(row[2]), float.Parse(row[3]), float.Parse(row[4])), 
-                                                         Quaternion.Euler(float.Parse(row[5]), float.Parse(row[6]), float.Parse(row[7])));
-                    obj.transform.localScale = new Vector3(float.Parse(row[8]), float.Parse(row[9]), float.Parse(row[10]));
-
-                    // Enemy Information
-                    if (obj.CompareTag(_enemyTag))
-                        obj.GetComponent<Enemy>().isPatrol = bool.Parse(row[11]);
-                }
-                sr.Close();
-                return obj;
-            }
-        }
-
-        public GameObject LoadPlayerCharacter()
-        {
-            return LoadResource("PlayerData", "Player");
+            GameManager.Instance.DataManager.InstantiatePlayer();
         }
     }
 }

@@ -93,6 +93,15 @@ namespace SK
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""Dodge_Forward"",
+                    ""type"": ""Value"",
+                    ""id"": ""975e4389-9b88-4acb-beb4-e2b22106a857"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""Dodge_Backward"",
                     ""type"": ""Value"",
                     ""id"": ""336950d3-0cef-4fe5-9cba-1f2beb0f34e1"",
@@ -145,6 +154,15 @@ namespace SK
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SwitchMouseMode"",
+                    ""type"": ""Button"",
+                    ""id"": ""be692de8-5e47-454f-9608-81b9bec7d4b2"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -155,6 +173,17 @@ namespace SK
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Rotate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8b004b94-7c26-4da8-bd97-d362711652d9"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Rotate"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -271,6 +300,17 @@ namespace SK
                 },
                 {
                     ""name"": """",
+                    ""id"": ""74614d9e-3e9a-4941-924d-5c8632e30fd6"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""61f00d29-787a-45e9-a417-05c517efdf57"",
                     ""path"": ""<Keyboard>/r"",
                     ""interactions"": """",
@@ -298,6 +338,17 @@ namespace SK
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2acdfc79-6ed8-4b4f-86f3-6e3a6dbb5b9d"",
+                    ""path"": ""<XInputController>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -370,6 +421,17 @@ namespace SK
                 },
                 {
                     ""name"": """",
+                    ""id"": ""53802538-7ac6-4cfd-ae9c-3d93cb43e41c"",
+                    ""path"": ""<Gamepad>/leftStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Run"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""c9e28fa9-3619-44e3-afbe-3a2d9902c549"",
                     ""path"": ""<Keyboard>/tab"",
                     ""interactions"": """",
@@ -391,6 +453,17 @@ namespace SK
                     ""isPartOfComposite"": false
                 },
                 {
+                    ""name"": """",
+                    ""id"": ""b0ccd9b9-7910-4bfb-ab9a-d2ffeb7d4b45"",
+                    ""path"": ""<XInputController>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
                     ""name"": ""S with Shift"",
                     ""id"": ""8a31e1b4-366d-48bf-baea-8767224b5c75"",
                     ""path"": ""OneModifier"",
@@ -407,7 +480,7 @@ namespace SK
                     ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Dodge_Backward"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -418,7 +491,7 @@ namespace SK
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Dodge_Backward"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -453,6 +526,50 @@ namespace SK
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Dodge_Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""21e266c9-f7b6-4940-93bb-37715fa3da30"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""SwitchMouseMode"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""W with Shift"",
+                    ""id"": ""24187ed0-c15a-48fd-b653-2f7843bc4931"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": ""MultiTap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dodge_Forward"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""28a8b1f3-b2be-4fcb-800f-311764233010"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Dodge_Forward"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""18be95eb-eccd-4f97-9b7a-4bb499674717"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Dodge_Forward"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 }
@@ -1014,12 +1131,14 @@ namespace SK
             m_GamePlay_Attack = m_GamePlay.FindAction("Attack", throwIfNotFound: true);
             m_GamePlay_Dodge_Left = m_GamePlay.FindAction("Dodge_Left", throwIfNotFound: true);
             m_GamePlay_Dodge_Right = m_GamePlay.FindAction("Dodge_Right", throwIfNotFound: true);
+            m_GamePlay_Dodge_Forward = m_GamePlay.FindAction("Dodge_Forward", throwIfNotFound: true);
             m_GamePlay_Dodge_Backward = m_GamePlay.FindAction("Dodge_Backward", throwIfNotFound: true);
             m_GamePlay_Interact = m_GamePlay.FindAction("Interact", throwIfNotFound: true);
             m_GamePlay_CameraZoom = m_GamePlay.FindAction("CameraZoom", throwIfNotFound: true);
             m_GamePlay_TargetLockOn = m_GamePlay.FindAction("TargetLockOn", throwIfNotFound: true);
             m_GamePlay_Shield = m_GamePlay.FindAction("Shield", throwIfNotFound: true);
             m_GamePlay_SwitchFightMode = m_GamePlay.FindAction("SwitchFightMode", throwIfNotFound: true);
+            m_GamePlay_SwitchMouseMode = m_GamePlay.FindAction("SwitchMouseMode", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1098,12 +1217,14 @@ namespace SK
         private readonly InputAction m_GamePlay_Attack;
         private readonly InputAction m_GamePlay_Dodge_Left;
         private readonly InputAction m_GamePlay_Dodge_Right;
+        private readonly InputAction m_GamePlay_Dodge_Forward;
         private readonly InputAction m_GamePlay_Dodge_Backward;
         private readonly InputAction m_GamePlay_Interact;
         private readonly InputAction m_GamePlay_CameraZoom;
         private readonly InputAction m_GamePlay_TargetLockOn;
         private readonly InputAction m_GamePlay_Shield;
         private readonly InputAction m_GamePlay_SwitchFightMode;
+        private readonly InputAction m_GamePlay_SwitchMouseMode;
         public struct GamePlayActions
         {
             private @PlayerInputAction m_Wrapper;
@@ -1115,12 +1236,14 @@ namespace SK
             public InputAction @Attack => m_Wrapper.m_GamePlay_Attack;
             public InputAction @Dodge_Left => m_Wrapper.m_GamePlay_Dodge_Left;
             public InputAction @Dodge_Right => m_Wrapper.m_GamePlay_Dodge_Right;
+            public InputAction @Dodge_Forward => m_Wrapper.m_GamePlay_Dodge_Forward;
             public InputAction @Dodge_Backward => m_Wrapper.m_GamePlay_Dodge_Backward;
             public InputAction @Interact => m_Wrapper.m_GamePlay_Interact;
             public InputAction @CameraZoom => m_Wrapper.m_GamePlay_CameraZoom;
             public InputAction @TargetLockOn => m_Wrapper.m_GamePlay_TargetLockOn;
             public InputAction @Shield => m_Wrapper.m_GamePlay_Shield;
             public InputAction @SwitchFightMode => m_Wrapper.m_GamePlay_SwitchFightMode;
+            public InputAction @SwitchMouseMode => m_Wrapper.m_GamePlay_SwitchMouseMode;
             public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -1151,6 +1274,9 @@ namespace SK
                     @Dodge_Right.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Right;
                     @Dodge_Right.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Right;
                     @Dodge_Right.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Right;
+                    @Dodge_Forward.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Forward;
+                    @Dodge_Forward.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Forward;
+                    @Dodge_Forward.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Forward;
                     @Dodge_Backward.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Backward;
                     @Dodge_Backward.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Backward;
                     @Dodge_Backward.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Backward;
@@ -1169,6 +1295,9 @@ namespace SK
                     @SwitchFightMode.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchFightMode;
                     @SwitchFightMode.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchFightMode;
                     @SwitchFightMode.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchFightMode;
+                    @SwitchMouseMode.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchMouseMode;
+                    @SwitchMouseMode.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchMouseMode;
+                    @SwitchMouseMode.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchMouseMode;
                 }
                 m_Wrapper.m_GamePlayActionsCallbackInterface = instance;
                 if (instance != null)
@@ -1194,6 +1323,9 @@ namespace SK
                     @Dodge_Right.started += instance.OnDodge_Right;
                     @Dodge_Right.performed += instance.OnDodge_Right;
                     @Dodge_Right.canceled += instance.OnDodge_Right;
+                    @Dodge_Forward.started += instance.OnDodge_Forward;
+                    @Dodge_Forward.performed += instance.OnDodge_Forward;
+                    @Dodge_Forward.canceled += instance.OnDodge_Forward;
                     @Dodge_Backward.started += instance.OnDodge_Backward;
                     @Dodge_Backward.performed += instance.OnDodge_Backward;
                     @Dodge_Backward.canceled += instance.OnDodge_Backward;
@@ -1212,6 +1344,9 @@ namespace SK
                     @SwitchFightMode.started += instance.OnSwitchFightMode;
                     @SwitchFightMode.performed += instance.OnSwitchFightMode;
                     @SwitchFightMode.canceled += instance.OnSwitchFightMode;
+                    @SwitchMouseMode.started += instance.OnSwitchMouseMode;
+                    @SwitchMouseMode.performed += instance.OnSwitchMouseMode;
+                    @SwitchMouseMode.canceled += instance.OnSwitchMouseMode;
                 }
             }
         }
@@ -1348,12 +1483,14 @@ namespace SK
             void OnAttack(InputAction.CallbackContext context);
             void OnDodge_Left(InputAction.CallbackContext context);
             void OnDodge_Right(InputAction.CallbackContext context);
+            void OnDodge_Forward(InputAction.CallbackContext context);
             void OnDodge_Backward(InputAction.CallbackContext context);
             void OnInteract(InputAction.CallbackContext context);
             void OnCameraZoom(InputAction.CallbackContext context);
             void OnTargetLockOn(InputAction.CallbackContext context);
             void OnShield(InputAction.CallbackContext context);
             void OnSwitchFightMode(InputAction.CallbackContext context);
+            void OnSwitchMouseMode(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {

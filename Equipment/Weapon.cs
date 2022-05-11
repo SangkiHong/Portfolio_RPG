@@ -5,7 +5,7 @@ namespace SK
 {
     public enum AttackType 
     {
-        CounterAttack, DodgeAttack, FinishAttack
+        CounterAttack, DodgeAttack, ChargeAttack, FinishAttack
     }
 
     [CreateAssetMenu(fileName = "Weapon_", menuName = "Equipments/Weapon", order = 0)]
@@ -15,12 +15,12 @@ namespace SK
         public struct SpecialAttack
         {
             public AttackType attackType;
-            public AttackBase specialAttack;
+            public AttackBase[] specialAttack;
         }
 
         [Header("Stat")]
-        [SerializeField] private int attackMinPower;
-        [SerializeField] private int attackMaxPower;
+        [SerializeField] private uint attackMinPower;
+        [SerializeField] private uint attackMaxPower;
 
         [Header("Combo")]
         [SerializeField] private int selectedComboIndex;
@@ -29,41 +29,50 @@ namespace SK
         
         [Header("Special Attack")]
         [SerializeField] private SpecialAttack[] specialAttacks;
-
+        
+        [System.NonSerialized] public AttackBase currentAttack;
         public int CurrentAttackIndex => currentAttackIndex;
 
-        private int _prevIndex;
-
-        //Property
-        public int AttackMinPower => attackMinPower;
-        public int AttackMaxPower => attackMaxPower;
+        // 무기 최소 공격력 + 공격 액션 추가 공격력을 합산한 값
+        public uint AttackMinPower => attackMinPower + currentAttack.attackPower;
+        // 무기 최대 공격력 + 공격 액션 추가 공격력을 합산한 값
+        public uint AttackMaxPower => attackMaxPower + currentAttack.attackPower;
 
 
         public override void ExecuteAction(Animator anim, bool comboAttack)
         {
-            if (!comboAttack) currentAttackIndex = 0;
-            _prevIndex = currentAttackIndex;
+            // Attack Length - 1 보다 Index 값이 더 많아졌을 경우
+            if (currentAttackIndex >= attackCombo[selectedComboIndex].comboAttacks.Length - 1)
+            { 
+                currentAttackIndex = -1;
 
-            anim.CrossFade(attackCombo[selectedComboIndex].comboAttacks[currentAttackIndex].animName, 0.15f);
+                selectedComboIndex++;
+
+                if (selectedComboIndex >= attackCombo.Length)                
+                    selectedComboIndex = 0;
+            }
+
+            if (!comboAttack) currentAttackIndex = -1;
 
             currentAttackIndex++;
 
-            if (currentAttackIndex > attackCombo[selectedComboIndex].comboAttacks.Length - 1) 
-                currentAttackIndex = 0;
+            currentAttack = attackCombo[selectedComboIndex].comboAttacks[currentAttackIndex];
+
+            anim.CrossFade(currentAttack.animName, 0.15f);
         }
 
-        public override void ExecuteAction(Animator anim, AttackType attackType)
+        public override void ExecuteSpecialAction(Animator anim, AttackType attackType, int index = 0)
         {
             foreach (var attack in specialAttacks)
             {
                 if (attack.attackType.Equals(attackType))
                 {
-                    anim.CrossFade(attack.specialAttack.animName, 0.15f);
+                    currentAttack = attack.specialAttack[index];
+
+                    anim.CrossFade(currentAttack.animName, 0.15f);
                     break;
                 }
             }
         }
-
-        public int GetAttackAngle() => attackCombo[selectedComboIndex].comboAttacks[_prevIndex].attackAngle;
     }
 }

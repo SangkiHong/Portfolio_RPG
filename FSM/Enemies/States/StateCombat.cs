@@ -27,7 +27,7 @@ namespace SK.FSM
             _enemy.uninterruptibleState = false;
 
             _attackElapsed = _enemy.AttackCooldown;
-            _enemy.anim.SetBool(Strings.AnimPara_isFight, true);
+            _enemy.anim.SetBool(Strings.AnimPara_onCombat, true);
 
             _enemy.navAgent.Warp(_enemy.mTransform.position);
             _enemy.navAgent.isStopped = false;

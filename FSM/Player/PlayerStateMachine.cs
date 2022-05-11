@@ -2,19 +2,17 @@
 {
     public class PlayerStateMachine : StateMachineBase
     {
-        private readonly PlayerStateManager _psm;
-
         internal LocomotionState locomotionState;
         internal AttackState attackState;
         internal DodgeState dodgeState;
+        internal KnockBackState knockBackState;
 
         public PlayerStateMachine(PlayerStateManager psm)
         {
-            _psm = psm;
-
             locomotionState = new LocomotionState(psm);
             attackState = new AttackState(psm);
             dodgeState = new DodgeState(psm);
+            knockBackState = new KnockBackState(psm);
 
             ChangeState(locomotionState);
         }

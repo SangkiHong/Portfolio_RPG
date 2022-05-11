@@ -6,6 +6,7 @@
         public StateChase stateChase;
         public StateCombat stateCombat;
         public StateAttack stateAttack;
+        public StateKnockBack stateKnockBack;
         public StateFlee stateFlee;
 
         internal readonly Enemy enemy;
@@ -17,11 +18,16 @@
             stateChase = new StateChase(enemy, this);
             stateCombat = new StateCombat(enemy, this);
             stateAttack = new StateAttack(enemy, this);
+            stateKnockBack = new StateKnockBack(enemy, this);
             stateFlee = new StateFlee(enemy, this);
         }
 
         public override void ChangeState(StateBase state)
         {
+            // 넉백 중일 경우 다른 상태로 변경 불가
+            if (CurrentState == stateKnockBack && stateKnockBack.onStateKnockBack)
+                return;
+
             base.ChangeState(state);
             enemy.currentStateName = state.GetType().Name;
         }

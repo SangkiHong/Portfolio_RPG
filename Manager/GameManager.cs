@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using SK.FSM;
+
+
 namespace SK
 {
     public class GameManager : MonoBehaviour
@@ -10,16 +13,33 @@ namespace SK
 
         public bool CusorVisible => cursorVisible;
 
-        public PlayerStateManager player;
+        [SerializeField] private GameObject[] dontDestroyObjects;
+
+        [Header("Reference")]
+        public Data.DataManager DataManager;
+        public InputManager InputManager;
+        public PlayerStateManager Player;
         
         private void Awake()
         {
             Instance = this;
 
-            // 씬 정보 테이블로부터 읽어들인 데이터에 맞추어 리소스를 로드하여 배치
-            GameObject p = ResourceManager.Instance.LoadPlayerCharacter();
-            p.name = "Player";
+            DontDestroyOnLoad(gameObject);
+            for (int i = 0; i < dontDestroyObjects.Length; i++)            
+                DontDestroyOnLoad(dontDestroyObjects[i]);            
 
+            // 타겟 프레임 설정
+            // 유니티에디터 Vsync를 해제해야 함
+            //Application.targetFrameRate = 40;
+        }
+
+        public void ChangeScene(int sceneNum)
+        {
+            SceneManager.LoadScene(sceneNum);
+        }
+
+        public void SetMainScene()
+        {
             Cursor.visible = cursorVisible;
             if (!cursorVisible)
                 Cursor.lockState = CursorLockMode.Locked;

@@ -3,19 +3,17 @@ namespace SK.FSM
     public class MonitorAnimationBool
     {
         private readonly PlayerStateManager states;
-        private readonly StateBase targetState;
-        private readonly int targetBool;
+        private readonly int _targetBoolHash;
 
-        public MonitorAnimationBool(PlayerStateManager characterStateManager, int targetBool, StateBase targetState)
+        public MonitorAnimationBool(PlayerStateManager characterStateManager, int targetBoolHash)
         {
             states = characterStateManager;
-            this.targetBool = targetBool;
-            this.targetState = targetState;
+            _targetBoolHash = targetBoolHash;
         }
 
-        public bool Execute()
+        public bool Execute(StateBase targetState)
         {
-            if (states.anim.GetBool(targetBool))
+            if (states.anim.GetBool(_targetBoolHash))
             {
                 return false;
             }

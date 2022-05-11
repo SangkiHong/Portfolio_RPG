@@ -22,9 +22,14 @@ namespace SK
         private void Awake()
         {
             _transform = transform;
-            Debug.Assert(Camera.main != null, "Main Camera is null");
-            _camera = Camera.main;
+
+            
             _tempPos.y = offsetY;
+        }
+
+        private void OnEnable()
+        {
+            if (!_camera) _camera = Camera.main;
         }
 
         private void FixedUpdate()
@@ -38,7 +43,7 @@ namespace SK
             }
         }
 
-        public void Assign(Vector3 position, int damageValue, bool isCriticalHit)
+        public void Assign(Vector3 position, uint damageValue, bool isCriticalHit)
         {
             _isAssigned = true;
 
@@ -57,7 +62,7 @@ namespace SK
             Done(true);
         }
 
-        private void SetUI(int value, bool isCriticalHit)
+        private void SetUI(uint value, bool isCriticalHit)
         {
             _timers = 0;
             textDamage.text = value.ToString();

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using SK.Utilities;
 
 namespace SK
 {
@@ -27,7 +28,7 @@ namespace SK
         private Vector3 _startPos, _tempPos, _destPos, _direction;
         
         [NonSerialized] public bool isDodge;
-        private float _timer;
+        private float _elapsed;
         private bool _counterAttack, _canDodge = true;
 
         private void Awake()
@@ -58,7 +59,7 @@ namespace SK
             if (NavMesh.SamplePosition(GetDodgePoint(dodgeAngle), out _navHit, dodgeDistance, NavMesh.AllAreas))
             {
                 _enemy.navAgent.isStopped = true;
-                _timer = 0;
+                _elapsed = 0;
                 _startPos = _transform.position;
                 _enemy.anim.SetBool(Strings.animPara_isInteracting, true);
                 _enemy.anim.CrossFade(Strings.AnimName_RollBack, 0.2f);
@@ -71,14 +72,14 @@ namespace SK
         #region Move & CounterAttack
         private void Move()
         {
-            _timer += Time.deltaTime;
-            _tempPos.x = EasingFunction.EaseOutCubic(_startPos.x, _navHit.position.x, _timer / dodgeTime);
-            _tempPos.y = EasingFunction.EaseOutCubic(_startPos.y, _navHit.position.y, _timer / dodgeTime);
-            _tempPos.z = EasingFunction.EaseOutCubic(_startPos.z, _navHit.position.z, _timer / dodgeTime);
+            _elapsed += Time.deltaTime;
+            _tempPos.x = EasingFunction.EaseOutCubic(_startPos.x, _navHit.position.x, _elapsed / dodgeTime);
+            _tempPos.y = EasingFunction.EaseOutCubic(_startPos.y, _navHit.position.y, _elapsed / dodgeTime);
+            _tempPos.z = EasingFunction.EaseOutCubic(_startPos.z, _navHit.position.z, _elapsed / dodgeTime);
             _transform.position = _tempPos;
             
             // 이동 완료
-            if (_timer >= dodgeTime)
+            if (_elapsed >= dodgeTime)
             {
                 isDodge = false;
                 _enemy.navAgent.velocity = Vector3.zero;
@@ -86,7 +87,7 @@ namespace SK
                 _enemy.navAgent.isStopped = false;
 
                 // 이동 완료 후 타격 반응 가능
-                _enemy.health.canDamage = true;
+                _enemy.health.CanDamage = true;
 
                 // 닷지 후 반격
                 CounterAttack();
@@ -109,7 +110,7 @@ namespace SK
 
                 _enemy.anim.CrossFade(Strings.AnimName_Attack_Jump, 0.15f);
                     
-                _timer = 0;
+                _elapsed = 0;
                 _startPos = _transform.position;
                 
                 _canDodge = false;
@@ -121,26 +122,27 @@ namespace SK
 
         private void AttackJump()
         {
-            _timer += Time.deltaTime;
-            var elapsed = _timer * CAJumpSpeed;
-            if (elapsed > 1) elapsed = 1;
-            var radian = Mathf.Deg2Rad * elapsed * 180;
+            if (_elapsed < 1)
+                _elapsed += Time.deltaTime * CAJumpSpeed; 
+            else
+                _elapsed = 1;
 
-            if (elapsed < 0.5f)
+            if (_elapsed < 0.5f)
             {
-                // 공중에 높이 뜰 때까지 타겟 앞 위치 계산
+                // 최대 높이까지 타겟 위치 계산
                 _direction = _transform.position - _enemy.combat.TargetObject.transform.position;
                 _direction.y = 0;
                 _destPos = _enemy.combat.TargetObject.transform.position + _direction.normalized * _enemy.combat.attackDistance * 0.5f;
             }
 
-            // 삼각함수 Sin을 통해 점프 구현
-            _transform.position = Vector3.Slerp(_startPos, _destPos + (Vector3.up * Mathf.Sin(radian) * CAJumpForce), elapsed);
+            // 삼각함수 Sine을 통해 점프 구현
+            _transform.position = Vector3.Slerp(_startPos, _destPos 
+                + (Vector3.up * MyMath.Instance.GetSine((uint)Mathf.RoundToInt(_elapsed * 180)) * CAJumpForce), _elapsed);
 
             // 디버깅::착지 위치
             Debug.DrawRay(_destPos, Vector3.up, Color.red);
 
-            if (elapsed >= 1)
+            if (_elapsed >= 1)
             {
                 _canDodge = true;
                 _counterAttack = false;
@@ -162,7 +164,7 @@ namespace SK
             float randomVal = UnityEngine.Random.Range(-1f, 1f); // 반원에서 방향을 랜덤 값으로 정함
             angle = randomVal * angle; // 0 ~ angle 사이의 각을 구함
 
-            return _transform.position + (_transform.rotation * Quaternion.Euler(0, angle, 0)) * (Vector3.forward * -dodgeDistance);
+            return _transform.position + _transform.rotation * Quaternion.Euler(0, angle, 0) * (Vector3.forward * -dodgeDistance);
         }
 
         private void LookAtTarget()

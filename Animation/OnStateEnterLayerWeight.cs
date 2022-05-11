@@ -6,6 +6,7 @@ namespace SK
 {
     public class OnStateEnterLayerWeight : StateMachineBehaviour
     {
+        [Header("Change Layer Weight On State Enter")]
         [SerializeField] private int targetLayer;
         [SerializeField] private float targetWeight;
         [SerializeField] private float changeSpeed;
@@ -15,11 +16,19 @@ namespace SK
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             if (animator.GetLayerWeight(targetLayer) != targetWeight)
-                isChangingWeight = true;
+            { 
+                if (changeSpeed == 0)
+                    animator.SetLayerWeight(targetLayer, targetWeight);
+                else
+                    isChangingWeight = true;
+            }
         }
 
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            // Interacting 중에는 Layer 변경 중단
+            if (animator.GetBool(Strings.animPara_isInteracting)) isChangingWeight = false;
+
             // Change Animator Layer Weight
             if (isChangingWeight)
             {
@@ -45,6 +54,7 @@ namespace SK
                         isChangingWeight = false;
                     }
                 }
+
                 animator.SetLayerWeight(targetLayer, currentWeight);
             }
         }

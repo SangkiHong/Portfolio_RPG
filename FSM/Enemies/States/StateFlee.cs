@@ -32,7 +32,7 @@ namespace SK.FSM
             _enemy.walkAnimSpeed = 1f;
             
             // Set Anim State
-            _enemy.anim.SetBool(Strings.AnimPara_isFight, false);
+            _enemy.anim.SetBool(Strings.AnimPara_onCombat, false);
 
             // 도주할 포인트 탐색
             _enemy.navAgent.SetDestination(GetFleePosition());
@@ -47,7 +47,7 @@ namespace SK.FSM
                 else // End Flee
                 {
                     _enemy.UnassignTarget();
-                    _enemy.anim.SetBool(Strings.AnimPara_isFight, true);
+                    _enemy.anim.SetBool(Strings.AnimPara_onCombat, true);
                     _stateMachine.ResetPatrol();
                 }
             }

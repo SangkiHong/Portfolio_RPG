@@ -9,18 +9,14 @@ namespace SK
         public UnityAction onDamaged;
         public UnityAction onDead;
 
-        public int CurrentHp => _currentHp;
-        private int _currentHp;
-
-        public bool canDamage = true;
         [SerializeField] private bool canHitFx;
         [SerializeField] private bool canDeadFx;
         [SerializeField] private float hitColorDuration = 0.8f;
         [SerializeField] private float deadFxDuration = 1.5f;
-        [SerializeField] private int bonusHpPerLevel;
-        [SerializeField] private int bonusHpPerSTR;
-        [SerializeField] private int bonusHpPerDEX;
-        [SerializeField] private int bonusHpPerINT;
+        [SerializeField] private uint bonusHpPerLevel;
+        [SerializeField] private uint bonusHpPerSTR;
+        [SerializeField] private uint bonusHpPerDEX;
+        [SerializeField] private uint bonusHpPerINT;
 
         [System.NonSerialized] public Transform hitTransform;
 
@@ -29,11 +25,18 @@ namespace SK
         private Color _hitEmision = new Color(1, 0, 0, 0);
         private Color _currentEmision;
         private WaitForSeconds ws;
+
         private readonly string _emissionColor = "_EmissionColor"; 
         private readonly string _cutoffHeight = "_CutoffHeight";
-        private bool _isCriticalHit, _isChangedColor;
+
+        private bool _canDamage = true;
+        private bool _isCriticalHit, _isChangedColor, _isStrongAttack;
+        private uint _currentHp, _damageValue;
         private float _timer;
-        private int _damageValue;
+
+        public uint CurrentHp => _currentHp;
+        public bool IsStrongAttack => _isStrongAttack;
+        public bool CanDamage { set { _canDamage = value; } }
 
         private void Awake()
         {
@@ -53,8 +56,24 @@ namespace SK
             }
         }
 
-        public void Init(int maxHp) => _currentHp = maxHp;
-        public void Init(int level, int s, int d, int i)
+        private void Update()
+        {
+            if (_isChangedColor)
+            {
+                if (_timer < hitColorDuration)
+                {
+                    _timer += Time.deltaTime;
+                    _currentEmision.r = Mathf.Lerp(1, 0, _timer / hitColorDuration);
+                    material.SetColor(_emissionColor, _currentEmision);                    
+                }
+                else
+                    _isChangedColor = false;
+            }
+        }
+
+        public void Init(uint maxHp) => _currentHp = maxHp;
+
+        public void Init(uint level, uint s, uint d, uint i)
         {
             _currentHp = (level * bonusHpPerLevel)
                       + ((s - 1) * bonusHpPerSTR)
@@ -62,13 +81,14 @@ namespace SK
                       + ((i - 1) * bonusHpPerINT);
         }
 
-        public void OnDamage(int damageValue, Transform tr, bool isCriticalHit)
+        public void OnDamage(uint damageValue, Transform tr, bool isCriticalHit, bool isStrongAttack)
         {
-            if (!canDamage) return;
+            if (!_canDamage) return;
 
             _damageValue = damageValue;
             hitTransform = tr;
             _isCriticalHit = isCriticalHit;
+            _isStrongAttack = isStrongAttack;
             onDamaged?.Invoke();
         }
 
@@ -84,11 +104,10 @@ namespace SK
             // 피격 시 Emission 효과 발동
             if (canHitFx)
             {
-                _timer = hitColorDuration;
                 material.SetColor(_emissionColor, _hitEmision);
 
-                if (!_isChangedColor)
-                    StartCoroutine(HitColorChange());
+                _timer = 0;
+                if (!_isChangedColor) _isChangedColor = true;
             }
 
             // HP가 0이 되었을 경우 죽음
@@ -100,25 +119,6 @@ namespace SK
         }
 
         public void PlayDeadFx() => StartCoroutine(DeadFx());
-
-        IEnumerator HitColorChange()
-        {
-            _isChangedColor = true;
-            var changeTime = hitColorDuration * 0.5f;
-
-            while (_timer > 0)
-            {
-                _timer -= 0.05f;
-                if (_timer <= changeTime && _timer <= 1)
-                {
-                    _currentEmision.r = _timer;
-                    material.SetColor(_emissionColor, _currentEmision);
-                }
-                yield return ws; 
-            }
-
-            _isChangedColor = false;
-        }
 
         IEnumerator DeadFx()
         {

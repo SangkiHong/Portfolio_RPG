@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using SK.Utilities;
 
 namespace SK.FSM
 {
@@ -10,9 +11,10 @@ namespace SK.FSM
         private Vector3 _targetVelocity, _origin, _targetDir;
         private Quaternion _targetRotation;
 
-        private float _frontY, _speed, _moveAmount, _degree;
         private readonly int _animHashForward = Animator.StringToHash("Forward");
         private readonly int _animHashSideways = Animator.StringToHash("Sideways");
+
+        private float _frontY, _speed, _moveAmount, _elapsed;
 
         public MoveCharacter(PlayerStateManager psm) => _state = psm;        
 
@@ -20,83 +22,89 @@ namespace SK.FSM
         {
             _moveAmount = _state.moveAmount;
 
-            HandleMovement();
-            HandleRotation();
+            // 피격되지 않은 채 점프 상태인 경우
+            if (_state.isJumping && !_state.isDamaged)
+                HandleJump();
+            else
+            {
+                HandleMovement();
+                HandleRotation();
+            }
+
             HandleAnimations();
         }
 
         private void HandleMovement()
         {
-            // Landing Check
-            if (_state.isGrounded && _state.isJumping)
-            {
-                _degree = 0;
-                _state.isJumping = false;
-                _state.anim.SetTrigger(Strings.AnimPara_Land);
-            }
-
             Vector3 tranformPos = _state.mTransform.position;
 
-            if (_moveAmount > 0.1f) // Move
+            // 피격 상태가 아닌 경우
+            if (!_state.isDamaged)
             {
-                _speed = _state.isRunning ? _state.runSpeed : _state.movementsSpeed; // 달릴 시 속도 변경
-
-                // Normal Movement
-                if (!_state.isTargeting)
+                if (_moveAmount > 0.1f) // Move
                 {
-                    float overrideMove = _moveAmount;
-                    if (_state.vertical < 0)
+                    _speed = _state.isRunning ? _state.runSpeed : _state.movementsSpeed; // 달릴 시 속도 변경
+
+                    // Normal Movement
+                    if (!_state.isTargeting)
                     {
-                        overrideMove *= -0.7f; // 뒷걸음 시 뒤로 70%로 감속
+                        float overrideMove = _moveAmount;
+                        if (_state.vertical < 0)
+                        {
+                            overrideMove *= -0.7f; // 뒷걸음 시 뒤로 70%로 감속
+                        }
+                        _targetVelocity = _state.mTransform.forward * overrideMove * _speed;
                     }
-                    _targetVelocity = _state.mTransform.forward * overrideMove * _speed;
+                    // Lock on Movement
+                    else
+                    {
+                        _speed *= 0.8f; // 움직임 스피드 80%로 감속
+                        _targetVelocity = _state.mTransform.forward * _state.vertical * _speed;
+                        _targetVelocity += _state.mTransform.right * _state.horizontal * _speed;
+                    }
+
+
+                    _origin = tranformPos + (_targetVelocity * _state.frontRayOffset);
+                    _origin.y += _state.frontRayOffsetHeight;
+
+                    Debug.DrawRay(_origin, -Vector3.up * (_state.frontRayOffsetHeight + 1), Color.red);
+                    if (Physics.Raycast(_origin, -Vector3.up, out _raycastHit, _state.frontRayOffsetHeight + 1, _state.groundLayerMask))
+                        _frontY = _raycastHit.point.y - tranformPos.y;
+
+                    // Idle, Move, on Air State
+                    if (_state.isGrounded)
+                    {
+                        float absY = Mathf.Abs(_frontY);
+
+                        // Slope
+                        if (absY < 0.2f)
+                        {
+                            if (_moveAmount > 0)
+                            {
+                                if (absY > 0.02f)
+                                    _targetVelocity.y = _frontY * 2f * _speed;
+                            }
+                        }
+                        else if (absY < 1f) // 높이 차 1 미만의 경사 지형에 대한 계산
+                        {
+                            var dir = _raycastHit.point - tranformPos;
+                            var angle = Vector3.Angle(dir, _state.mTransform.forward);
+                            if (angle > _state.slopeLimitAngle)
+                            {
+                                _state.isSlipping = true;
+                            }
+                        }
+                    }
                 }
-                // Lock on Movement
                 else
-                {
-                    _speed *= 0.8f; // 움직임 스피드 80%로 감속
-                    _targetVelocity = _state.mTransform.forward * _state.vertical * _speed;
-                    _targetVelocity += _state.mTransform.right * _state.horizontal * _speed;
-                }
-
-
-                _origin = tranformPos + (_targetVelocity * _state.frontRayOffset);
-                _origin.y += _state.frontRayOffsetHeight;
-
-                Debug.DrawRay(_origin, -Vector3.up * (_state.frontRayOffsetHeight + 1), Color.red);
-                if (Physics.Raycast(_origin, -Vector3.up, out _raycastHit, _state.frontRayOffsetHeight + 1, _state.groundLayerMask))
-                    _frontY = _raycastHit.point.y - tranformPos.y;
-
-                // Idle, Move, on Air State
-                if (_state.isGrounded)
-                {
-                    float absY = Mathf.Abs(_frontY);
-
-                    // Slope
-                    if (absY < 0.2f)
-                    {
-                        if (_moveAmount > 0)
-                        {
-                            if (absY > 0.02f)
-                                _targetVelocity.y = _frontY * 2f * _speed;
-                        }
-                    }
-                    else if (absY < 1f) // 높이 차 1 미만의 경사 지형에 대한 계산
-                    {
-                        var dir = _raycastHit.point - tranformPos;
-                        var angle = Vector3.Angle(dir, _state.mTransform.forward);
-                        if (angle > _state.slopeLimitAngle)
-                        {
-                            _state.isSlipping = true;
-                        }
-                    }
-                }
+                    _targetVelocity = Vector3.zero;
             }
+            // 피격 상태인 경우
             else
+            {
                 _targetVelocity = Vector3.zero;
-
-            if (_state.isJumping) HandleJump();
-            else Gravity();
+            }
+            Gravity();
 
             Debug.DrawRay((tranformPos + Vector3.up * 0.2f), _targetVelocity, Color.green, 0.01f, false);
             //_state.mTransform.position = Vector3.MoveTowards(tranformPos, tranformPos + _targetVelocity, _state.fixedDelta * _state.adaptSpeed);
@@ -142,12 +150,23 @@ namespace SK.FSM
 
         private void HandleJump()
         {
-            if (_degree < 4.5f)            
-                _degree += _state.fixedDelta * _state.jumpDuration;
-            
-            _targetVelocity.y = Mathf.Sin(_degree) * (1 + _speed) * _state.jumpForce;
-            _targetVelocity.x *= _degree * _state.jumpForce;
-            _targetVelocity.z *= _degree * _state.jumpForce;
+            // Landing Check
+            if (_state.isJumping && _state.isGrounded)
+            {
+                // 초기화
+                _elapsed = 0;
+                _state.isJumping = false;
+                _state.anim.SetTrigger(Strings.AnimPara_Land);
+                return;
+            }
+
+            if (_elapsed < 1)
+                _elapsed += _state.fixedDelta * _state.jumpDuration;
+            else
+                _elapsed = 1;
+
+            _targetVelocity.y = MyMath.Instance.GetSine((uint)Mathf.RoundToInt(_elapsed * 270)) * (1 + _speed) * _state.jumpForce; 
+            _state.characterController.Move(_targetVelocity);
         }
 
         private void HandleAnimations()

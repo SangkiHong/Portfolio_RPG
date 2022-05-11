@@ -25,7 +25,7 @@ namespace SK.FSM
 
         public override void Tick()
         {
-            if (!_enemy.anim.GetBool(Strings.animPara_isInteracting))
+            if (!_enemy.isInteracting)
                 _enemy.stateMachine.ChangeState(_stateMachine.stateCombat);
         }
 

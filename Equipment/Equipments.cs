@@ -9,6 +9,6 @@ namespace SK
         public virtual void ExecuteAction() { }
 
         public virtual void ExecuteAction(Animator anim, bool setDefault = false) { }
-        public virtual void ExecuteAction(Animator anim, AttackType attackType) { }
+        public virtual void ExecuteSpecialAction(Animator anim, AttackType attackType, int index) { }
     }
 }

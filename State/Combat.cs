@@ -18,8 +18,6 @@ namespace SK.Behavior
         [Header("Attack")]
         public float combatDistance = 3.5f;
         public float canComboDuration = 1.5f;
-        [SerializeField] private float impactMotionTime = 1;
-        [SerializeField] private AnimationCurve impactMotionCurve;
 
         [Header("Attack Search")]
         [SerializeField] private LayerMask targetLayerMask;
@@ -43,87 +41,97 @@ namespace SK.Behavior
 
         internal Alert alert;
         internal Weapon currentUseWeapon;
-        internal int calculatedDamage;
+        internal uint calculatedDamage;
 
         internal bool attackExcuted;
-        private bool _isCriticalHit, _isImpact;
-        private float _elapsed;
+        private bool _isCriticalHit;
 
         private void Awake()
         {
+            // 초기화
             _transform = transform;
             _targetBuff = new List<GameObject>();
-
             _anim = GetComponent<Animator>();
+            if (!equipmentHolderManager) 
+                equipmentHolderManager = GetComponentInChildren<EquipmentHolderManager>();
             
-            if (!equipmentHolderManager) equipmentHolderManager = GetComponentInChildren<EquipmentHolderManager>();
-
-            equipmentHolderManager?.Init(); // 장비 초기화
-
-            if (primaryEquipment) // 장비 착용(주무기)
+            // 장비 초기화
+            equipmentHolderManager?.Init();
+            // 장비 착용(주 무기)
+            if (primaryEquipment) 
                 equipmentHolderManager.LoadEquipmentOnHook(primaryEquipment, true);
-            
-            if (secondaryEquipment) // 장비 착용(보조 장비)
+            // 장비 착용(보조 장비)
+            if (secondaryEquipment) 
                 equipmentHolderManager.LoadEquipmentOnHook(secondaryEquipment, false);
 
+            // 현재 무기 디폴드 값으로 주 무기 할당
+            currentUseWeapon = primaryEquipment;
             searchUtility = new SearchUtility(_transform);
         }
 
-        private void FixedUpdate()
-        {
-            if (_isImpact)
-            {
-                _elapsed += Time.deltaTime;
-                if (_elapsed >= impactMotionTime)
-                {
-                    _elapsed = impactMotionTime;
-                    _isImpact = false;
-                }
-                _anim.SetFloat(Strings.AnimPara_AnimSpeed, impactMotionCurve.Evaluate(_elapsed / impactMotionTime));
-            }
-        }
-
+        // 공격 실행(콤보 공격 여부)
         public void ExecuteAttack(bool comboAttack = true)
         {
             attackExcuted = false;
+            // 주 무기 공격 실행
             primaryEquipment.ExecuteAction(_anim, comboAttack);
-            // Secondary Attack 구현 필요...
+            // 보조 무기 구현 필요...
         }
 
-        public void ExcuteSpecialAttack(AttackType attackType)
+        // 특수 공격 실행(공격 타입, 타입의 인덱스)
+        public void ExcuteSpecialAttack(AttackType attackType, int index = 0)
         {
             attackExcuted = false;
-            primaryEquipment.ExecuteAction(_anim, attackType);
+            // 주 무기 특수 공격 실행
+            primaryEquipment.ExecuteSpecialAction(_anim, attackType, index);
         }
 
-        // Use LineCast & OverlapSphereNonAlloc
-        public void Attack()
+        // LineCast & OverlapSphereNonAlloc 사용한 타격 구현(추가 사거리)
+        public void Attack(float addDist)
         {
             if (attackExcuted) return;
 
             attackExcuted = true;
-            // Using Secondary Weapon
+
+            // 보조 장비 착용 여부 확인
             if (_anim.GetBool(Strings.AnimPara_isSecondEquip))
                 currentUseWeapon = (Weapon)secondaryEquipment;
             else
                 currentUseWeapon = primaryEquipment;
 
-            SearchAndInflictDamage(currentUseWeapon.GetAttackAngle());
+            // 공격 범위 안 타겟 탐색 및 타격(공격 각도, 추가 사거리)
+            SearchAndInflictDamage(currentUseWeapon.currentAttack.attackAngle, addDist);
         }
 
-        public void GlobalAttack() => SearchAndInflictDamage(360);
+        // 주변 전체 공격
+        public void GlobalAttack(float addDist) => SearchAndInflictDamage(360, addDist);
 
-        private void ImpactMotion() 
+        // 타겟 지정
+        public void SetTarget(GameObject target) => targetObject = target;
+
+        // 데미지 계산(레벨, 힘 스탯, 크리티컬 확률, 크리티컬 배수)
+        public void CalculateDamage(uint level, uint strength, float criticalChance, float criticalMultiplier)
         {
-            _elapsed = 0;
-            _isImpact = true;
+            // Calculate Damage
+            int weaponPower = Random.Range((int)currentUseWeapon.AttackMinPower, (int)currentUseWeapon.AttackMaxPower + 1);
+            var damage = weaponPower + ((level * 0.5f) + (strength * 0.5f) + (level + 9));
+
+            // Critical Chance
+            if (Random.value < criticalChance)
+            {
+                damage *= criticalMultiplier;
+                _isCriticalHit = true;
+            }
+
+            calculatedDamage = (uint)damage;
         }
 
-        private void SearchAndInflictDamage(int degree)
+        // 타겟 확인 및 타격
+        private void SearchAndInflictDamage(int degree, float addDistance = 0)
         {
             _targetBuff.Clear();
 
-             searchUtility.FindTargets(offset, degree, attackDistance, ref _targetBuff, targetLayerMask);
+             searchUtility.FindTargets(offset, degree, attackDistance + addDistance, ref _targetBuff, targetLayerMask);
 
             if (_targetBuff != null && _targetBuff.Count > 0)
             {
@@ -135,32 +143,17 @@ namespace SK.Behavior
 
                 for (int i = 0; i < _targetBuff.Count; i++)
                 {
-                    _targetBuff[i].GetComponent<IDamagable>()?.OnDamage(calculatedDamage, _transform, _isCriticalHit);
+                    // 타겟에게 데미지 전달
+                    _targetBuff[i].GetComponent<IDamagable>()?
+                        .OnDamage(calculatedDamage, _transform, _isCriticalHit, currentUseWeapon.currentAttack.isStrongAttack);
 
-                    // 타격 효과
-                    ImpactMotion();
+                    // 타격 효과 시전
+
                 }
             }
         }
 
-        public void SetTarget(GameObject target) => targetObject = target;
-        
-        public int CalculateDamage(int level, int strength, float criticalChance, float criticalMultiplier)
-        {
-            // Calculate Damage
-            int weaponPower = Random.Range(currentUseWeapon.AttackMinPower, currentUseWeapon.AttackMaxPower + 1);
-            var damage = (level * 0.5f) + (strength * 0.5f) + (weaponPower * 0.5f) + (level + 9);
-
-            // Critical Chance
-            if (Random.value < criticalChance)
-            {
-                damage *= criticalMultiplier;
-                _isCriticalHit = true;
-            }
-
-            return (int)damage;
-        }
-
+        // 디버깅
         #region Debug
         private void DrawAttackRange(Vector3 positionOffset, float fieldOfViewAngle, float viewDistance, Color color)
         {
