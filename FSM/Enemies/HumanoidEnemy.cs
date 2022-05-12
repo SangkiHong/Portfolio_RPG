@@ -5,7 +5,7 @@ namespace SK
     public class HumanoidEnemy : Enemy
     {
         private float _moveBlend, _sideways, _walkSpeed;
-        [SerializeField] Vector3 moveDir;
+
         public override void Update()
         {
             base.Update();
@@ -69,7 +69,6 @@ namespace SK
                 }
                 else
                 {
-                    moveDir = stateMachine.stateCombat.moveDirection;
                     _moveBlend = stateMachine.stateCombat.moveDirection.normalized.z;
                     var sideway = -stateMachine.stateCombat.moveDirection.y / 90;
                     if (sideway > 1) sideway -= (int)sideway; // 정수부 제거

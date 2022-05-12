@@ -22,7 +22,8 @@ namespace SK
             {
                 for (int i = 0; i < grassRenderers.Count; i++)
                 {
-                    _sqrMag = (grassRenderers[i].transform.position - _playerTransform.position).sqrMagnitude;
+                    if (_playerTransform != null)
+                        _sqrMag = (grassRenderers[i].transform.position - _playerTransform.position).sqrMagnitude;
 
                     if (lodValue * 100 > _sqrMag)
                         grassRenderers[i].RederingGrass();

@@ -5,8 +5,20 @@ namespace SK
 {
     public class InputManager : MonoBehaviour
     {
-        public PlayerInput playerInput;
+        public PlayerInputAction playerInputAction;
 
-        
+        private void Awake() {
+            playerInputAction = new PlayerInputAction();
+        }
+
+        private void OnEnable()
+        {
+            playerInputAction.Enable();
+        }
+
+        private void OnDisable()
+        {
+            playerInputAction.Disable();
+        }
     }
 }

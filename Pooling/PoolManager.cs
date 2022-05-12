@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class PoolManager : MonoBehaviour 
 {
+	// 프리펩을 보관할 딕셔너리
 	Dictionary<string, GameObject> poolPrefabs = new Dictionary<string, GameObject>();
+	// 오브젝트의 부모 오브젝트를 보관할 딕셔너리
 	Dictionary<string, GameObject> poolParents = new Dictionary<string, GameObject>();
+	// 사용하지 않는 오브젝트 인스턴스를 큐로 보관할 딕셔너리
 	Dictionary<string, Queue<ObjectInstance>> poolFreeDictionary = new Dictionary<string, Queue<ObjectInstance>>();
+	// 사용중인 오브젝트 인스턴스를 딕셔너리로 보관할 딕셔너리
 	Dictionary<string, Dictionary<int, ObjectInstance>> poolUsedDictionary = new Dictionary<string, Dictionary<int, ObjectInstance>>();
 
 	static PoolManager _instance;

@@ -79,7 +79,7 @@ namespace SK.Data
                 sr.WriteLine();
 
                 // 인벤토리 아이템 정보 저장
-                sr.Write("ItemID,ItemType,EquipType,Amount,SlotID");
+                sr.Write("ItemID,ItemType,EquipType,Amount,SlotID,IsEquiped");
                 if (itemData.items.Count > 0)
                 {
                     foreach (var item in itemData.items)
@@ -90,6 +90,7 @@ namespace SK.Data
                         sr.Write("," + (int)item.item.equipmentType);
                         sr.Write("," + item.amount);
                         sr.Write("," + item.slotID);
+                        sr.Write("," + (item.isEquiped ? 1 : 0));
                     }
                 }
                 sr.Close();
@@ -108,6 +109,7 @@ namespace SK.Data
                 sr.Write("," + (int)addItem.equipmentType);
                 sr.Write("," + 1);
                 sr.Write("," + -1);
+                sr.Write("," + 0);
                 sr.Close();
             }
         }

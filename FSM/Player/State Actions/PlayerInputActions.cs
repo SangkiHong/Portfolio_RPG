@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace SK.FSM
 {
-    public class PlayerInputActions : StateAction
+    public class InputActions : StateAction
     {
         private readonly PlayerStateManager _state;
 
@@ -25,7 +25,7 @@ namespace SK.FSM
         private float _jumpIntervalTimer;
         private bool _interacting, isChangeCombatMode, _isCombatMode, _isShield, _isPressedMouseMode, _isPressedTargeting;
         
-        public PlayerInputActions(PlayerStateManager states, PlayerInputAction playerInput)
+        public InputActions(PlayerStateManager states, PlayerInputAction playerInput)
         {
             _state = states;
             var input = playerInput;
@@ -84,7 +84,8 @@ namespace SK.FSM
             
             _state.horizontal = _Input_Move.ReadValue<Vector2>().x;
             _state.vertical = _Input_Move.ReadValue<Vector2>().y;
-            _state.moveAmount = Mathf.Clamp01(Mathf.Abs(_state.horizontal) + Mathf.Abs(_state.vertical));
+            // 플레이어가 피해를 입었을 경우에는 움직이지 않고, 그 외엔 수평, 수직 입력 값의 합산으로 할당
+            _state.moveAmount = _state.isDamaged ? 0 : Mathf.Clamp01(Mathf.Abs(_state.horizontal) + Mathf.Abs(_state.vertical));
             #endregion
 
             #region Targeting Button

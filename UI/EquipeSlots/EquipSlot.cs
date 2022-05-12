@@ -6,8 +6,9 @@ namespace SK.UI
 {
     internal class EquipSlot : SlotBase
     {
-        [SerializeField] private EquipmentType slotEquipmentType;
-        private Item assignedItem;
+        public EquipmentType slotEquipmentType;
+
+        public Item assignedItem { get; private set; }
 
         // 슬롯에 아이템 할당(아이템 정보, 수량, 데이터 변경 여부)_220510
         public bool AssignEquipment(Item item)
@@ -29,18 +30,21 @@ namespace SK.UI
             assignedItem = null;
         }
 
-        // 할당된 아이템 전달_220510
-        public Item GetAssignedItem() => assignedItem;
-
         #region Event Function
-        // 단순 클릭 시 호출_220510
-        public override void OnClick()
+        // 좌클릭 시 이벤트 호출(아이템 세부 정보 패널 열기)_220510
+        public override void OnLeftClick()
         {
-            base.OnClick();
             if (IsAssigned)
-                OnClickEvent?.Invoke(slotID);
+                OnLeftClickEvent?.Invoke(slotID);
         }
-        
+
+        // 우클릭 시 이벤트 호출(아이템 착용 해제)_220511
+        public override void OnRightClick()
+        {
+            if (IsAssigned)
+                OnRightClickEvent?.Invoke(slotID);
+        }
+
         // 마우스를 눌렀을 경우 이벤트 호출_220510
         public override void OnPointerDown(PointerEventData eventData)
         {
@@ -53,34 +57,25 @@ namespace SK.UI
             base.OnPointerUp(eventData);
         }
 
-        // 드래그 시작 시 이벤트 호출_220510
+        // 드래그 시작 시 이벤트 호출_220512
         public override void OnBeginDrag(PointerEventData eventData)
         {
+            IsOnLeftClick = false;
+            IsOnRightClick = false;
             if (!IsAssigned || !canDrag) return;
-            base.OnBeginDrag(eventData);
-
-            // 모든 슬롯의 하이라이트 꺼짐
-            OnClickEvent?.Invoke(-1);
         }
 
-        // 드래그 중 이벤트 반복 호출_220510
+        // 드래그 중 이벤트 반복 호출_220512
         public override void OnDrag(PointerEventData eventData)
         {
             if (!IsAssigned) return;
-            IsOnClick = false;
-            if (!canDrag) return;
-            base.OnDrag(eventData);
-
         }
 
-        // 드래그 종료 시 이벤트 호출_220510
+        // 드래그 종료 시 이벤트 호출_220512
         public override void OnEndDrag(PointerEventData eventData)
         {
-            if (!IsAssigned || !canDrag) return;
-            base.OnEndDrag(eventData);
-
+            if (!canDrag) return;
         }
         #endregion
-
     }
 }

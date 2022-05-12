@@ -9,6 +9,7 @@ namespace SK.Data
         public Item item; // 아이템 정보
         public int slotID; // 슬롯 ID 정보
         public uint amount; // 아이템 갯수
+        public bool isEquiped; // 아이템 착용 여부
     }
 
     [CreateAssetMenu(fileName = "PlayerItemData", menuName = "Game Data/Player Item Data")]
@@ -115,14 +116,25 @@ namespace SK.Data
         public void ChangeSlotInfo(int slotID, uint changeAmount)
         {
             // 슬롯ID를 통해 검색한 데이터의 아이템 수량을 변경
-            items.Find(x => x.slotID == slotID).amount = changeAmount;
+            tempItemData = items.Find(x => x.slotID == slotID);
+
+            if (tempItemData != null) tempItemData.amount = changeAmount;
         }
 
         // 해당 슬롯 데이터의 아이템 수량 변경_220507
         public void ChangeSlotInfo(Item item, uint currentAmount, uint changeAmount)
         {
-            // 슬롯ID를 통해 검색한 데이터의 아이템 수량을 변경
+            // 아이템 정보를 통해 검색한 데이터의 아이템 수량을 변경
             items.Find(x => x.item.Equals(item) && x.amount == currentAmount).amount = changeAmount;
+        }
+
+        // 해당 슬롯 데이터의 아이템 착용 상태 변경_220512
+        public void ChangeSlotInfo(Item item, bool equip)
+        {
+            // 아이템 정보를 통해 검색한 데이터의 아이템 착용 상태를 변경
+            tempItemData = items.Find(x => x.item.Equals(item) && x.isEquiped != equip);
+            
+            if (tempItemData != null)tempItemData.isEquiped = equip;
         }
     }
 }

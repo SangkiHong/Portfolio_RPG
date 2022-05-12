@@ -64,7 +64,7 @@ namespace SK.FSM
         internal PlayerStateMachine stateMachine;
 
         // States Actions
-        internal PlayerInputActions playerInputActions;
+        internal InputActions playerInputs;
         internal MoveCharacter moveCharacter;
         internal MonitorAnimationBool monitorInteracting;
 
@@ -87,7 +87,7 @@ namespace SK.FSM
             mTransform = this.transform;
             GameManager.Instance.Player = this;
 
-            // Initialize References
+            // References 초기화
             if (!anim) anim = GetComponent<Animator>();
             if (!equipmentHolder) equipmentHolder = GetComponent<EquipmentHolderManager>();
             if (!animHook) animHook = GetComponentInChildren<AnimatorHook>();
@@ -95,32 +95,30 @@ namespace SK.FSM
             if (!combat) combat = GetComponent<Combat>();
             if (!health) health = GetComponent<Health>();
 
-            // Initialize Input System
-            _playerInputAction = new PlayerInputAction();
-            _playerInputAction.Enable();
+            // 인풋 시스템 초기화
+            _playerInputAction = GameManager.Instance.InputManager.playerInputAction;
 
-            // Initialize State Machine
+            // 상태 머신과 상태 액션 초기화
             stateMachine = new PlayerStateMachine(this);
-
-            // Initialize State Actions
-            playerInputActions = new PlayerInputActions(this, _playerInputAction);
+            playerInputs = new InputActions(this, _playerInputAction);
             moveCharacter = new MoveCharacter(this);
             monitorInteracting = new MonitorAnimationBool(this, Strings.animPara_isInteracting);
 
-            // Initialize Heath
+            // Heath 컴포넌트 초기화
             health.Init(playerData.Level, playerData.Str, playerData.Dex, playerData.Int);
 
-            // Initialize Camera Settings
+            // 카메라 세팅 초기화
             if (!cameraManager) cameraManager = Camera.main.GetComponent<CameraManager>();
             cameraManager.normalCamera.m_Lens.FieldOfView = PlayerPrefs.GetFloat("ZoomAmount", 0);
             cameraManager.Init(cameraTarget);
             _playerInputAction.GamePlay.CameraZoom.performed += x => _scrollY = x.ReadValue<float>() * cameraManager.cameraZoomSpeed;
 
+            // 애니메이션 초기화
             anim.applyRootMotion = false;
             if (animHook) animHook.Init(this);
-            _targetColliders = new Collider[5];
 
-            // Init Variable
+            // 변수 초기화
+            _targetColliders = new Collider[5];
             _environmentLayer = LayerMask.NameToLayer("Environment");
 
         }
@@ -131,9 +129,6 @@ namespace SK.FSM
             health.onDamaged += OnDamageEvent;
             health.onDead += OnDeadEvent;
             if (combat) combat.onAttack += CalculateDamage;
-
-            // Input 해제
-            _playerInputAction.Disable();
         }
 
         private void FixedUpdate()
@@ -161,10 +156,6 @@ namespace SK.FSM
                     canComboAttack = false;
             }
 
-            // 피격 상태 업데이트
-            if (isDamaged && !isInteracting)
-                isDamaged = false;
-
             // 타겟팅 포인트 회전 값 초기화
             if (isTargeting && cameraTarget.localRotation != Quaternion.identity)
                 cameraTarget.localRotation = Quaternion.Slerp(cameraTarget.localRotation, 
@@ -180,6 +171,10 @@ namespace SK.FSM
 
             // Interacting 상태 Check
             isInteracting = anim.GetBool(Strings.animPara_isInteracting);
+
+            // 피격 상태 업데이트
+            if (isDamaged && !isInteracting)
+                isDamaged = false;
 
             if (stateMachine.isAssigned())
                 stateMachine.CurrentState.Tick();
@@ -283,7 +278,7 @@ namespace SK.FSM
         }
         #endregion
 
-        #region Event Func
+        #region Event Function
         private void OnDamageEvent()
         {
             float impulse;

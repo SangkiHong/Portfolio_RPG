@@ -1,22 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SK.Data
 {
     public class ItemListManager : MonoBehaviour
     {
-        public static ItemListManager Instance;
-
         public ItemList[] itemLists; // 0: Equipment, 1: Weapon, 2: Props
-
-        private void Awake()
-        {
-            if (Instance != null) Destroy(this);
-            
-            Instance = this;
-            DontDestroyOnLoad(this);
-        }
 
         // 아이템 id로 아이템 불러오기_220503
         public Item GetItembyID(int id)

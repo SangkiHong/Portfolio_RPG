@@ -29,7 +29,7 @@ namespace SK.Behavior
         public Weapon primaryEquipment;
         public Equipments secondaryEquipment;
         public EquipmentHolderManager equipmentHolderManager;
-
+        [SerializeField]
         private GameObject targetObject;
         public GameObject TargetObject => targetObject;
 

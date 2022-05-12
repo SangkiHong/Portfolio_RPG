@@ -8,9 +8,14 @@ namespace SK.UI
     public abstract class SlotBase : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         /// <summary>
-        /// 슬롯을 단순 클릭 했을 시 발생 이벤트(슬롯 ID)
+        /// 슬롯을 단순 우클릭 했을 시 발생 이벤트(슬롯 ID)
         /// </summary>
-        public UnityAction<int> OnClickEvent;
+        public UnityAction<int> OnRightClickEvent;
+
+        /// <summary>
+        /// 슬롯을 단순 좌클릭 했을 시 발생 이벤트(슬롯 ID)
+        /// </summary>
+        public UnityAction<int> OnLeftClickEvent;
 
         /// <summary>
         /// 슬롯 할당 시 발생 이벤트(슬롯 정보, 슬롯 ID, 아이템 수량)
@@ -32,7 +37,8 @@ namespace SK.UI
         [SerializeField] internal bool canDrag; // 슬롯이 드래그 가능한지 여부
         [SerializeField] internal Image iconImage; // 아이콘 이미지
 
-        internal bool IsOnClick; // 단순 클릭인지 확인 여부
+        internal bool IsOnLeftClick; // 단순 좌클릭인지 확인 여부
+        internal bool IsOnRightClick; // 단순 우클릭인지 확인 여부
         internal bool IsDragging { get; private set; } // 드래그 중인지 확인
 
         private bool isAssigned; // 할당된 슬롯인지 여부
@@ -63,24 +69,43 @@ namespace SK.UI
             iconImage.gameObject.SetActive(false);
         }
 
-        // 단순 클릭 시 발동 함수_220503
-        public virtual void OnClick() { }
+        // 단순 좌클릭 시 발동 함수_220503
+        public virtual void OnLeftClick() { }
+
+        // 단순 우클릭 시 발동 함수_220511
+        public virtual void OnRightClick() { }
 
         public virtual void OnPointerDown(PointerEventData eventData)
         {
-            IsOnClick = true;
+            // 좌 클릭
+            if (eventData.button == PointerEventData.InputButton.Left)
+            { 
+                IsOnLeftClick = true;
+                Debug.Log("좌 클릭");
+            }
+            // 우 클릭
+            else if (eventData.button == PointerEventData.InputButton.Right)
+            { 
+                IsOnRightClick = true;
+                Debug.Log("우 클릭");
+            }
         }
 
         public virtual void OnPointerUp(PointerEventData eventData)
         {
-            if (IsOnClick) OnClick();
-            else IsOnClick = true;
+            // 드래그 없이 단순 좌클릭 시 함수 실행
+            if (IsOnLeftClick) OnLeftClick();
+            IsOnLeftClick = false;
 
+            // 드래그 없이 단순 우클릭 시 함수 실행
+            if (IsOnRightClick) OnRightClick();
+            IsOnRightClick = false;
         }
 
         public virtual void OnBeginDrag(PointerEventData eventData)
         {
-            IsOnClick = false;
+            IsOnLeftClick = false;
+            IsOnRightClick = false;
             IsDragging = true;
             if (!CurrentDraggedObject) CreateTempIcon(); // 임시 드래그 아이콘 생성
             else GetTempIcon(); // 임시 드래그 아이콘 재사용

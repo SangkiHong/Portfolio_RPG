@@ -26,7 +26,7 @@ namespace SK
 
             DontDestroyOnLoad(gameObject);
             for (int i = 0; i < dontDestroyObjects.Length; i++)            
-                DontDestroyOnLoad(dontDestroyObjects[i]);            
+                DontDestroyOnLoad(dontDestroyObjects[i]);
 
             // 타겟 프레임 설정
             // 유니티에디터 Vsync를 해제해야 함

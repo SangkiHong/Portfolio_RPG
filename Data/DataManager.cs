@@ -8,7 +8,8 @@ namespace SK.Data
         [SerializeField] private PlayerData playerData;
         [SerializeField] private PlayerItemData playerItemData;
 
-        //Reference
+        [Header("Reference")]
+        public ItemListManager itemListManager;
         public GrassManager grassManager;
 
         public PlayerData PlayerData => playerData;
@@ -85,7 +86,7 @@ namespace SK.Data
 
             GameObject player = Resources.Load(Path.Combine(_prefabs, s_player, s_player)) as GameObject;
             player = Instantiate(player);
-            player.transform.SetPositionAndRotation(playerData.RecentLocation, Quaternion.identity);
+            player.transform.position = playerData.RecentLocation;
             player.name = s_player;
             return player;
         }
@@ -152,11 +153,13 @@ namespace SK.Data
                         // 아이템 정보 로드
                         itemData = new ItemData
                         {
-                            item = ItemListManager.Instance
+                            item = itemListManager
                             .GetItem(int.Parse(row[0]), (ItemType)int.Parse(row[1]), (EquipmentType)int.Parse(row[2])),
                             amount = uint.Parse(row[3]),
                             slotID = int.Parse(row[4])
                         };
+                        if (row.Length > 5)
+                            itemData.isEquiped = Equals(row[5], '1');
 
                         playerItemData.items.Add(itemData);
                     }
@@ -172,11 +175,11 @@ namespace SK.Data
         #region ITEM DATA
         // 새로운 슬롯 & 아이템 추가_220507
         public void AddNewItemData(UI.InventorySlot inventorySlot)
-            => playerItemData.AddItem(inventorySlot.GetAssignedItem(), inventorySlot.slotID, inventorySlot.GetItemAmount());
+            => playerItemData.AddItem(inventorySlot.assignedItem, inventorySlot.slotID, inventorySlot.GetItemAmount());
 
         // 슬롯 아이템 데이터 삭제_220507
         public void DeleteItemData(UI.InventorySlot inventorySlot)
-            => playerItemData.RemoveItem(inventorySlot.GetAssignedItem(), inventorySlot.slotID);
+            => playerItemData.RemoveItem(inventorySlot.assignedItem, inventorySlot.slotID);
 
         // 슬롯 아이템 데이터 삭제_220507
         public void DeleteItemData(Item item, uint amount)
@@ -185,15 +188,14 @@ namespace SK.Data
         // 슬롯 아이템 정보 변경(A슬롯 ID, B슬롯 ID)_220506
         public void SwapSlot(int aSlotID, int bSlotID)
             => playerItemData.SwapSlotData(aSlotID, bSlotID);
-                
-        // 슬롯 아이템 데이터에서 아이템 수량 변경(슬롯 ID, 변경할 수량)_220507
-        public void UpdateItemData(int slotID, uint changeAmount)
-            => playerItemData.ChangeSlotInfo(slotID, changeAmount);
 
         // 슬롯 아이템 데이터에서 아이템 수량 변경(아이템 정보, 변경할 수량)_220507
         public void UpdateItemData(Item item, uint currentAmount, uint changeAmount)
             => playerItemData.ChangeSlotInfo(item, currentAmount, changeAmount);
 
+        // 아이템의 착용 여부 변경(아이템 정보, 변경할 상태)_220512
+        public void UpdateItemData(Item item, bool equip)
+            => playerItemData.ChangeSlotInfo(item, equip);
         #endregion
 
         // 종료 시 플레이어 데이터 저장_220503

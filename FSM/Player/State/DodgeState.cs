@@ -40,7 +40,7 @@
         public override void FixedTick()
         {
             base.FixedTick();
-            _state.playerInputActions.Execute();
+            _state.playerInputs.Execute();
 
             if (_state.isDodge)
             {

@@ -26,7 +26,7 @@ namespace SK
             else if (!combat.TargetObject && _isFindTarget)
                 _isFindTarget = false;
 
-            if (!isInteracting && !isDead && targetDistance <= nearAttackDistance)
+            if (combat.TargetObject && !isInteracting && !isDead && targetDistance <= nearAttackDistance)
             {
                 if (_attackElapsed >= nearAttackInterval)
                 {

@@ -29,8 +29,9 @@ namespace SK.UI
         [SerializeField] private Text text_ItemDescription;
 
         [Header("Item Sub Status")]
-        [SerializeField] private GameObject text_ItemEffectParent;
+        [SerializeField] private GameObject itemEffectParent;
         [SerializeField] private Text text_ItemEffectSpecific;
+        [SerializeField] private GameObject itemDurabilityParent;
         [SerializeField] private Text text_ItemCurrentDurability;
         [SerializeField] private Text text_ItemMaxDurability;
 
@@ -139,16 +140,21 @@ namespace SK.UI
             
             if (_stringBuilder.Length > 0)
             {
-                text_ItemEffectParent.SetActive(true);
+                itemDurabilityParent.SetActive(true);
                 text_ItemEffectSpecific.text = _stringBuilder.ToString();
             }
             else
-                text_ItemEffectParent.SetActive(false);
+                itemDurabilityParent.SetActive(false);
 
-            // 해당 아이템 내구도 표시
-            text_ItemCurrentDurability.text = item.durability.ToString();
-            text_ItemMaxDurability.text = item.durability.ToString();
-
+            // 장비 아이템인 경우 내구도 표시
+            if (item.itemType == ItemType.Equipment)
+            {
+                itemDurabilityParent.SetActive(true);
+                text_ItemCurrentDurability.text = item.durability.ToString();
+                text_ItemMaxDurability.text = item.durability.ToString();
+            }
+            else
+                itemDurabilityParent.SetActive(false);
         }
     }
 }

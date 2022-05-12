@@ -21,7 +21,7 @@ namespace SK.Utilities
         [SerializeField] private Vector3 offset;
 
         private SearchUtility searchUtility;
-
+        [SerializeField] GameObject findtarget;
         private Transform _thisTransform;
         private NavMeshHit _navHit;
         private Vector3 _originPos;
@@ -37,7 +37,8 @@ namespace SK.Utilities
         // Find Target
         public GameObject FindTarget()
         {
-            return searchUtility.FindTarget(offset, fieldOfViewAngle, viewDistance, objectLayerMask);
+            findtarget = searchUtility.FindTarget(offset, fieldOfViewAngle, viewDistance, objectLayerMask);
+            return findtarget;
         }
 
         // SEEK AND WONDER

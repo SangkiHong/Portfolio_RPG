@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SK
+namespace SK.UI
 {
     public class CharacterStatusManager : MonoBehaviour
     {
@@ -14,8 +14,9 @@ namespace SK
             public Text statsValue;
         }
 
+        [SerializeField] private UIManager uiManager;
+
         [SerializeField] private Text text_CharacterName;
-        [SerializeField] private Transform equipSlotParent;
         [SerializeField] private Button[] buttons_CharacterRotating;
 
         [SerializeField] private StatsText text_Level;
@@ -52,8 +53,7 @@ namespace SK
         [SerializeField] private StatsText text_RecoverSP;
 
         private Data.PlayerData _playerData;
-        private UI.EquipSlot[] _equipSlots;
-        private Weapon primaryWeapon, secondaryWeapon;
+        private Vector2 _attackRange;
 
         private void Awake()
         {
@@ -62,9 +62,6 @@ namespace SK
                 var tempIndex = i;
                 //buttons_CharacterRotating[i].onClick.AddListener();
             }
-
-            // 장비 슬롯 초기화
-            _equipSlots = equipSlotParent.GetComponentsInChildren<UI.EquipSlot>();
         }
 
         private void Start()
@@ -90,27 +87,9 @@ namespace SK
             text_Dex.statsValue.text = _playerData.Dex.ToString();
             text_Int.statsValue.text = _playerData.Int.ToString();
 
-            // 현재 착용한 무기의 공격력 + 힘 스탯을 통해 합산한 공격력 표시
-            var baseDamage = (_playerData.Level * 0.5f) + (_playerData.Str * 0.5f) + (_playerData.Level + 9);
-            uint maxDamage = 0,  minDamage = 0;
-
-            // 착용한 주 무기 데이터 정보 가져오기
-            if (_equipSlots[_equipSlots.Length - 2].IsAssigned)
-            { 
-                primaryWeapon = _equipSlots[_equipSlots.Length - 2].GetAssignedItem().equipmentData as Weapon;
-                minDamage = primaryWeapon.AttackMinPower + (uint)baseDamage;
-                maxDamage = primaryWeapon.AttackMaxPower + (uint)baseDamage;
-            }
-            // 착용한 보조 무기 데이터 정보 가져오기
-            if (_equipSlots[_equipSlots.Length - 1].IsAssigned &&
-                _equipSlots[_equipSlots.Length - 2].GetAssignedItem().equipmentType == EquipmentType.Weapon)
-            { 
-                secondaryWeapon = _equipSlots[_equipSlots.Length - 1].GetAssignedItem().equipmentData as Weapon;
-                minDamage += secondaryWeapon.AttackMinPower + (uint)baseDamage;
-                maxDamage += secondaryWeapon.AttackMaxPower + (uint)baseDamage;
-            }
-
-            text_Damage.statsValue.text = minDamage.ToString() + " - " + maxDamage.ToString();
+            _attackRange = uiManager.equipSlotManager.CalDamageRange();
+            text_Damage.statsValue.text = 
+                string.Format("{0:N1}%", _attackRange.x) + " - " + string.Format("{0:N1}%", _attackRange.y);
             text_AttackSpeed.statsValue.text = _playerData.AttackSpeed.ToString();
             text_CriticalChance.statsValue.text = _playerData.CriticalChance.ToString();
 

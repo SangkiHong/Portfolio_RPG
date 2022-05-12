@@ -10,7 +10,7 @@ namespace SK.FSM
         public override void FixedTick()
         {
             base.FixedTick();
-            _state.playerInputActions.Execute();
+            _state.playerInputs.Execute();
             _state.moveCharacter.Execute();
         }
     }

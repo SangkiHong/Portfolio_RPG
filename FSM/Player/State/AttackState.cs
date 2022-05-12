@@ -25,7 +25,7 @@ namespace SK.FSM
         public override void FixedTick()
         {
             // Attack 실행되기 전까지 input 받기
-            _state.playerInputActions.Execute();
+            _state.playerInputs.Execute();
 
             _state.mTransform.rotation = Quaternion.Lerp(_state.mTransform.rotation, _lookRot, _state.fixedDelta * _state.rotationSpeed);
         }
