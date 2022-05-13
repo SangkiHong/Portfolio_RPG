@@ -77,9 +77,9 @@ namespace SK.UI
 
             _attackRange = uiManager.equipSlotManager.CalDamageRange();
             text_Damage.statsValue.text = 
-                string.Format("{0:N1}%", _attackRange.x) + " - " + string.Format("{0:N1}%", _attackRange.y);
-            text_AttackSpeed.statsValue.text = _playerData.AttackSpeed.ToString();
-            text_CriticalChance.statsValue.text = _playerData.CriticalChance.ToString();
+                string.Format("{0:N0}", _attackRange.x) + " - " + string.Format("{0:N0}", _attackRange.y);
+            text_AttackSpeed.statsValue.text = string.Format("{0:N1}", _playerData.AttackSpeed);
+            text_CriticalChance.statsValue.text = (_playerData.CriticalChance * 100).ToString() + '%';
 
             text_Armor.statsValue.text = _playerData.Armor.ToString();
             text_Speed.statsValue.text = _playerData.Speed.ToString();

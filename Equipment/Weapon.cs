@@ -34,9 +34,9 @@ namespace SK
         public int CurrentAttackIndex => currentAttackIndex;
 
         // 무기 최소 공격력 + 공격 액션 추가 공격력을 합산한 값
-        public uint AttackMinPower => attackMinPower; // + currentAttack.attackPower;
+        public uint AttackMinPower => attackMinPower;
         // 무기 최대 공격력 + 공격 액션 추가 공격력을 합산한 값
-        public uint AttackMaxPower => attackMaxPower; // + currentAttack.attackPower;
+        public uint AttackMaxPower => attackMaxPower;
 
 
         public override void ExecuteAction(Animator anim, bool comboAttack)

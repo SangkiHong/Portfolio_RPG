@@ -83,6 +83,7 @@ namespace SK.Behavior
         }
 
         // LineCast & OverlapSphereNonAlloc 사용한 타격 구현(추가 사거리)
+        // 애니메이션 이벤트로 실행됨
         public void Attack(float addDist)
         {
             if (attackExcuted) return;
@@ -93,7 +94,7 @@ namespace SK.Behavior
             SearchAndInflictDamage(((Weapon)equipmentManager.currentUseEquipment).currentAttack.attackAngle, addDist);
         }
 
-        // 주변 전체 공격
+        // 주위 전체 범위 공격(추가 사거리)
         public void GlobalAttack(float addDist) => SearchAndInflictDamage(360, addDist);
 
         // 타겟 지정
@@ -102,18 +103,24 @@ namespace SK.Behavior
         // 데미지 계산(레벨, 힘 스탯, 크리티컬 확률, 크리티컬 배수)
         public void CalculateDamage(uint level, uint strength, float criticalChance, float criticalMultiplier)
         {
-            // Calculate Damage
+            // 현재 착용 중인 무기의 범위 값 중 랜덤으로 가져옴
             int weaponPower = Random.Range((int)((Weapon)equipmentManager.currentUseEquipment).AttackMinPower, 
                                            (int)((Weapon)equipmentManager.currentUseEquipment).AttackMaxPower + 1);
-            var damage = weaponPower + ((level * 0.5f) + (strength * 0.5f) + (level + 9));
 
-            // Critical Chance
+            // 현재 공격 액션의 고정 데미지 값을 가져옴
+            uint attackActionPower = ((Weapon)equipmentManager.currentUseEquipment).currentAttack.attackPower;
+
+            // 값을 합산하여 공격 데미지를 구함(무기 공격력 + 공격 액션 데미지 + (레벨 / 2) + (힘 스탯 / 2) + (최소 데미지 10))
+            var damage = weaponPower + attackActionPower + ((level * 0.5f) + (strength * 0.5f) + (10));
+
+            // 크리티컬 확률보다 랜덤 값이 더 낮게 나오면 데미지에 크리티컬 배율이 적용됨
             if (Random.value < criticalChance)
             {
                 damage *= criticalMultiplier;
                 _isCriticalHit = true;
             }
 
+            // 최종 계산된 공격 데미지를 변수에 저장
             calculatedDamage = (uint)damage;
         }
 
