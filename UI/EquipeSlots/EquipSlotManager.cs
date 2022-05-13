@@ -8,6 +8,8 @@ namespace SK.UI
         [SerializeField] private Transform equipSlotParent;
 
         private EquipSlot[] _equipSlots;
+        private Data.PlayerItemData _playerItemData;
+        private Item _tempItem;
         private Weapon _usingWeapon;
         private Vector2 attackRange;
 
@@ -15,6 +17,40 @@ namespace SK.UI
         {
             // 장비 슬롯 초기화
             _equipSlots = equipSlotParent.GetComponentsInChildren<EquipSlot>();
+        }
+
+        public void Initialize()
+        {
+            _playerItemData = GameManager.Instance.DataManager.PlayerItemData;
+
+            // 초기 데이터에 따른 장비 착용 슬롯 할당_220513
+            for (int i = 0; i < _playerItemData.items.Count; i++)
+            {
+                if (_playerItemData.items[i].isEquiped)
+                {
+                    _tempItem = _playerItemData.items[i].item;
+
+                    // 해당 데이터 아이템의 장비 타입에 맞는 장비 슬롯을 탐색하여 할당
+                    for (int j = 0; j < _equipSlots.Length; j++)
+                    {
+                        if (!_equipSlots[j].IsAssigned && _equipSlots[j].slotEquipmentType.Equals(_tempItem.equipmentType))
+                        {
+                            _equipSlots[j].AssignEquipment(_tempItem);
+
+                            // 무기 또는 방패 아이템인 경우 착용 모델 반영
+                            if (_tempItem.equipmentData && (_tempItem.equipmentType.Equals(EquipmentType.Weapon) ||
+                                                            _tempItem.equipmentType.Equals(EquipmentType.Shield)))
+                            {
+                                GameManager.Instance.Player.equipmentHolder
+                                    .AssignEquipment(_tempItem.equipmentData, _equipSlots[j].isPrimaryWeapon);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 캐릭터 정보 업데이트_220513
+            uiManager.characterStatusManager.UpdateInformaion();
         }
 
         // 장비 아이템 착용_220512
@@ -29,13 +65,17 @@ namespace SK.UI
                     if (_equipSlots[i].IsAssigned)
                     {
                         // 슬롯 아이템 데이터 착용 여부 업데이트
-                        GameManager.Instance.DataManager.UpdateItemData(_equipSlots[i].assignedItem, false);
+                        GameManager.Instance.DataManager.UpdateItemData(_equipSlots[i].AssignedItem, false);
 
-                        uiManager.inventoryManager.FindSlotByItem(_equipSlots[i].assignedItem, true).EquipItem(false); 
+                        uiManager.inventoryManager.FindSlotByItem(_equipSlots[i].AssignedItem, true).EquipItem(false); 
                     }
 
                     // 해당 슬롯에 장비 아이템 할당
                     _equipSlots[i].AssignEquipment(item);
+
+                    // 캐릭터 정보 업데이트_220513
+                    uiManager.characterStatusManager.UpdateInformaion();
+                    return;
                 }
             }
         }
@@ -51,6 +91,10 @@ namespace SK.UI
 
                     // 슬롯에 할당된 장비를 착용 해제
                     _equipSlots[i].Unassign();
+
+                    // 캐릭터 정보 업데이트_220513
+                    uiManager.characterStatusManager.UpdateInformaion();
+                    return;
                 }
             }
         }
@@ -59,16 +103,17 @@ namespace SK.UI
         public Vector2 CalDamageRange()
         {
             // 현재 착용한 무기의 공격력 + 힘 스탯을 통해 합산한 공격력 표시
-            var baseDamage = (GameManager.Instance.DataManager.PlayerData.Level * 0.5f) + (GameManager.Instance.DataManager.PlayerData.Str * 0.5f) + (GameManager.Instance.DataManager.PlayerData.Level + 9);
+            var baseDamage = (GameManager.Instance.DataManager.PlayerData.Level * 0.5f)
+                            + (GameManager.Instance.DataManager.PlayerData.Str * 0.5f) + (GameManager.Instance.DataManager.PlayerData.Level + 9);
             uint maxDamage = 0, minDamage = 0;
 
             // 착용한 주 무기 데이터 정보 가져오기
             for (int i = 0; i < _equipSlots.Length; i++)
             {
                 // 착용된 무기 탐색
-                if (_equipSlots[i].IsAssigned && _equipSlots[i].assignedItem.equipmentType.Equals(EquipmentType.Weapon))
+                if (_equipSlots[i].IsAssigned && _equipSlots[i].AssignedItem.equipmentType.Equals(EquipmentType.Weapon))
                 {
-                    _usingWeapon = _equipSlots[i].assignedItem.equipmentData as Weapon;
+                    _usingWeapon = _equipSlots[i].AssignedItem.equipmentData as Weapon;
 
                     minDamage += _usingWeapon.AttackMinPower + (uint)baseDamage;
                     maxDamage += _usingWeapon.AttackMaxPower + (uint)baseDamage;

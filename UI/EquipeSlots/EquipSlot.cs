@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 namespace SK.UI
@@ -8,7 +7,9 @@ namespace SK.UI
     {
         public EquipmentType slotEquipmentType;
 
-        public Item assignedItem { get; private set; }
+        [SerializeField] internal bool isPrimaryWeapon;
+
+        public Item AssignedItem { get; private set; }
 
         // 슬롯에 아이템 할당(아이템 정보, 수량, 데이터 변경 여부)_220510
         public bool AssignEquipment(Item item)
@@ -18,7 +19,7 @@ namespace SK.UI
 
             this.Unassign(); // 슬롯 초기화
             base.Assign(item.itemIcon); // 베이스 슬롯 할당(이미지 변경 등)
-            assignedItem = item; // 아이템 정보 할당
+            AssignedItem = item; // 아이템 정보 할당
 
             return true;
         }
@@ -27,7 +28,7 @@ namespace SK.UI
         public override void Unassign()
         {
             base.Unassign();
-            assignedItem = null;
+            AssignedItem = null;
         }
 
         #region Event Function

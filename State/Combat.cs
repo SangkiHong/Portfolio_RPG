@@ -26,21 +26,18 @@ namespace SK.Behavior
         [SerializeField] private Vector3 offset;
 
         [Header("Equipments")]
-        public Weapon primaryEquipment;
-        public Equipments secondaryEquipment;
-        public EquipmentHolderManager equipmentHolderManager;
-        [SerializeField]
+        public EquipmentHolderManager equipmentManager;
+
         private GameObject targetObject;
         public GameObject TargetObject => targetObject;
 
         private Transform _transform;
         private Animator _anim;
         private SearchUtility searchUtility;
-        [SerializeField]
+
         private List<GameObject> _targetBuff;
 
         internal Alert alert;
-        internal Weapon currentUseWeapon;
         internal uint calculatedDamage;
 
         internal bool attackExcuted;
@@ -52,30 +49,29 @@ namespace SK.Behavior
             _transform = transform;
             _targetBuff = new List<GameObject>();
             _anim = GetComponent<Animator>();
-            if (!equipmentHolderManager) 
-                equipmentHolderManager = GetComponentInChildren<EquipmentHolderManager>();
+            if (!equipmentManager) 
+                equipmentManager = GetComponentInChildren<EquipmentHolderManager>();
             
-            // 장비 초기화
-            equipmentHolderManager?.Init();
-            // 장비 착용(주 무기)
-            if (primaryEquipment) 
-                equipmentHolderManager.LoadEquipmentOnHook(primaryEquipment, true);
-            // 장비 착용(보조 장비)
-            if (secondaryEquipment) 
-                equipmentHolderManager.LoadEquipmentOnHook(secondaryEquipment, false);
-
-            // 현재 무기 디폴드 값으로 주 무기 할당
-            currentUseWeapon = primaryEquipment;
             searchUtility = new SearchUtility(_transform);
         }
 
         // 공격 실행(콤보 공격 여부)
-        public void ExecuteAttack(bool comboAttack = true)
+        public void ExecuteAttack(bool comboAttack = true, bool isLeftSide = true)
         {
             attackExcuted = false;
+
             // 주 무기 공격 실행
-            primaryEquipment.ExecuteAction(_anim, comboAttack);
-            // 보조 무기 구현 필요...
+            if (isLeftSide && equipmentManager.primaryEquipment)
+            {
+                equipmentManager.currentUseEquipment = equipmentManager.primaryEquipment;
+                equipmentManager.primaryEquipment.ExecuteAction(_anim, comboAttack);
+            }
+            // 보조 장비(무기) 공격 실행
+            else if (!isLeftSide && equipmentManager.secondaryEquipment)
+            {
+                equipmentManager.currentUseEquipment = equipmentManager.secondaryEquipment;
+                equipmentManager.secondaryEquipment.ExecuteAction(_anim, comboAttack);
+            }
         }
 
         // 특수 공격 실행(공격 타입, 타입의 인덱스)
@@ -83,7 +79,7 @@ namespace SK.Behavior
         {
             attackExcuted = false;
             // 주 무기 특수 공격 실행
-            primaryEquipment.ExecuteSpecialAction(_anim, attackType, index);
+            equipmentManager.primaryEquipment.ExecuteSpecialAction(_anim, attackType, index);
         }
 
         // LineCast & OverlapSphereNonAlloc 사용한 타격 구현(추가 사거리)
@@ -93,14 +89,8 @@ namespace SK.Behavior
 
             attackExcuted = true;
 
-            // 보조 장비 착용 여부 확인
-            if (_anim.GetBool(Strings.AnimPara_isSecondEquip))
-                currentUseWeapon = (Weapon)secondaryEquipment;
-            else
-                currentUseWeapon = primaryEquipment;
-
             // 공격 범위 안 타겟 탐색 및 타격(공격 각도, 추가 사거리)
-            SearchAndInflictDamage(currentUseWeapon.currentAttack.attackAngle, addDist);
+            SearchAndInflictDamage(((Weapon)equipmentManager.currentUseEquipment).currentAttack.attackAngle, addDist);
         }
 
         // 주변 전체 공격
@@ -113,7 +103,8 @@ namespace SK.Behavior
         public void CalculateDamage(uint level, uint strength, float criticalChance, float criticalMultiplier)
         {
             // Calculate Damage
-            int weaponPower = Random.Range((int)currentUseWeapon.AttackMinPower, (int)currentUseWeapon.AttackMaxPower + 1);
+            int weaponPower = Random.Range((int)((Weapon)equipmentManager.currentUseEquipment).AttackMinPower, 
+                                           (int)((Weapon)equipmentManager.currentUseEquipment).AttackMaxPower + 1);
             var damage = weaponPower + ((level * 0.5f) + (strength * 0.5f) + (level + 9));
 
             // Critical Chance
@@ -145,7 +136,8 @@ namespace SK.Behavior
                 {
                     // 타겟에게 데미지 전달
                     _targetBuff[i].GetComponent<IDamagable>()?
-                        .OnDamage(calculatedDamage, _transform, _isCriticalHit, currentUseWeapon.currentAttack.isStrongAttack);
+                        .OnDamage(calculatedDamage, _transform, _isCriticalHit,
+                                  ((Weapon)equipmentManager.currentUseEquipment).currentAttack.isStrongAttack);
 
                     // 타격 효과 시전
 

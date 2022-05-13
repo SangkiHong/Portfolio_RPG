@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +15,6 @@ namespace SK.UI
         [SerializeField] private UIManager uiManager;
 
         [SerializeField] private Text text_CharacterName;
-        [SerializeField] private Button[] buttons_CharacterRotating;
 
         [SerializeField] private StatsText text_Level;
         [SerializeField] private StatsText text_Exp;
@@ -55,24 +52,15 @@ namespace SK.UI
         private Data.PlayerData _playerData;
         private Vector2 _attackRange;
 
-        private void Awake()
-        {
-            for (int i = 0; i < buttons_CharacterRotating.Length; i++)
-            {
-                var tempIndex = i;
-                //buttons_CharacterRotating[i].onClick.AddListener();
-            }
-        }
-
-        private void Start()
+        public void Initialize()
         {
             _playerData = GameManager.Instance.DataManager.PlayerData;
 
-            SetInfo();
+            UpdateInformaion();
         }
 
         // 케릭터 정보 창의 UI 표시_220510
-        private void SetInfo()
+        public void UpdateInformaion()
         {
             // Text 표시
             text_CharacterName.text = _playerData.Name;

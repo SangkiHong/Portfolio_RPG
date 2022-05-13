@@ -40,8 +40,8 @@ namespace SK.FSM
             _enemy.walkAnimSpeed = 0.3f;
 
             // 어택 콤보 시작 시에 위치 이동
-            if ((_enemy.combat.currentUseWeapon && _enemy.combat.currentUseWeapon.CurrentAttackIndex == 0) ||
-                _enemy.combat.primaryEquipment && _enemy.combat.primaryEquipment.CurrentAttackIndex == 0)
+            if ((_enemy.equipmentManager.currentUseEquipment && ((Weapon)_enemy.equipmentManager.currentUseEquipment).CurrentAttackIndex == 0) ||
+                _enemy.equipmentManager.primaryEquipment && _enemy.equipmentManager.primaryEquipment.CurrentAttackIndex == 0)
                 _enemy.navAgent.SetDestination(GetAroundPosition());
 
             // Assign Check

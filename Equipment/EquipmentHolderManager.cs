@@ -1,100 +1,154 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 namespace SK
 {
     public class EquipmentHolderManager : MonoBehaviour
     {
-        public EquipmentHolderHook primaryHook;
-        public EquipmentHolderHook secondaryHook;
+        [Header("Equipment")]
+        public Weapon primaryEquipment;
+        public Equipments secondaryEquipment;
+
+        [Header("Hook")]
+        public EquipmentHolderHook rightHandHook;
+        public EquipmentHolderHook leftHandHook;
+        public EquipmentHolderHook shieldHook;
+
         [SerializeField] private Transform sheathPrimary;
-        [SerializeField] private Transform sheathSecondary;
+        [SerializeField] private Transform sheathBack;
 
-        private bool isEquipPrimary, isEquipSecondary;
-        private Transform targetTransform;
+        internal Equipments currentUseEquipment;
 
-        public void Init()
+        private bool _isEquipPrimary, _isEquipSecondary; // 착여 여부 확인용 Bool값
+        private Transform _targetTransform;
+
+        private void Awake()
         {
-            if (!secondaryHook && !primaryHook)
-            {
-                EquipmentHolderHook[] equipmentHolderHooks = GetComponentsInChildren<EquipmentHolderHook>();
-                foreach (var hook in equipmentHolderHooks)
-                {
-                    if (hook.isPrimaryHook)
-                        secondaryHook = hook;
-                    else
-                        primaryHook = hook;
-                }
-            }
+            // Hook 초기화
+            if (rightHandHook) rightHandHook.Initialize();
+            if (leftHandHook) leftHandHook.Initialize();
+            if (shieldHook) shieldHook.Initialize();
 
-            // Subscribe Event
+            // 죽을 경우 장비 해제 이벤트 등록
             GetComponent<Health>().onDead += UnloadEquipment;
+            
+            // 몬스터인 경우 사전 장비 장착
+            if (primaryEquipment) LoadEquipmentOnHook(primaryEquipment, true);
+            if (secondaryEquipment) LoadEquipmentOnHook(secondaryEquipment, false);
         }
 
+        public void AssignEquipment(Equipments equipment, bool isPrimary)
+        {
+            if (equipment == null) return;
+
+            if (isPrimary) // 장비 착용(주 무기)
+                primaryEquipment = equipment as Weapon;
+            else // 장비 착용(보조 장비)
+                secondaryEquipment = equipment;
+
+            LoadEquipmentOnHook(equipment, isPrimary);
+        }
+
+        // 착용 위치 지정 및 모델 로딩
         public void LoadEquipmentOnHook(Equipments equipment, bool isPrimary)
         {
             if (isPrimary)
-                primaryHook.LoadModel(equipment);
+                rightHandHook.LoadModel(equipment);
             else
-                secondaryHook.LoadModel(equipment);
+            { 
+                // 보조 장비가 방패인 경우
+                if (equipment.equipType.Equals(EquipType.Shield))
+                    shieldHook.LoadModel(equipment);
+                else // 보조 장비가 무기인 경우
+                    leftHandHook.LoadModel(equipment);
+            }
         }
 
-        public void UnloadEquipment()
-        {
-            primaryHook?.UnloadWeapon();
-            secondaryHook?.UnloadWeapon();
-        }
-
+        // 장비 착용(애니메이션 이벤트 함수로도 사용)
         public void Equip(int isPrimary = 0)
         {
             if (isPrimary == 0) // 주무기
             {
-                if (!isEquipPrimary)
+                if (!_isEquipPrimary)
                 {
-                    isEquipPrimary = true;
-                    targetTransform = primaryHook.currentModel.transform;
-                    targetTransform.parent = primaryHook.transform;
+                    _isEquipPrimary = true;
+
+                    // 현재 할당된 주 무기의 트랜스폼을 변수에 할당
+                    _targetTransform = rightHandHook.currentModel.transform;
+
+                    // 모델의 부모 트랜스폼을 Hook으로 지정
+                    _targetTransform.parent = rightHandHook.transform;
                 }
             }
             else // 보조 무기
             {
-                if (!isEquipSecondary)
+                if (!_isEquipSecondary)
                 {
-                    isEquipSecondary = true;
-                    targetTransform = secondaryHook.currentModel.transform;
-                    targetTransform.parent = secondaryHook.transform;
+                    _isEquipSecondary = true;
+
+                    // 현재 할당된 보조 장비의 트랜스폼을 변수에 할당
+                    _targetTransform = shieldHook.assignedEquipment != null ? 
+                        shieldHook.currentModel.transform : leftHandHook.currentModel.transform;
+
+                    // 정상적인 할당이 이뤄지지 않았다면 return
+                    if (!_targetTransform) return;
+
+                    // 모델의 부모 트랜스폼을 Hook으로 지정
+                    _targetTransform.parent = shieldHook.assignedEquipment != null ?
+                        shieldHook.transform : leftHandHook.transform;
                 }
             }
             
-            targetTransform.localPosition = Vector3.zero;
-            targetTransform.localRotation = Quaternion.identity;
-            targetTransform.localScale = Vector3.one;
+            // 타겟 트랜스폼의 로컬 위치, 로컬 회전, 스케일 값을 초기화
+            _targetTransform.localPosition = Vector3.zero;
+            _targetTransform.localRotation = Quaternion.identity;
+            _targetTransform.localScale = Vector3.one;
         }
 
+        // 장비 착용 해제(애니메이션 이벤트 함수로도 사용)
         public void Unequip(int isPrimary = 0)
         {
             if (isPrimary == 0)
             {
-                if (isEquipPrimary)
+                if (_isEquipPrimary)
                 {
-                    isEquipPrimary = false;
-                    targetTransform = primaryHook.currentModel.transform;
-                    targetTransform.parent = sheathPrimary;
+                    _isEquipPrimary = false;
+
+                    // 현재 할당된 주 무기의 트랜스폼을 변수에 할당
+                    _targetTransform = rightHandHook.currentModel.transform;
+
+                    // 모델의 부모 트랜스폼을 Sheath로 지정
+                    _targetTransform.parent = sheathPrimary;
                 }
             }
             else
             {
-                if (isEquipSecondary)
+                if (_isEquipSecondary)
                 {
-                    isEquipSecondary = false;
-                    targetTransform = secondaryHook.currentModel.transform;
-                    targetTransform.parent = sheathSecondary;
+                    _isEquipSecondary = false;
+
+                    // 현재 할당된 보조 장비의 트랜스폼을 변수에 할당
+                    _targetTransform = shieldHook.assignedEquipment != null ?
+                        shieldHook.currentModel.transform : leftHandHook.currentModel.transform;
+
+                    // 정상적인 할당이 이뤄지지 않았다면 return
+                    if (!_targetTransform) return;
+
+                    // 모델의 부모 트랜스폼을 Sheath로 지정
+                    _targetTransform.parent = sheathBack;
                 }
             }
             
-            targetTransform.localPosition = Vector3.zero;
-            targetTransform.localRotation = Quaternion.identity;
-            targetTransform.localScale = Vector3.one;
+            _targetTransform.localPosition = Vector3.zero;
+            _targetTransform.localRotation = Quaternion.identity;
+            _targetTransform.localScale = Vector3.one;
+        }
+
+        // 모든 장비 해제
+        private void UnloadEquipment()
+        {
+            if (rightHandHook.assignedEquipment) rightHandHook.UnloadWeapon();
+            if (shieldHook.assignedEquipment) shieldHook.UnloadWeapon();
+            if (leftHandHook.assignedEquipment) leftHandHook.UnloadWeapon();
         }
     }
 }

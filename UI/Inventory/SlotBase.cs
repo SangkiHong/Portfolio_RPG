@@ -20,7 +20,7 @@ namespace SK.UI
         /// <summary>
         /// 슬롯 할당 시 발생 이벤트(슬롯 정보, 슬롯 ID, 아이템 수량)
         /// </summary>
-        public UnityAction <Object, int, uint> OnAssignEvent;
+        public UnityAction <SlotBase, int, uint> OnAssignEvent;
 
         /// <summary>
         /// 슬롯 교환(교체) 시 발생 이벤트(현재 슬롯 ID, 이동할 슬롯 ID)

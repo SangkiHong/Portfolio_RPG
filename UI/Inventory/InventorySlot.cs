@@ -65,7 +65,6 @@ namespace SK.UI
         // 슬롯의 장비 아이템을 장착한 경우_220512
         public void EquipItem(bool equip)
         {
-            Debug.Log($"{slotID} 번 슬롯 착용 상태: {equip}");
             isEquiped = equip;
 
             // 착용 텍스트(E) 표시

@@ -11,7 +11,6 @@ namespace SK
         public static readonly int AnimPara_Sideways = Animator.StringToHash("Sideways");
         public static readonly int AnimPara_EquipShield = Animator.StringToHash("EquipShield");
         public static readonly int AnimPara_isShielding = Animator.StringToHash("isShielding"); 
-        public static readonly int AnimPara_isSecondEquip = Animator.StringToHash("isSecondEquip"); 
         public static readonly int AnimPara_isChangingEquipState = Animator.StringToHash("isChangingEquipState");
         public static readonly int AnimPara_Jump = Animator.StringToHash("Jump");
         public static readonly int AnimPara_Land = Animator.StringToHash("Land");

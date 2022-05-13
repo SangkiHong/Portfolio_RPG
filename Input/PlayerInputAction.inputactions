@@ -42,9 +42,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Attack",
+                    "name": "LAttack",
                     "type": "Button",
                     "id": "9e89b11e-df0b-4e5b-bc46-acfb1fa6b0bc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RAttack",
+                    "type": "Button",
+                    "id": "cd8dfb60-6c64-4d95-8398-9d83eef912e7",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -451,18 +460,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Attack",
+                    "action": "LAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "b0ccd9b9-7910-4bfb-ab9a-d2ffeb7d4b45",
-                    "path": "<XInputController>/buttonEast",
+                    "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Attack",
+                    "action": "LAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -606,6 +615,28 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "UI_CloseAll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "997b421b-e9e3-4a37-8551-6f7294ab2286",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "RAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b5e4f1b2-acdf-4a2c-9e08-d7bab006f283",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "RAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

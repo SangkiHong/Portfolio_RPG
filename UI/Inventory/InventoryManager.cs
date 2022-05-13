@@ -75,8 +75,8 @@ namespace SK.UI
                 _itemDataQueues[i] = new Queue<ItemData>();
             
             _focusLocalPos = tabFocus.localPosition;
-                        
-            // slot ID 할당
+
+            // slot ID 할당 및 슬롯의 포인터 이벤트 등록_220504
             for (int i = 0; i < _slots.Length; i++)
             {
                 _slots[i].slotID = i;
@@ -89,7 +89,7 @@ namespace SK.UI
                 _rectTransforms[i] = _slots[i].transform as RectTransform;
             }
 
-            // Tab 버튼 이벤트 할당
+            // Tab 버튼 이벤트 할당_220506
             for (int i = 0; i < tabs.Length; i++)
             {
                 int tempIndex = i; // Closuer problem 으로 인해 임시 인덱스 값을 생성
@@ -102,13 +102,11 @@ namespace SK.UI
             button_EraseMode.onClick.AddListener(SwitchEraseMode); // 아이템 삭제 모드 버튼 이벤트 할당
             button_Erase.onClick.AddListener(EraseSelectedItem); // 선택한 아이템을 모두 삭제하는 버튼 이벤트 할당
             button_CancelSelection.onClick.AddListener(CancelSelection); // 삭제할 아이템 선택을 모두 취소하는 버튼 이벤트 할당
-
-            // 보유 아이템 데이터를 토대로 인벤토리에 슬롯 정보 불러오기(초기화)_220503
-            Invoke("Initialize", 0.3f);
         }
 
-        private void Initialize()
+        public void Initialize()
         {
+            // 보유 아이템 데이터를 토대로 인벤토리에 슬롯 정보 불러오기(초기화)_220503
             LoadSlotData();
         }
 
@@ -146,7 +144,7 @@ namespace SK.UI
         /// <param name="slot">슬롯 정보</param>
         /// <param name="slotID">슬롯 ID</param>
         /// <param name="amount">아이템 수량</param>
-        private void NewAssignItem(Object slot, int slotID, uint amount)
+        private void NewAssignItem(SlotBase slot, int slotID, uint amount)
         {
             _selectedSlot = slot as InventorySlot;
             GameManager.Instance.DataManager.AddNewItemData(_selectedSlot);

@@ -14,7 +14,7 @@ namespace SK.FSM
         {
             _state.anim.SetBool(Strings.animPara_isInteracting, true);
 
-            if (_state.combat.currentUseWeapon.currentAttack.onRootMotion)
+            if (((Weapon)_state.equipmentHolder.currentUseEquipment).currentAttack.onRootMotion)
                 _state.EnableRootMotion();
 
             _targetDir = _state.cameraManager.transform.forward;

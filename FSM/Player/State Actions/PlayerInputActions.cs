@@ -11,7 +11,8 @@ namespace SK.FSM
         private readonly InputAction _Input_Rotate;
         private readonly InputAction _Input_Run;
         private readonly InputAction _Input_Jump;
-        private readonly InputAction _Input_Attack;
+        private readonly InputAction _Input_LAttack;
+        private readonly InputAction _Input_RAttack;
         private readonly InputAction _Input_Interact;
         private readonly InputAction _Input_DodgeLeft;
         private readonly InputAction _Input_DodgeRight;
@@ -34,7 +35,8 @@ namespace SK.FSM
             _Input_Rotate = input.GamePlay.Rotate;
             _Input_Run = input.GamePlay.Run;
             _Input_Jump = input.GamePlay.Jump;
-            _Input_Attack = input.GamePlay.Attack;
+            _Input_LAttack = input.GamePlay.LAttack;
+            _Input_RAttack = input.GamePlay.RAttack;
             _Input_Interact = input.GamePlay.Interact;
             _Input_DodgeLeft = input.GamePlay.Dodge_Left;
             _Input_DodgeRight = input.GamePlay.Dodge_Right;
@@ -111,7 +113,7 @@ namespace SK.FSM
             if (_state.isGrounded)
             {
                 if (_Input_SwitchFightMode.triggered && SwitchCombatMode()) return;
-                if (_Input_Attack.IsPressed() && HandleAttacking()) return;
+                if (HandleAttacking()) return;
                 if (HandleDodge()) return;
 
                 HandleShield();
@@ -179,51 +181,59 @@ namespace SK.FSM
 
         private bool HandleAttacking()
         {
-            // 콤보 공격 불가능 상태 & 장비 장착 해제 중이거나 공격 상태일 때 return
-            if (!_state.canComboAttack && (_state.anim.GetBool(Strings.AnimPara_isChangingEquipState) || 
-                _state.stateMachine.CurrentState == _state.stateMachine.attackState)) 
-                return false;
-
-            // 장비 장착 중이 아닐 시 즉시 장착
-            if (!_isCombatMode)
+            if (_Input_LAttack.IsPressed() || _Input_RAttack.IsPressed())
             {
-                _isCombatMode = true;
+                bool attackLeftSide = _Input_LAttack.IsPressed();
 
-                // 주무기 착용
-                _state.equipmentHolder.Equip();
+                // 콤보 공격 불가능 상태 & 장비 장착 해제 중이거나 공격 상태일 때 return
+                if (!_state.canComboAttack && (_state.anim.GetBool(Strings.AnimPara_isChangingEquipState) ||
+                    _state.stateMachine.CurrentState == _state.stateMachine.attackState))
+                    return false;
 
-                // 보조장비 착용
-                if (_state.combat.secondaryEquipment)
-                    _state.equipmentHolder.Equip(1);
+                // 장비 장착 중이 아닐 시 즉시 장착
+                if (!_isCombatMode)
+                {
+                    _isCombatMode = true;
 
-                // 애니메이션 전투 상태로 전환
-                _state.anim.SetBool(Strings.AnimPara_onCombat, true);
+                    // 주무기 착용
+                    _state.equipmentHolder.Equip();
 
-                // 방패 착용 여부 확인하여 애니메이션 파라미터 변경
-                if (_state.combat.secondaryEquipment && _state.combat.secondaryEquipment.GetType() != typeof(Weapon))
-                    _state.anim.SetBool(Strings.AnimPara_EquipShield, true);
+                    // 보조장비 착용
+                    if (_state.equipmentHolder.secondaryEquipment)
+                        _state.equipmentHolder.Equip(1);
+
+                    // 애니메이션 전투 상태로 전환
+                    _state.anim.SetBool(Strings.AnimPara_onCombat, true);
+
+                    // 방패 착용 여부 확인하여 애니메이션 파라미터 변경
+                    if (_state.equipmentHolder.secondaryEquipment && 
+                        _state.equipmentHolder.secondaryEquipment.equipType == EquipType.Shield)
+                        _state.anim.SetBool(Strings.AnimPara_EquipShield, true);
+                }
+
+                // Attack 실행
+                if (_state.isDodge) // 회피 상태일 경우 Attack 실행
+                {
+                    if (_state.stateMachine.dodgeState.directionAngle == 0) // 전진 회피 중 공격
+                        _state.combat.ExcuteSpecialAttack(AttackType.ChargeAttack);
+                    else // 그 외 다른 방향으로 회피 중 공격
+                        _state.combat.ExcuteSpecialAttack(AttackType.DodgeAttack);
+                }
+                else if (Unshielding()) // Sheild 상태일 경우 Counter Attack 실행
+                {
+                    _state.combat.ExcuteSpecialAttack(AttackType.CounterAttack);
+                }
+                else // 일반 공격 실행(콤보 가능 여부, 공격 장비 위치-좌,우)
+                    _state.combat.ExecuteAttack(_state.canComboAttack, attackLeftSide);
+
+                _state.stateMachine.ChangeState(_state.stateMachine.attackState);
+
+                _state.canComboAttack = false; // 콤보 공격 가능 상태 초기화
+
+                return true;
             }
 
-            // Attack 실행
-            if (_state.isDodge) // 회피 상태일 경우 Attack 실행
-            {
-                if (_state.stateMachine.dodgeState.directionAngle == 0) // 전진 회피 중 공격
-                    _state.combat.ExcuteSpecialAttack(AttackType.ChargeAttack);
-                else // 그 외 다른 방향으로 회피 중 공격
-                    _state.combat.ExcuteSpecialAttack(AttackType.DodgeAttack);
-            }
-            else if (Unshielding()) // Sheild 상태일 경우 Counter Attack 실행
-            {
-                _state.combat.ExcuteSpecialAttack(AttackType.CounterAttack);
-            }
-            else // 일반 콤보 공격 실행                
-                _state.combat.ExecuteAttack(_state.canComboAttack);                
-
-            _state.stateMachine.ChangeState(_state.stateMachine.attackState);
-
-            _state.canComboAttack = false; // 콤보 공격 가능 상태 초기화
-
-            return true;
+            return false;
         }
 
         private bool SwitchCombatMode()
@@ -251,7 +261,7 @@ namespace SK.FSM
                 _state.PlayerTargetAnimation(Strings.AnimName_Unequip_Sword, false);            
                     
             // 방패 착용, 해제
-            if (_state.combat.secondaryEquipment && _state.combat.secondaryEquipment.GetType() != typeof(Weapon))
+            if (_state.equipmentHolder.secondaryEquipment && _state.equipmentHolder.secondaryEquipment is Weapon)
             {
                 _state.anim.SetBool(Strings.AnimPara_EquipShield, _isCombatMode);
                 _state.anim.SetLayerWeight(3, 1);

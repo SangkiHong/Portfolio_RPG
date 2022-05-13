@@ -13,6 +13,7 @@ namespace SK.Data
         public GrassManager grassManager;
 
         public PlayerData PlayerData => playerData;
+        public PlayerItemData PlayerItemData => playerItemData;
 
         private readonly string _prefabs = "Prefabs";
         private readonly string _resources = "Resources";
@@ -21,10 +22,14 @@ namespace SK.Data
         private readonly string _enemyTag = "Enemy";
         private readonly string _grassTag = "Grass";
 
+        private bool isCompleteLoad;
+
         // 인트로 씬에서 플레이어 데이터 불러오기_220503
         private void Awake()
         {
-            if (!LoadPlayerData())
+            isCompleteLoad = LoadPlayerData();
+
+            if (!isCompleteLoad)
             {
                 // 로드할 플레이어 데이터 파일이 없는 경우
                 playerData.Initialize();
@@ -159,7 +164,7 @@ namespace SK.Data
                             slotID = int.Parse(row[4])
                         };
                         if (row.Length > 5)
-                            itemData.isEquiped = Equals(row[5], '1');
+                            itemData.isEquiped = int.Parse(row[5]) == 1;
 
                         playerItemData.items.Add(itemData);
                     }
@@ -199,6 +204,10 @@ namespace SK.Data
         #endregion
 
         // 종료 시 플레이어 데이터 저장_220503
-        private void OnApplicationQuit() => SavePlayerData();
+        private void OnApplicationQuit()
+        {
+            // 데이터 로드가 완료되었을 때만 저장하도록 변경_220513
+            if (isCompleteLoad) SavePlayerData();
+        }
     }
 }

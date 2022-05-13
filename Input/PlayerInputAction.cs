@@ -66,9 +66,18 @@ namespace SK
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Attack"",
+                    ""name"": ""LAttack"",
                     ""type"": ""Button"",
                     ""id"": ""9e89b11e-df0b-4e5b-bc46-acfb1fa6b0bc"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""cd8dfb60-6c64-4d95-8398-9d83eef912e7"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -475,18 +484,18 @@ namespace SK
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Attack"",
+                    ""action"": ""LAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""b0ccd9b9-7910-4bfb-ab9a-d2ffeb7d4b45"",
-                    ""path"": ""<XInputController>/buttonEast"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
-                    ""action"": ""Attack"",
+                    ""action"": ""LAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -630,6 +639,28 @@ namespace SK
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""UI_CloseAll"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""997b421b-e9e3-4a37-8551-6f7294ab2286"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""RAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b5e4f1b2-acdf-4a2c-9e08-d7bab006f283"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""RAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1188,7 +1219,8 @@ namespace SK
             m_GamePlay_Rotate = m_GamePlay.FindAction("Rotate", throwIfNotFound: true);
             m_GamePlay_Run = m_GamePlay.FindAction("Run", throwIfNotFound: true);
             m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
-            m_GamePlay_Attack = m_GamePlay.FindAction("Attack", throwIfNotFound: true);
+            m_GamePlay_LAttack = m_GamePlay.FindAction("LAttack", throwIfNotFound: true);
+            m_GamePlay_RAttack = m_GamePlay.FindAction("RAttack", throwIfNotFound: true);
             m_GamePlay_Dodge_Left = m_GamePlay.FindAction("Dodge_Left", throwIfNotFound: true);
             m_GamePlay_Dodge_Right = m_GamePlay.FindAction("Dodge_Right", throwIfNotFound: true);
             m_GamePlay_Dodge_Forward = m_GamePlay.FindAction("Dodge_Forward", throwIfNotFound: true);
@@ -1277,7 +1309,8 @@ namespace SK
         private readonly InputAction m_GamePlay_Rotate;
         private readonly InputAction m_GamePlay_Run;
         private readonly InputAction m_GamePlay_Jump;
-        private readonly InputAction m_GamePlay_Attack;
+        private readonly InputAction m_GamePlay_LAttack;
+        private readonly InputAction m_GamePlay_RAttack;
         private readonly InputAction m_GamePlay_Dodge_Left;
         private readonly InputAction m_GamePlay_Dodge_Right;
         private readonly InputAction m_GamePlay_Dodge_Forward;
@@ -1299,7 +1332,8 @@ namespace SK
             public InputAction @Rotate => m_Wrapper.m_GamePlay_Rotate;
             public InputAction @Run => m_Wrapper.m_GamePlay_Run;
             public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
-            public InputAction @Attack => m_Wrapper.m_GamePlay_Attack;
+            public InputAction @LAttack => m_Wrapper.m_GamePlay_LAttack;
+            public InputAction @RAttack => m_Wrapper.m_GamePlay_RAttack;
             public InputAction @Dodge_Left => m_Wrapper.m_GamePlay_Dodge_Left;
             public InputAction @Dodge_Right => m_Wrapper.m_GamePlay_Dodge_Right;
             public InputAction @Dodge_Forward => m_Wrapper.m_GamePlay_Dodge_Forward;
@@ -1334,9 +1368,12 @@ namespace SK
                     @Jump.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
                     @Jump.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
                     @Jump.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
-                    @Attack.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
-                    @Attack.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
-                    @Attack.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnAttack;
+                    @LAttack.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnLAttack;
+                    @LAttack.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnLAttack;
+                    @LAttack.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnLAttack;
+                    @RAttack.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRAttack;
+                    @RAttack.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRAttack;
+                    @RAttack.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnRAttack;
                     @Dodge_Left.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Left;
                     @Dodge_Left.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Left;
                     @Dodge_Left.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnDodge_Left;
@@ -1392,9 +1429,12 @@ namespace SK
                     @Jump.started += instance.OnJump;
                     @Jump.performed += instance.OnJump;
                     @Jump.canceled += instance.OnJump;
-                    @Attack.started += instance.OnAttack;
-                    @Attack.performed += instance.OnAttack;
-                    @Attack.canceled += instance.OnAttack;
+                    @LAttack.started += instance.OnLAttack;
+                    @LAttack.performed += instance.OnLAttack;
+                    @LAttack.canceled += instance.OnLAttack;
+                    @RAttack.started += instance.OnRAttack;
+                    @RAttack.performed += instance.OnRAttack;
+                    @RAttack.canceled += instance.OnRAttack;
                     @Dodge_Left.started += instance.OnDodge_Left;
                     @Dodge_Left.performed += instance.OnDodge_Left;
                     @Dodge_Left.canceled += instance.OnDodge_Left;
@@ -1567,7 +1607,8 @@ namespace SK
             void OnRotate(InputAction.CallbackContext context);
             void OnRun(InputAction.CallbackContext context);
             void OnJump(InputAction.CallbackContext context);
-            void OnAttack(InputAction.CallbackContext context);
+            void OnLAttack(InputAction.CallbackContext context);
+            void OnRAttack(InputAction.CallbackContext context);
             void OnDodge_Left(InputAction.CallbackContext context);
             void OnDodge_Right(InputAction.CallbackContext context);
             void OnDodge_Forward(InputAction.CallbackContext context);

@@ -12,8 +12,12 @@ namespace SK.FSM
         public Data.PlayerData playerData;
         public Data.PlayerItemData playerItemData;
 
+        // Unity Action
+        internal UnityAction<float, float> OnKnockBack;
+
         [Header("References")]
         public CameraManager cameraManager;
+        public Transform renderCameraTransform;
         public CinemachineImpulseSource impulseSource;
         public Animator anim;
         public CharacterController characterController;
@@ -25,8 +29,6 @@ namespace SK.FSM
 
         [Header("States")] 
         public bool useRootMotion;
-        [SerializeField]
-        internal bool isDead, isGrounded, isRunning, isJumping, isDamaged, isDodge, isSlipping, isTargeting;
 
         [Header("Targeting")]
         [SerializeField] internal Transform cameraTarget;
@@ -68,18 +70,15 @@ namespace SK.FSM
         internal MoveCharacter moveCharacter;
         internal MonitorAnimationBool monitorInteracting;
 
-        // Unity Action
-        internal UnityAction<float, float> OnKnockBack;
-
         internal Transform mTransform;
 
         private PlayerInputAction _playerInputAction;
-        private Collider[] _groundCheckCols = new Collider[3];
+        private Collider[] _groundCheckCols;
 
+        internal bool isDead, isGrounded, isRunning, isJumping, isDamaged, isDodge, isSlipping, isTargeting;
         internal bool canComboAttack, isInteracting;
         internal float delta, fixedDelta;
         private float _comboTimer, _scrollY;
-        private int _environmentLayer;
 
         #region Unity Events
         private void Awake()
@@ -119,8 +118,7 @@ namespace SK.FSM
 
             // 변수 초기화
             _targetColliders = new Collider[5];
-            _environmentLayer = LayerMask.NameToLayer("Environment");
-
+            _groundCheckCols = new Collider[5];
         }
 
         internal virtual void OnEnable()
@@ -343,22 +341,6 @@ namespace SK.FSM
         #endregion
 
         #region Collision Check
-        private void OnCollisionStay(Collision collision)
-        {
-            if (collision.gameObject.layer == _environmentLayer)
-            {
-                //thisRigidbody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
-            }
-        }
-
-        private void OnCollisionExit(Collision collision)
-        {
-            if (collision.gameObject.layer == _environmentLayer)
-            {
-                //thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
-            }
-        }
-
         private bool IsCheckGrounded()
         {
             var position = mTransform.position;

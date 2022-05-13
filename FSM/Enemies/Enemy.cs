@@ -44,6 +44,7 @@ namespace SK
         [SerializeField] internal NavMeshAgent navAgent;
         [SerializeField] internal SearchRadar searchRadar;
         [SerializeField] internal Behavior.Combat combat;
+        [SerializeField] internal EquipmentHolderManager equipmentManager;
         [SerializeField] internal Dodge dodge;
         [SerializeField] internal Health health;
         #endregion
