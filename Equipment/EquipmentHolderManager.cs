@@ -30,9 +30,12 @@ namespace SK
 
             // 죽을 경우 장비 해제 이벤트 등록
             GetComponent<Health>().onDead += UnloadEquipment;
-            
+
             // 몬스터인 경우 사전 장비 장착
-            if (primaryEquipment) LoadEquipmentOnHook(primaryEquipment, true);
+            if (primaryEquipment) { 
+                LoadEquipmentOnHook(primaryEquipment, true);
+                currentUseEquipment = primaryEquipment;
+            }
             if (secondaryEquipment) LoadEquipmentOnHook(secondaryEquipment, false);
         }
 
@@ -141,6 +144,18 @@ namespace SK
             _targetTransform.localPosition = Vector3.zero;
             _targetTransform.localRotation = Quaternion.identity;
             _targetTransform.localScale = Vector3.one;
+        }
+
+        public Weapon GetUseWeapon(bool isLeftAttack)
+        {
+            // 주 무기 공격 실행
+            if (isLeftAttack && primaryEquipment)
+                currentUseEquipment = primaryEquipment;
+            // 보조 장비(무기) 공격 실행
+            else if (!isLeftAttack && secondaryEquipment)
+                currentUseEquipment = secondaryEquipment;
+
+            return (Weapon)currentUseEquipment;
         }
 
         // 모든 장비 해제

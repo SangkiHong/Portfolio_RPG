@@ -6,6 +6,6 @@ namespace SK.Behavior
     public class ComboAttack
     {
         [SerializeField]
-        internal AttackBase[] comboAttacks;
+        internal Attack[] comboAttacks;
     }
 }

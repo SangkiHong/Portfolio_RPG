@@ -7,7 +7,7 @@
         internal DodgeState dodgeState;
         internal KnockBackState knockBackState;
 
-        public PlayerStateMachine(PlayerStateManager psm)
+        public PlayerStateMachine(Player psm)
         {
             locomotionState = new LocomotionState(psm);
             attackState = new AttackState(psm);

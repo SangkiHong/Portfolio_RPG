@@ -6,9 +6,9 @@ namespace SK
     {
         private float _moveBlend, _sideways, _walkSpeed;
 
-        public override void Update()
+        public override void Tick()
         {
-            base.Update();
+            base.Tick();
             
             if (!isInteracting && !dodge.isDodge)
             {
@@ -17,7 +17,7 @@ namespace SK
                 Rotate(); // 움직임에 따른 회전
             }
 
-            if (anim.GetBool(Strings.AnimPara_onCombat) && !combat.TargetObject)
+            if (anim.GetBool(Strings.AnimPara_onCombat) && !combat.Target)
             {
                 UnassignTarget();
             }
@@ -34,7 +34,7 @@ namespace SK
                 Quaternion targetAngle = Quaternion.LookRotation(direction);
 
                 // 선형보간 함수를 이용해 부드러운 회전
-                mTransform.rotation = Quaternion.Slerp(mTransform.rotation, targetAngle, delta * 8.0f);
+                mTransform.rotation = Quaternion.Slerp(mTransform.rotation, targetAngle, deltaTime * 8.0f);
             }
         }
 
@@ -53,7 +53,7 @@ namespace SK
                 }
                 else
                 {
-                    _moveBlend = walkAnimSpeed * _walkSpeed + delta;
+                    _moveBlend = walkAnimSpeed * _walkSpeed + deltaTime;
                 }
             }
             // 전투 상황인 경우

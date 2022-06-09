@@ -41,28 +41,32 @@ namespace SK.UI
         [SerializeField] private GameObject eraseMenuPanel;
         [SerializeField] private EraseInputPanel eraseAmountPanel;
 
-        [Space]
+        [Header("Listing")]
         [SerializeField] private Button autoListingButton;
-        [SerializeField] private ItemType[] listOrderby;
+        [SerializeField] private ItemType[] listOrderby; // 슬롯 자동 정렬 순서
 
         [Header("Item Specifics Panel")]
         [SerializeField] internal ItemSpecificsPanel itemSpecificsPanel;
 
         // 삭제 모드 시 삭제할 슬롯 저장용 리스트
         private List<EraseItem> _eraseItemList;
+        
         // 자동 정렬 시 임시로 데이터를 담을 큐 배열
         private Queue<ItemData>[] _itemDataQueues;
         private InventorySlot[] _slots;
         private RectTransform[] _rectTransforms;
 
-        private PlayerItemData _itemData;
-        private InventorySlot _selectedSlot;
-        private ItemData _tempData;
+        private PlayerItemData _itemData; // 아이템 데이터 클래스 변수
+        private InventorySlot _selectedSlot; // 선택한 슬롯을 저장할 변수
+        private ItemData _tempData; // 슬롯 교환 시 임시 데이터 저장할 변수
 
         private Vector3 _focusLocalPos;
 
-        private bool _isCategoryListing, _isEraseMode;
-        private int _selectedSlotID;
+        private bool _isCategoryListing, // 카테고리 정렬 모드 여부
+                     _isEraseMode; // 아이템 삭제 모드 여부
+        
+        // 선택한 슬롯과 탭의 인덱스를 저장할 변수
+        private int _selectedSlotID, _selectedTabIndex;
 
         private void Awake()
         {
@@ -92,7 +96,9 @@ namespace SK.UI
             // Tab 버튼 이벤트 할당_220506
             for (int i = 0; i < tabs.Length; i++)
             {
-                int tempIndex = i; // Closuer problem 으로 인해 임시 인덱스 값을 생성
+                // Closuer problem 으로 인해 임시 인덱스 값을 생성
+                int tempIndex = i; 
+
                 // 탭 인덱스에 따른 아이템 리스팅
                 tabs[i].onClick.AddListener(delegate { TabButton(tempIndex); });
             }
@@ -100,7 +106,7 @@ namespace SK.UI
             // 버튼 이벤트 할당_220506
             autoListingButton.onClick.AddListener(AutoListing); // 자동 정렬 버튼 이벤트 할당
             button_EraseMode.onClick.AddListener(SwitchEraseMode); // 아이템 삭제 모드 버튼 이벤트 할당
-            button_Erase.onClick.AddListener(EraseSelectedItem); // 선택한 아이템을 모두 삭제하는 버튼 이벤트 할당
+            button_Erase.onClick.AddListener(EraseAllSelectedItem); // 선택한 아이템을 모두 삭제하는 버튼 이벤트 할당
             button_CancelSelection.onClick.AddListener(CancelSelection); // 삭제할 아이템 선택을 모두 취소하는 버튼 이벤트 할당
         }
 
@@ -138,25 +144,39 @@ namespace SK.UI
             UpdateInfoUI();
         }
 
+        public bool AddNewItem(Item newItem, uint amount = 1)
+        {
+            // 인벤토리가 꽉 찼으면 false를 반환
+            if (IsFull()) return false;
+
+            for (int i = 0; i < _slots.Length; i++)
+            {
+                // 할당되지 않은 빈 슬롯인지 체크
+                if (!_slots[i].IsAssigned) 
+                {
+                    // 빈 슬롯에 아이템 할당
+                    _slots[i].AssignItem(newItem, amount, false, true);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// 새로운 슬롯 할당_220504
         /// </summary>
         /// <param name="slot">슬롯 정보</param>
         /// <param name="slotID">슬롯 ID</param>
         /// <param name="amount">아이템 수량</param>
-        private void NewAssignItem(SlotBase slot, int slotID, uint amount)
+        private void NewAssignItem(SlotBase slot, uint amount)
         {
             _selectedSlot = slot as InventorySlot;
             GameManager.Instance.DataManager.AddNewItemData(_selectedSlot);
             UpdateInfoUI();
         }
 
-        // 두 슬롯 정보 스왑_220504
-        private void SwapSlot(int aSlotID, int bSlotID)
-        {
-            GameManager.Instance.DataManager.SwapSlot(aSlotID, bSlotID);
-            UpdateInfoUI();
-        }
+        // 슬롯이 꽉 찬 상태인지를 반환(꽉 찼으면 True를 반환)_220520
+        public bool IsFull() { return _itemData.items.Count < _slots.Length; }
         #endregion
 
         #region INFO UI
@@ -179,11 +199,24 @@ namespace SK.UI
         #endregion
 
         #region LISTING & TAB BUTTON
+        // 전체 슬롯을 데이터에 기반해 업데이트하는 함수_220520
+        public void UpdateSlots()
+        {
+            // 아이템 리스팅 함수 호출
+            LoadSlotByCategory(_selectedTabIndex);
+
+            // 인벤토리 정보 UI를 업데이트
+            UpdateInfoUI();
+        }
+
         // 카테고리 별로 아이템 정렬(탭 인덱스)_220506
         private void TabButton(int tabIndex)
         {
+            // 탭 인덱스 값을 변수에 저장_220520
+            _selectedTabIndex = tabIndex;
+
             // 아이템 리스팅 함수 호출
-            LoadSlotByCategory(tabIndex); 
+            LoadSlotByCategory(_selectedTabIndex); 
 
             // 선택된 탭 버튼 비활성화
             tabs[tabIndex].interactable = false;
@@ -217,7 +250,7 @@ namespace SK.UI
                         for (int j = 0; j < _eraseItemList.Count; j++)
                         {
                             
-                            if (_slots[i].assignedItem.Equals(_eraseItemList[j].item) &&
+                            if (_slots[i].AssignedItem.Equals(_eraseItemList[j].item) &&
                                 _slots[i].GetItemAmount() == _eraseItemList[j].itemAmount)
                                 _slots[i].highlight.SetActive(true);
                         }
@@ -232,6 +265,7 @@ namespace SK.UI
         /// <param name="tabCategory">0: All, 1: Weapon, 2: Equipment, 3: Usable Item, 4: etc</param>
         private void LoadSlotByCategory(int tabCategory)
         {
+            // 모든 슬롯을 비움
             ClearAllSlots();
 
             // 모든 종류의 아이템 리스팅
@@ -343,7 +377,7 @@ namespace SK.UI
         }
 
         // 선택한 아이템을 모두 삭제하는 함수_220506
-        private void EraseSelectedItem()
+        private void EraseAllSelectedItem()
         {
             foreach (var eraseItem in _eraseItemList)
             {
@@ -357,7 +391,8 @@ namespace SK.UI
 
                 for (int i = 0; i < _slots.Length; i++)
                 {
-                    if (_slots[i].IsAssigned && _slots[i].assignedItem.Equals(eraseItem.item) && _slots[i].GetItemAmount() == eraseItem.itemAmount)
+                    if (_slots[i].IsAssigned && _slots[i].AssignedItem.Equals(eraseItem.item) && 
+                        _slots[i].GetItemAmount() == eraseItem.itemAmount)
                     {
                         // 변경된 수량이 0보다 크면 슬롯의 정보 변경
                         if (changedAmount > 0)
@@ -385,7 +420,7 @@ namespace SK.UI
             else // 리스트에 슬롯 ID, 삭제 수량 추가
                 _eraseItemList.Add(new EraseItem()
                 {
-                    item = _slots[_selectedSlotID].assignedItem,
+                    item = _slots[_selectedSlotID].AssignedItem,
                     eraseAmount = eraseAmount,
                     itemAmount = _slots[_selectedSlotID].GetItemAmount()
                 });
@@ -407,13 +442,17 @@ namespace SK.UI
             // 아이템 삭제 모드 시 드래그 앤 드랍 불가
             if (_isEraseMode) return;
 
+            var dropPos = eventData.position;
+
             for (int i = 0; i < _rectTransforms.Length; i++)
             {
-                if (_rectTransforms[i].position.x - _rectTransforms[i].rect.width * 0.5f <= eventData.position.x && eventData.position.x <= _rectTransforms[i].position.x + _rectTransforms[i].rect.width * 0.5f &&
-                   _rectTransforms[i].position.y - _rectTransforms[i].rect.height * 0.5f <= eventData.position.y && eventData.position.y <= _rectTransforms[i].position.y + _rectTransforms[i].rect.height * 0.5f)
-                {
+                var rectPos = _rectTransforms[i].position;
+                var width = _rectTransforms[i].rect.width * 0.5f;
+                var height = _rectTransforms[i].rect.height * 0.5f;
+
+                if (rectPos.x - width <= dropPos.x && dropPos.x <= rectPos.x + width && 
+                    rectPos.y - height <= dropPos.y && dropPos.y <= rectPos.y + height)
                     _slots[slotID].SwapSlot(_slots[i], !_isCategoryListing);
-                }
             }
         }
 
@@ -422,7 +461,7 @@ namespace SK.UI
         {
             // 할당된 슬롯을 클릭하였을 경우 세부 정보 패널 표시_220508
             if (slotNum >= 0 && _slots[slotNum].IsAssigned)
-                itemSpecificsPanel.SetPanel(_slots[slotNum].assignedItem, uiManager.window_Invenroty.transform.position.x);
+                itemSpecificsPanel.SetPanel(_slots[slotNum].AssignedItem, uiManager.window_Invenroty.transform.position.x);
             else
                 itemSpecificsPanel.gameObject.SetActive(false);
 
@@ -449,7 +488,7 @@ namespace SK.UI
                     for (int i = 0; i < _eraseItemList.Count; i++)
                     {
                         // 이미 선택되었던 경우에는 선택을 취소
-                        if (_eraseItemList[i].item.Equals(_slots[slotNum].assignedItem) &&
+                        if (_eraseItemList[i].item.Equals(_slots[slotNum].AssignedItem) &&
                             _eraseItemList[i].itemAmount == itemAmount)
                         {
                             _eraseItemList.RemoveAt(i);
@@ -470,7 +509,7 @@ namespace SK.UI
                     // 리스트에 추가
                     _eraseItemList.Add(new EraseItem()
                     {
-                        item = _slots[_selectedSlotID].assignedItem,
+                        item = _slots[_selectedSlotID].AssignedItem,
                         eraseAmount = itemAmount,
                         itemAmount = itemAmount
                     });
@@ -483,20 +522,27 @@ namespace SK.UI
         {
             // 슬롯이 장비 아이템으로 할당되어 있는 경우
             if (_slots[slotNum].IsAssigned &&
-                _slots[slotNum].assignedItem.itemType.Equals(ItemType.Equipment))
+                _slots[slotNum].AssignedItem.itemType.Equals(ItemType.Equipment))
             {
                 // 슬롯 아이템 데이터 착용 여부 업데이트
-                GameManager.Instance.DataManager.UpdateItemData(_slots[slotNum].assignedItem, !_slots[slotNum].isEquiped);
+                GameManager.Instance.DataManager.UpdateItemData(_slots[slotNum].AssignedItem, !_slots[slotNum].IsEquiped);
 
                 // 장비 슬롯 매니저를 통해 케릭터 상태 창에 아이템 착용 여부 표시
-                if (!_slots[slotNum].isEquiped)
-                    uiManager.equipSlotManager.EquipItem(_slots[slotNum].assignedItem);
+                if (!_slots[slotNum].IsEquiped)
+                    uiManager.equipSlotManager.EquipItem(_slots[slotNum].AssignedItem);
                 else
-                    uiManager.equipSlotManager.UnequipItem(_slots[slotNum].assignedItem);
+                    uiManager.equipSlotManager.UnequipItem(_slots[slotNum].AssignedItem);
 
                 // 인벤토리 슬롯에 아이템 착용 여부 전달
-                _slots[slotNum].EquipItem(!_slots[slotNum].isEquiped);
+                _slots[slotNum].EquipItem(!_slots[slotNum].IsEquiped);
             }
+        }
+
+        // 두 슬롯 정보 스왑_220504
+        private void SwapSlot(int aSlotID, int bSlotID)
+        {
+            GameManager.Instance.DataManager.SwapSlot(aSlotID, bSlotID);
+            UpdateInfoUI();
         }
 
         // 모든 슬롯의 하이라이트를 끔_220506
@@ -514,7 +560,7 @@ namespace SK.UI
         {
             for (int i = 0; i < _slots.Length; i++)
             {
-                if (_slots[i].assignedItem == item && _slots[i].isEquiped == isEquiped)
+                if (_slots[i].AssignedItem == item && _slots[i].IsEquiped == isEquiped)
                     return _slots[i];
             }
 

@@ -2,33 +2,35 @@
 {
     public class EnemyStateMachine : StateMachineBase
     {
-        public StatePatrol statePatrol;
-        public StateChase stateChase;
-        public StateCombat stateCombat;
-        public StateAttack stateAttack;
-        public StateKnockBack stateKnockBack;
-        public StateFlee stateFlee;
+        public EnemyStatePatrol statePatrol;
+        public EnemyStateChase stateChase;
+        public EnemyStateCombat stateCombat;
+        public EnemyStateAttack stateAttack;
+        public EnemyStateKnockBack stateKnockBack;
+        public EnemyStateFlee stateFlee;
 
         internal readonly Enemy enemy;
 
         public EnemyStateMachine(Enemy enemy)
         {
             this.enemy = enemy;
-            statePatrol = new StatePatrol(enemy, this);
-            stateChase = new StateChase(enemy, this);
-            stateCombat = new StateCombat(enemy, this);
-            stateAttack = new StateAttack(enemy, this);
-            stateKnockBack = new StateKnockBack(enemy, this);
-            stateFlee = new StateFlee(enemy, this);
+            statePatrol = new EnemyStatePatrol(enemy, this);
+            stateChase = new EnemyStateChase(enemy, this);
+            stateCombat = new EnemyStateCombat(enemy, this);
+            stateAttack = new EnemyStateAttack(enemy, this);
+            stateKnockBack = new EnemyStateKnockBack(enemy, this);
+            stateFlee = new EnemyStateFlee(enemy, this);
         }
 
         public override void ChangeState(StateBase state)
         {
             // 넉백 중일 경우 다른 상태로 변경 불가
-            if (CurrentState == stateKnockBack && stateKnockBack.onStateKnockBack)
+            if (CurrentState == stateKnockBack)
                 return;
 
             base.ChangeState(state);
+            
+            // 디버그용으로 현재 상태 표시
             enemy.currentStateName = state.GetType().Name;
         }
 

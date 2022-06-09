@@ -31,9 +31,9 @@ namespace SK
         #endregion
 
         #region Pool
-        public static readonly string PoolName_DamagePoint = "DamagePoint";
-
-
+        public static readonly string PoolName_DamagePoint = "DamagePoint"; 
+        public static readonly string PoolName_QuestTitle = "QuestTitle";
+        public static readonly string PoolName_QuestTask = "QuestTask";
         #endregion
     }
 }

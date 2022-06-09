@@ -64,7 +64,7 @@ public class UIPoolManager : MonoBehaviour
 		}
 	}
 
-	public GameObject GetObject(string poolKey, Vector3 position)
+	public GameObject GetObject(string poolKey, Vector3 position, Transform parent = null)
 	{
 		if (_poolPrefabs.ContainsKey(poolKey))
 		{
@@ -72,6 +72,7 @@ public class UIPoolManager : MonoBehaviour
 			{
 				ObjectInstance obj = _poolFreeDictionary[poolKey].Dequeue();
 				_poolUsedDictionary[poolKey].Add(obj.GO.GetInstanceID(), obj);
+				if (parent == null) obj.SetParent(uiCanvas); else obj.SetParent(parent);
 				obj.Awake(position, obj.GO.transform.rotation);
 				return obj.GO;
 			}
@@ -79,7 +80,7 @@ public class UIPoolManager : MonoBehaviour
 			{
 				ObjectInstance newObject = new ObjectInstance(Instantiate(_poolPrefabs[poolKey]) as GameObject);
 				_poolUsedDictionary[poolKey].Add(newObject.GO.GetInstanceID(), newObject);
-				newObject.SetParent(uiCanvas);
+				if (parent == null) newObject.SetParent(uiCanvas); else newObject.SetParent(parent);
 				newObject.Awake(position, newObject.GO.transform.rotation);
 				return newObject.GO;
 			}
@@ -92,6 +93,7 @@ public class UIPoolManager : MonoBehaviour
 		if (poolObject)
 		{
 			string poolKey = poolObject.poolKey;
+			go.transform.SetParent(uiCanvas);
 			go.SetActive(false);
 			ObjectInstance obj = _poolUsedDictionary[poolKey][go.GetInstanceID()];
 			_poolUsedDictionary[poolKey].Remove(go.GetInstanceID());

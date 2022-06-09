@@ -81,7 +81,7 @@ namespace SK.UI
             text_AttackSpeed.statsValue.text = string.Format("{0:N1}", _playerData.AttackSpeed);
             text_CriticalChance.statsValue.text = (_playerData.CriticalChance * 100).ToString() + '%';
 
-            text_Armor.statsValue.text = _playerData.Armor.ToString();
+            text_Armor.statsValue.text = _playerData.Def.ToString();
             text_Speed.statsValue.text = _playerData.Speed.ToString();
             text_Avoidance.statsValue.text = _playerData.Avoidance.ToString();
 

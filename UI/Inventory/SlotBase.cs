@@ -18,9 +18,9 @@ namespace SK.UI
         public UnityAction<int> OnLeftClickEvent;
 
         /// <summary>
-        /// 슬롯 할당 시 발생 이벤트(슬롯 정보, 슬롯 ID, 아이템 수량)
+        /// 슬롯 할당 시 발생 이벤트(슬롯 정보, 아이템 수량)
         /// </summary>
-        public UnityAction <SlotBase, int, uint> OnAssignEvent;
+        public UnityAction <SlotBase, uint> OnAssignEvent;
 
         /// <summary>
         /// 슬롯 교환(교체) 시 발생 이벤트(현재 슬롯 ID, 이동할 슬롯 ID)
@@ -79,16 +79,10 @@ namespace SK.UI
         {
             // 좌 클릭
             if (eventData.button == PointerEventData.InputButton.Left)
-            { 
                 IsOnLeftClick = true;
-                Debug.Log("좌 클릭");
-            }
             // 우 클릭
             else if (eventData.button == PointerEventData.InputButton.Right)
-            { 
                 IsOnRightClick = true;
-                Debug.Log("우 클릭");
-            }
         }
 
         public virtual void OnPointerUp(PointerEventData eventData)

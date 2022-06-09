@@ -17,8 +17,16 @@ namespace SK.UI
         {
             // 장비 슬롯 초기화
             _equipSlots = equipSlotParent.GetComponentsInChildren<EquipSlot>();
+
+            // slot ID 할당 및 슬롯의 포인터 이벤트 등록_220515
+            for (int i = 0; i < _equipSlots.Length; i++)
+            {
+                _equipSlots[i].slotID = i; // 슬롯 고유 ID 지정
+                _equipSlots[i].OnLeftClickEvent += OpenItemSpecificsPanel; // 슬롯을 단순 좌클릭 시 발동 이벤트 등록
+            }
         }
 
+        // 플레이어 데이터에 따른 장비 슬롯 초기화_220512
         public void Initialize()
         {
             _playerItemData = GameManager.Instance.DataManager.PlayerItemData;
@@ -73,6 +81,9 @@ namespace SK.UI
                     // 해당 슬롯에 장비 아이템 할당
                     _equipSlots[i].AssignEquipment(item);
 
+                    // 캐릭터 방어력 업데이트
+                    CalDefense();
+
                     // 캐릭터 정보 업데이트_220513
                     uiManager.characterStatusManager.UpdateInformaion();
                     return;
@@ -92,6 +103,9 @@ namespace SK.UI
                     // 슬롯에 할당된 장비를 착용 해제
                     _equipSlots[i].Unassign();
 
+                    // 캐릭터 방어력 업데이트
+                    CalDefense();
+
                     // 캐릭터 정보 업데이트_220513
                     uiManager.characterStatusManager.UpdateInformaion();
                     return;
@@ -99,13 +113,13 @@ namespace SK.UI
             }
         }
 
-        // 현재 착용된 아이템들의 공격력 범위(최소 값~ 최대 값)을 계산하여 Vector2형으로 전달_220510
+        // 현재 착용된 아이템들의 공격력 범위(최소 값 ~ 최대 값)을 계산하여 Vector2형으로 반환_220510
         public Vector2 CalDamageRange()
         {
             // 현재 착용한 무기의 공격력 + 힘 스탯을 통해 합산한 공격력 표시
-            var baseDamage = (GameManager.Instance.DataManager.PlayerData.Level * 0.5f)
-                            + (GameManager.Instance.DataManager.PlayerData.Str * 0.5f) + (GameManager.Instance.DataManager.PlayerData.Level + 9);
-            uint maxDamage = 0, minDamage = 0;
+            int baseDamage = (int)((GameManager.Instance.DataManager.PlayerData.Level * 0.5f)
+                            + (GameManager.Instance.DataManager.PlayerData.Str * 0.5f) + (GameManager.Instance.DataManager.PlayerData.Level + 9));
+            int maxDamage = 0, minDamage = 0;
 
             // 착용한 주 무기 데이터 정보 가져오기
             for (int i = 0; i < _equipSlots.Length; i++)
@@ -115,14 +129,51 @@ namespace SK.UI
                 {
                     _usingWeapon = _equipSlots[i].AssignedItem.equipmentData as Weapon;
 
-                    minDamage += _usingWeapon.AttackMinPower + (uint)baseDamage;
-                    maxDamage += _usingWeapon.AttackMaxPower + (uint)baseDamage;
+                    minDamage += _usingWeapon.AttackMinPower + baseDamage;
+                    maxDamage += _usingWeapon.AttackMaxPower + baseDamage;
                 }
             }
             attackRange.x = minDamage;
             attackRange.y = maxDamage;
 
             return attackRange;
+        }
+
+        // 현재 착용된 장비 아이템들의 방어력을 합산하여 플에이어 데이터의 방어력을 업데이트_220530
+        public void CalDefense()
+        {
+            int totalDefense = 0;
+
+            // 착용한 장비 데이터 정보 가져오기
+            for (int i = 0; i < _equipSlots.Length; i++)
+            {
+                // 착용된 장비 탐색
+                if (_equipSlots[i].IsAssigned && !_equipSlots[i].AssignedItem.equipmentType.Equals(EquipmentType.Weapon))
+                {
+                    totalDefense += _equipSlots[i].AssignedItem.baseAbility;
+                }
+            }
+
+            GameManager.Instance.DataManager.PlayerData.Def = (uint)totalDefense;
+        }
+
+        // 장비 아이템을 클릭할 경우 아이템 세부 정보 패널 보이기_220515
+        private void OpenItemSpecificsPanel(int slotIndex)
+        {
+            if (_equipSlots[slotIndex].IsAssigned)
+            {
+                uiManager.inventoryManager.itemSpecificsPanel.
+                    SetPanel(_equipSlots[slotIndex].AssignedItem, uiManager.window_CharacterStatus.transform.position.x);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // Event 해제
+            for (int i = 0; i < _equipSlots.Length; i++)
+            {
+                _equipSlots[i].OnLeftClickEvent -= OpenItemSpecificsPanel;
+            }
         }
     }
 }

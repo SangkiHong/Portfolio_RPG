@@ -4,20 +4,22 @@ namespace SK.FSM
 {
     public class AttackState : StateBase
     {
-        private readonly PlayerStateManager _state;
-        public AttackState(PlayerStateManager psm) => _state = psm;
+        private readonly Player _player;
+        public AttackState(Player player) => _player = player;
 
         private Vector3 _targetDir;
         private Quaternion _lookRot;
 
         public override void StateInit()
         {
-            _state.anim.SetBool(Strings.animPara_isInteracting, true);
+            _player.onCombatMode = true;
+            _player.combat.canComboAttack = false;
+            _player.anim.SetBool(Strings.animPara_isInteracting, true);
 
-            if (((Weapon)_state.equipmentHolder.currentUseEquipment).currentAttack.onRootMotion)
-                _state.EnableRootMotion();
+            if (_player.combat.currentAttack.onRootMotion)
+                _player.EnableRootMotion();
 
-            _targetDir = _state.cameraManager.transform.forward;
+            _targetDir = _player.cameraManager.transform.forward;
             _targetDir.y = 0;
             _lookRot = Quaternion.LookRotation(_targetDir);
         }
@@ -25,17 +27,20 @@ namespace SK.FSM
         public override void FixedTick()
         {
             // Attack 실행되기 전까지 input 받기
-            _state.playerInputs.Execute();
+            _player.inputActions.Execute();
 
-            _state.mTransform.rotation = Quaternion.Lerp(_state.mTransform.rotation, _lookRot, _state.fixedDelta * _state.rotationSpeed);
+            _player.mTransform.rotation = Quaternion.Lerp(_player.mTransform.rotation, _lookRot, _player.fixedDeltaTime * _player.rotationSpeed);
         }
 
         public override void Tick()
         {
             base.Tick();
-            _state.monitorInteracting.Execute(_state.stateMachine.locomotionState);
+            _player.monitorInteracting.Execute(_player.stateMachine.locomotionState);
         }
-        public override void StateExit() => _state.DisableRootMotion();
-
+        public override void StateExit()
+        {
+            _player.combat.canComboAttack = true;
+            _player.DisableRootMotion();
+        }
     }
 }

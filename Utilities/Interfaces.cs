@@ -4,7 +4,7 @@ namespace SK
 {
     public interface IDamagable
     {
-        void OnDamage(uint damageValue, Transform hitTransform, bool isCriticalHit, bool isStrongAttack);
+        void OnDamage();
     }
 
     public interface ITargetable

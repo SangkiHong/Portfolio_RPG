@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace SK.FSM
+﻿namespace SK.FSM
 {
     public abstract class StateMachineBase
     {

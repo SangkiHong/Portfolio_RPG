@@ -20,12 +20,12 @@ namespace SK
         [Range(0, 1)]
         [SerializeField] private float targetingPositionRatio = 0.5f;
         [SerializeField] private float targetingLimitDistance = 30;
+        [SerializeField] private Transform _targetingPointUI;
 
         private Camera mainCamera;
         private Enemy _enemy;
         private Transform _transform, _playerTranform;
         private Transform _targetTransform, _targetPoint;
-        private Transform _targetingPointUI;
 
         private Rig _rig;
         private RigBuilder _rigBuilder;
@@ -38,13 +38,15 @@ namespace SK
 
         public void Init(Transform cameraTarget)
         {
-            _playerTranform = GameManager.Instance.Player.transform;
+            if (GameManager.Instance.Player)
+                _playerTranform = GameManager.Instance.Player.transform;
+            else
+                _playerTranform = GameObject.FindGameObjectWithTag("Player").transform;
             _transform = transform;
             mainCamera = Camera.main;
             _rigBuilder = _playerTranform.GetComponentInChildren<RigBuilder>();
             _rig = _playerTranform.GetComponentInChildren<Rig>();
             _aimConstraint = _playerTranform.GetComponentInChildren<MultiAimConstraint>();
-            _targetingPointUI = GameObject.FindGameObjectWithTag("TargetingPoint").transform;
 
             if (normalCamera)
             {
@@ -77,8 +79,8 @@ namespace SK
                 if (_enemy.isDead || _targetDistance > targetingLimitDistance)
                 {
                     OnClearLookOverride();
-                    GameManager.Instance.Player.isTargeting = false;
-                    GameManager.Instance.Player.targetEnemy = null;
+                    GameManager.Instance.Player.targeting.isTargeting = false;
+                    GameManager.Instance.Player.targeting.target = null;
 
                     return;
                 }
@@ -124,9 +126,9 @@ namespace SK
             if (_targetFOV > zoomMinMax.y) _targetFOV = zoomMinMax.y;
         }
 
-        public void CameraRotateSwtich(bool switchOn)
+        public void CameraRotatingHold(bool isHold)
         {
-            if (switchOn)
+            if (!isHold)
             {
                 normalCamera.m_XAxis.m_MaxSpeed = _defaultAxisSpeedX;
                 normalCamera.m_YAxis.m_MaxSpeed = _defaultAxisSpeedY;

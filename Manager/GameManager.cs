@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 using SK.FSM;
-
+using SK.Data;
 
 namespace SK
 {
@@ -16,9 +15,13 @@ namespace SK
         [SerializeField] private GameObject[] dontDestroyObjects;
 
         [Header("Reference")]
-        public Data.DataManager DataManager;
+        public DataManager DataManager;
         public InputManager InputManager;
-        public PlayerStateManager Player;
+        public GrassManager GrassManager;
+        public ItemListManager ItemListManager;
+
+        public UI.UIManager UIManager;
+        public Player Player;
         
         private void Awake()
         {
@@ -28,6 +31,9 @@ namespace SK
             for (int i = 0; i < dontDestroyObjects.Length; i++)            
                 DontDestroyOnLoad(dontDestroyObjects[i]);
 
+            // 초기화
+            DataManager.Initialize();
+
             // 타겟 프레임 설정
             // 유니티에디터 Vsync를 해제해야 함
             //Application.targetFrameRate = 40;
@@ -35,7 +41,8 @@ namespace SK
 
         public void ChangeScene(int sceneNum)
         {
-            SceneManager.LoadScene(sceneNum);
+            InputManager.SwitchInputMode(InputMode.GamePlay);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneNum);
         }
 
         public void SetMainScene()
@@ -45,17 +52,15 @@ namespace SK
                 Cursor.lockState = CursorLockMode.Locked;
         }
 
-        public bool SwitchMouseState()
+        public void SwitchMouseState(bool onVisible)
         {
-            cursorVisible = !cursorVisible;
+            cursorVisible = onVisible;
             Cursor.visible = cursorVisible;
 
             if (cursorVisible)
                 Cursor.lockState = CursorLockMode.Confined;
             else
                 Cursor.lockState = CursorLockMode.Locked;
-
-            return !cursorVisible; // Unvisible 상태 시 카메라 회전 가능하기 위해 반전 값 리턴
         }
     }
 }

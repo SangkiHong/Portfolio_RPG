@@ -7,6 +7,8 @@ namespace SK.UI
     public class ItemSpecificsPanel : MonoBehaviour
     {
         [SerializeField] private float intervalWithInventoryWindow = 3f;
+        
+        [SerializeField] private VerticalLayoutGroup verticalLayoutGroup;
 
         [SerializeField] private Text text_ItemName;
         [SerializeField] private Text text_ItemGrade;
@@ -155,6 +157,10 @@ namespace SK.UI
             }
             else
                 itemDurabilityParent.SetActive(false);
+
+            // VerticalLayoutGroup을 통해 UI의 높이를 다시 설정
+            verticalLayoutGroup.CalculateLayoutInputVertical();
+            verticalLayoutGroup.CalculateLayoutInputHorizontal();
         }
     }
 }

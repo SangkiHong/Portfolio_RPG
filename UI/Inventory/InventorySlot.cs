@@ -10,8 +10,8 @@ namespace SK.UI
         [SerializeField] internal GameObject highlight;
         [SerializeField] internal GameObject notify;
 
-        public Item assignedItem { get; private set; }
-        public bool isEquiped { get; private set; }
+        public Item AssignedItem { get; private set; }
+        public bool IsEquiped { get; private set; }
 
         InventorySlot source, tempSlot;
         private uint itemAmount;
@@ -21,7 +21,7 @@ namespace SK.UI
         {
             this.Unassign(); // 슬롯 초기화
             base.Assign(item.itemIcon); // 베이스 슬롯 할당(이미지 변경 등)
-            assignedItem = item; // 아이템 정보 할당
+            AssignedItem = item; // 아이템 정보 할당
             itemAmount = amount; // 아이템 수량 할당
             
             // 아이템이 장비인 경우
@@ -31,7 +31,7 @@ namespace SK.UI
                 UpdateAmount(); // 수량 텍스트 표시 업데이트
 
             // 슬롯 정보 변경 이벤트 호출
-            if (addData) OnAssignEvent?.Invoke(this, this.slotID, amount); 
+            if (addData) OnAssignEvent?.Invoke(this, amount); 
         }
 
         // 슬롯 해제하며 아이템 정보 초기화_220503
@@ -43,8 +43,8 @@ namespace SK.UI
             if (amountText.gameObject.activeSelf) 
                 amountText.gameObject.SetActive(false);
             itemAmount = 0;
-            assignedItem = null;
-            isEquiped = false;
+            AssignedItem = null;
+            IsEquiped = false;
 
             // 하이라이트 꺼짐
             highlight.SetActive(false);
@@ -65,10 +65,10 @@ namespace SK.UI
         // 슬롯의 장비 아이템을 장착한 경우_220512
         public void EquipItem(bool equip)
         {
-            isEquiped = equip;
+            IsEquiped = equip;
 
             // 착용 텍스트(E) 표시
-            if (isEquiped)
+            if (IsEquiped)
             {
                 amountText.gameObject.SetActive(true);
                 amountText.text = "E";
@@ -114,7 +114,7 @@ namespace SK.UI
         {
             base.OnRightClick();
             // 좌클릭 시 장비 아이템인 경우 이벤트 호출
-            if (IsAssigned && assignedItem.itemType == ItemType.Equipment)
+            if (IsAssigned && AssignedItem.itemType == ItemType.Equipment)
             {
                 OnRightClickEvent?.Invoke(slotID);
             }
@@ -173,15 +173,15 @@ namespace SK.UI
             if (!targetSlot.IsAssigned)
             {
                 // 빈 슬롯에 현재 정보 할당
-                source.AssignItem(assignedItem, itemAmount, isEquiped);
+                source.AssignItem(AssignedItem, itemAmount, IsEquiped);
 
                 // 현재 슬롯 해제
                 this.Unassign();
             }
             else
             {
-                // 같은 종류의 아이템인지 확인
-                if (this.assignedItem == source.assignedItem)
+                // 같은 종류의 아이템인지 확인 후 장비 아이템이 아닌 경우 수량만 증가
+                if (this.AssignedItem == source.AssignedItem && this.AssignedItem.itemType != ItemType.Equipment)
                 {
                     var addAmount = source.itemAmount + this.itemAmount;
 
@@ -192,7 +192,7 @@ namespace SK.UI
                     source.UpdateAmount();
 
                     // 데이터의 아이템 수량 업데이트
-                    GameManager.Instance.DataManager.UpdateItemData(source.assignedItem, source.itemAmount, addAmount);
+                    GameManager.Instance.DataManager.UpdateItemData(source.AssignedItem, source.itemAmount, addAmount);
 
                     // 현재 슬롯 할당 해제
                     this.Unassign();
@@ -203,16 +203,16 @@ namespace SK.UI
                 if (!tempSlot) tempSlot = new InventorySlot();
 
                 // 임시 슬롯에 타겟 슬롯 정보 저장
-                tempSlot.assignedItem = source.assignedItem;
+                tempSlot.AssignedItem = source.AssignedItem;
                 tempSlot.itemAmount = source.itemAmount;
                 tempSlot.slotID = source.slotID;
-                tempSlot.isEquiped = source.isEquiped;
+                tempSlot.IsEquiped = source.IsEquiped;
 
                 // 타겟 슬롯에 현재 슬롯 정보 할당(데이터 업데이트 X)
-                source.AssignItem(assignedItem, itemAmount, isEquiped);
+                source.AssignItem(AssignedItem, itemAmount, IsEquiped);
 
                 // 임시 슬롯에 저장했던 타겟 슬롯 정보를 현재 슬롯에 할당(데이터 업데이트 X)
-                this.AssignItem(tempSlot.assignedItem, tempSlot.itemAmount, tempSlot.isEquiped);
+                this.AssignItem(tempSlot.AssignedItem, tempSlot.itemAmount, tempSlot.IsEquiped);
             }
 
             // 현재 슬롯과 타겟 슬롯의 정보 교체로 인한 데이터 업데이트

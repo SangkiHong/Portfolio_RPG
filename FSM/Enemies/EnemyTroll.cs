@@ -13,20 +13,20 @@ namespace SK
         private bool _isFindTarget;
         private float _attackElapsed;
 
-        public override void FixedUpdate()
+        public override void FixedTick()
         {
-            base.FixedUpdate();
+            base.FixedTick();
 
             // 타겟을 처음 발견하여 전투 외침(Battle Cry) 시전
-            if (combat.TargetObject && !_isFindTarget)
+            if (combat.Target && !_isFindTarget)
             {
                 _isFindTarget = true;
                 anim.CrossFade(_animName_BattleCry, 0.1f);
             }
-            else if (!combat.TargetObject && _isFindTarget)
+            else if (!combat.Target && _isFindTarget)
                 _isFindTarget = false;
 
-            if (combat.TargetObject && !isInteracting && !isDead && targetDistance <= nearAttackDistance)
+            if (combat.Target && !isInteracting && !isDead && targetDistance <= nearAttackDistance)
             {
                 if (_attackElapsed >= nearAttackInterval)
                 {
@@ -43,7 +43,7 @@ namespace SK
                     anim.CrossFade(_animName_Jumping, 0.15f);
                 }
                 else
-                    _attackElapsed += fixedDelta;                
+                    _attackElapsed += fixedDeltaTime;                
             }
         }
     }
