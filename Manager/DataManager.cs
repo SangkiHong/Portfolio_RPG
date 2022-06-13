@@ -11,8 +11,12 @@ namespace SK.Data
         [SerializeField] private PlayerData playerData;
         [SerializeField] private PlayerItemData playerItemData;
 
+        // 프로퍼티
         public PlayerData PlayerData => playerData;
         public PlayerItemData PlayerItemData => playerItemData;
+
+        private ItemListManager _itemListManager;
+        private UI.InventoryManager _inventoryManager;
 
         private readonly string _prefabs = "Prefabs";
         private readonly string _enemyTag = "Enemy";
@@ -32,7 +36,15 @@ namespace SK.Data
                 playerData.Initialize();
             }
 
+            _itemListManager = GameManager.Instance.ItemListManager;
+
             Debug.Log("DataManager 초기화 완료");
+        }
+
+        public void InitializeScene()
+        {
+            if (_inventoryManager == null)
+                _inventoryManager = GameManager.Instance.UIManager.inventoryManager;
         }
 
         /// <summary>
@@ -177,15 +189,26 @@ namespace SK.Data
         #endregion
 
         #region ITEM DATA
-        public void AddNewItem(Item newItem, uint amount = 1)
-        {
-            if (newItem == null)
-                return;
+        // 인벤토리와 데이터 정보에 아이템을 추가_220610
+        public void AddItem(Item item, uint amount, bool applyData)
+            => _inventoryManager.AddNewItem(item, amount, applyData);
 
-            if (!GameManager.Instance.UIManager.inventoryManager.AddNewItem(newItem, amount))
+        // 퀘스트 보상에 대한 아이템 추가_220610
+        public void GetReward(Reward reward)
+        {
+            playerData.Exp += reward.exp;
+            playerData.Gold += reward.gold;
+            playerData.Gem += reward.gem;
+
+            if (reward.rewardItems.Length > 0)
             {
-                // 아이템 추가에 실패했다면(인벤토리가 꽉 찼거나 아이템 정보가 없다면)
-                Debug.Log("아이템 추가에 실패하였습니다");
+                for (int i = 0; i < reward.rewardItems.Length; i++)
+                {
+                    AddItem(_itemListManager.GetItembyID(
+                            (int)reward.rewardItems[i].itemList,
+                            reward.rewardItems[i].itemId),
+                            reward.rewardItems[i].itemAmount, true);
+                }
             }
         }
 

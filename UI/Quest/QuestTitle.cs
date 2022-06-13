@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using SK.Quests;
 
@@ -9,8 +11,10 @@ namespace SK.UI
      * 내용: 퀘스트 타이틀 UI 표시에 관련된 클래스
      * 작성일: 22년 5월 24일
      */
-    public class QuestTitle : PoolObject
+    public class QuestTitle : PoolObject, IPointerDownHandler
     {
+        // 퀘스트 바를 클릭 시 실행할 이벤트
+        public UnityAction<Quest> OnClickQuest;
         // 퀘스트 카테고리 텍스트 컴포넌트
         public Text categoryText;
         // 퀘스트 타이틀 텍스트 컴포넌트
@@ -20,10 +24,15 @@ namespace SK.UI
         // 퀘스트에 속한 업무 클래스 리스트
         internal List<QuestTask> tasks;
 
+        // 할당된 퀘스트
+        private Quest _assignedQuest;
         // 퀘스트 업무 UI가 접혀져 있는 지에 대한 여부
         private bool _isFolded;
         // 퀘스트가 할당되어 있는 지에 대한 여부
         private bool _isAssigned;
+
+        // 프로퍼티
+        public Quest AssignedQuest => _assignedQuest;
         public bool IsAssigned => _isAssigned;
 
         private readonly string[] _categoryTexts = { "[ 메인 ]", "[ 부가 ]", "[ 길드 ]", "[ 완료 ]" };
@@ -44,14 +53,15 @@ namespace SK.UI
 
             gameObject.SetActive(true);
 
-            for (int i = 0; i < quest.TaskGroups.Count; i++)
+            _assignedQuest = quest;
+            for (int i = 0; i < _assignedQuest.TaskGroups.Count; i++)
             {
                 // 업무 그룹이 활성화되지 않았으면 루프문 빠져나옴
-                if (quest.TaskGroups[i].State == TaskGroupState.Inactive)
+                if (_assignedQuest.TaskGroups[i].State == TaskGroupState.Inactive)
                     break;
 
                 // 오브젝트 풀에서 퀘스트 업무 오브젝트를 가져오면서 업무 클래스 리스트에 추가
-                for (int j = 0; j < quest.TaskGroups[i].Tasks.Count; j++)
+                for (int j = 0; j < _assignedQuest.TaskGroups[i].Tasks.Count; j++)
                 {
                     if (tasks.Count < j + 1)
                     {
@@ -61,16 +71,16 @@ namespace SK.UI
                     }
 
                     // 퀘스트 업무 할당
-                    tasks[j].Assign(quest.TaskGroups[i].Tasks[j]);
+                    tasks[j].Assign(_assignedQuest.TaskGroups[i].Tasks[j]);
                 }
             }
 
             // 퀘스트의 카테고리를 텍스트로 표시
-            categoryText.text = quest.QuestState != QuestState.Complete ?
-                _categoryTexts[(int)quest.Category.questCategory] : _categoryTexts[3];
+            categoryText.text = _assignedQuest.QuestState != QuestState.Complete ?
+                _categoryTexts[(int)_assignedQuest.Category.questCategory] : _categoryTexts[3];
 
             // 퀘스트의 타이틀을 텍스트로 표시
-            titleText.text = quest.DisplayName;
+            titleText.text = _assignedQuest.DisplayName;
         }
 
         // 퀘스트 UI를 해제_220525
@@ -78,6 +88,7 @@ namespace SK.UI
         {
             _isAssigned = false;
             _isFolded = false;
+            _assignedQuest = null;
 
             // 업무 리스트의 각 업무를 해제
             for (int i = 0; i < tasks.Count; i++)
@@ -110,6 +121,12 @@ namespace SK.UI
 
             // 접힌 여부를 변경
             _isFolded = !_isFolded;
+        }
+
+        // 클릭한 경우 퀘스트 정보 창 보이는 함수
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            OnClickQuest?.Invoke(_assignedQuest);
         }
     }
 }

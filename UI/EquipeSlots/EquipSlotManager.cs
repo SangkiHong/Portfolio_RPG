@@ -163,7 +163,7 @@ namespace SK.UI
             if (_equipSlots[slotIndex].IsAssigned)
             {
                 uiManager.inventoryManager.itemSpecificsPanel.
-                    SetPanel(_equipSlots[slotIndex].AssignedItem, uiManager.window_CharacterStatus.transform.position.x);
+                    SetPanel(_equipSlots[slotIndex].AssignedItem, _equipSlots[slotIndex].transform.position.x);
             }
         }
 

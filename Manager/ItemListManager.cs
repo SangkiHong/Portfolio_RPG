@@ -33,6 +33,18 @@ namespace SK.Data
             return null;
         }
 
+        // 아이템 list 인덱스, id로 아이템 불러오기_220610
+        public Item GetItembyID(int itemListIndex, int id)
+        {
+            for (int i = 0; i < itemLists[itemListIndex].itemList.Count; i++)
+            {
+                if (itemLists[itemListIndex].itemList[i].id == id)
+                    return itemLists[itemListIndex].itemList[i];
+            }
+
+            return null;
+        }
+
         // 아이템 id, type 등의 정보로 아이템 불러오기_220504
         public Item GetItem(int id, ItemType itemType, EquipmentType equipType)
         {

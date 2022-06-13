@@ -25,6 +25,7 @@ namespace SK.FSM
         private bool _isShield, // 쉴드를 하고 있는 지에 대한 여부
                      _isMouseMode; // 마우스 모드인 지에 대한 여부
         
+        // 생성자를 통한 초기화
         public InputActions(Player player, PlayerInput playerInput)
         {
             _player = player;
@@ -120,11 +121,19 @@ namespace SK.FSM
                 return;
             }
 
-            _player.horizontal = _Input_Move.ReadValue<Vector2>().x;
-            _player.vertical = _Input_Move.ReadValue<Vector2>().y;
+            // 피해를 입거나 인터렉팅 중이면 이동 불가
+            if (_player.isDamaged || _player.isInteracting)
+            {
+                _player.moveAmount = 0;
+            }
+            else
+            {
+                _player.horizontal = _Input_Move.ReadValue<Vector2>().x;
+                _player.vertical = _Input_Move.ReadValue<Vector2>().y;
 
-            // 플레이어가 피해를 입었을 경우에는 움직이지 않고, 그 외엔 수평, 수직 입력 값의 합산으로 할당
-            _player.moveAmount = _player.isDamaged ? 0 : Mathf.Clamp01(Mathf.Abs(_player.horizontal) + Mathf.Abs(_player.vertical));
+                // 플레이어가 피해를 입었을 경우에는 움직이지 않고, 그 외엔 수평, 수직 입력 값의 합산으로 할당
+                _player.moveAmount = Mathf.Clamp01(Mathf.Abs(_player.horizontal) + Mathf.Abs(_player.vertical));
+            }
         }
 
         private void HandleJumping(InputAction.CallbackContext context)

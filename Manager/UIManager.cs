@@ -26,7 +26,9 @@ namespace SK.UI
 
         private void Start()
         {
+            // 레퍼런스 초기화
             GameManager.Instance.UIManager = this;
+            GameManager.Instance.DataManager.InitializeScene();
             _playerInput = GameManager.Instance.InputManager.playerInput;
 
             // 캔버스그룹 리스트 초기화
@@ -74,13 +76,19 @@ namespace SK.UI
             if (targetWindow.alpha == 0)
             {
                 targetWindow.alpha = 1;
-                targetWindow.blocksRaycasts = true;
+                targetWindow.blocksRaycasts = true; 
+                
+                GameManager.Instance.InputManager.SwitchInputMode(InputMode.UI);
             }
             // 창이 열려있는 경우 창을 닫음
             else
             {
                 targetWindow.alpha = 0;
                 targetWindow.blocksRaycasts = false;
+
+                // 인벤토리 창과 케릭터 창이 모두 닫혀진 경우 아이템 세부 정보 창도 함께 닫음
+                if (!window_Invenroty.blocksRaycasts && !window_CharacterStatus.blocksRaycasts)
+                    inventoryManager.itemSpecificsPanel.gameObject.SetActive(false);
 
                 // 모든 창이 닫혔는지 검사하는 함수
                 CheckAllWindowsClosed();
@@ -129,7 +137,7 @@ namespace SK.UI
             inventoryManager.Initialize();
             equipSlotManager.Initialize();
             questManager.Initialize();
-            dialogManager.Initialize();
+            dialogManager.Initialize(questManager);
         }
     }
 }

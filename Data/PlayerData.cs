@@ -6,6 +6,8 @@ namespace SK.Data
     public class PlayerData : UnitBaseData
     {
         public uint Exp = 0;
+        public uint Gold = 0;
+        public uint Gem = 0;
         public uint MaxHp = 10;
         public uint MaxMp = 10;
         public uint MaxSp = 10;

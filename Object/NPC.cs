@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,8 +5,20 @@ namespace SK
 {
     public class NPC : MonoBehaviour
     {
+        public enum NPCType
+        {
+            Normal, // 일반 NPC
+            PropShop,
+            EquipmentShop
+        }
+
         [SerializeField] private string codeName;
+        [SerializeField] private NPCType npctype;
         [SerializeField] private Collider _thisCollider;
+        [SerializeField] private Quests.Quest[] npcQuests;
+
+        public NPCType NpcType => npctype;
+        public IReadOnlyList<Quests.Quest> NpcQuests => npcQuests;
 
         private Transform _thisTransform;
         private Transform _playerTransform;
@@ -16,12 +27,14 @@ namespace SK
         private float _dialgueAngle;
         private bool _onBoundsPlayer, _isActive;
 
-        private void Awake()
-        {
-            _thisTransform = transform;
-        }
+        private void Awake()        
+            => _thisTransform = transform;        
 
-        private void FixedUpdate()
+        // 생성 시 씬 매니저의 딕셔너리에 추가(키: 코드네임, 값: NPC)
+        private void Start()       
+            => SceneManager.Instance.AddNPC(codeName, this);
+        
+        public void FixedTick()
         {
             if (!GameManager.Instance.Player) return;
 

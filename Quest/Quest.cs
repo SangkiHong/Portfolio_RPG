@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
-
 using Debug = UnityEngine.Debug;
 
 namespace SK.Quests
@@ -20,6 +19,25 @@ namespace SK.Quests
         Complete, // 자동으로 완료되는 상태
         Cancel,
         WaitingForCompletion // 완료 버튼을 누르면 완료되는 상태
+    }
+
+    public enum ItemList : int { Equipment, Weapon, Props }
+
+    [System.Serializable]
+    public struct RewardItem
+    {
+        public ItemList itemList;
+        public int itemId;
+        public uint itemAmount;
+    }
+
+    [System.Serializable]
+    public struct Reward
+    {
+        public uint exp;
+        public uint gold;
+        public uint gem;
+        public RewardItem[] rewardItems; // 최대 5개를 넘지 않음
     }
 
     [CreateAssetMenu(menuName = "Quest/Quest", fileName = "Quest_")]
@@ -41,8 +59,11 @@ namespace SK.Quests
         [Header("Task")]
         [SerializeField] private TaskGroup[] taskGroups;
 
+        [Header("NPC")]
+        [SerializeField] private string completeNPC;
+
         [Header("Reward")]
-        [SerializeField] private Reward[] rewards;
+        [SerializeField] private Reward reward;
 
         [Header("Option")]
         [SerializeField] private bool useAutoComplete;
@@ -60,19 +81,38 @@ namespace SK.Quests
         public QuestCategory Category => category;
         public string DisplayName => displayName;
         public string Description => description;
+        public string CompleteNPC => completeNPC;
         public int CurrentTaskGroupIndex => currentTaskGroupindex;
 
         public QuestState QuestState { get; private set; }
         public TaskGroup CurrentTaskGroup => taskGroups[currentTaskGroupindex];
         public IReadOnlyList<TaskGroup> TaskGroups => taskGroups;
-        public IReadOnlyList<Reward> Reward => rewards;
+        public Reward Reward => reward;
 
         public bool IsRegistered => QuestState != QuestState.Inactive;
         public bool IsCompletable => QuestState == QuestState.WaitingForCompletion;
         public bool IsComplete => QuestState == QuestState.Complete;
         public bool IsCancel => QuestState == QuestState.Cancel;
-        public bool IsCancelable => isCancelable && cancelationCondition.All(x => x.IsPass(this));
-        public bool IsAcceptable => acceptionCondition.All(x => x.IsPass(this));
+        public bool IsAcceptable 
+        {
+            get
+            {
+                if (acceptionCondition != null)
+                    return acceptionCondition.All(x => x.IsPass(this));
+                else
+                    return true;
+            }
+        }
+        public bool IsCancelable 
+        {
+            get
+            {
+                if (cancelationCondition != null)
+                    return isCancelable && cancelationCondition.All(x => x.IsPass(this));
+                else
+                    return true;
+            }
+        }
         internal void SetState(QuestState state) { QuestState = state; }
         internal void SetTaskGroupIndex(int index) { currentTaskGroupindex = index; }
         internal void SetTaskGroupState(TaskGroupState state) { CurrentTaskGroup.State = state; }
@@ -158,8 +198,7 @@ namespace SK.Quests
             QuestState = QuestState.Complete;
 
             // 보상 지급
-            foreach (var reward in rewards)
-                reward.GiveReward();
+            GameManager.Instance.DataManager.GetReward(reward);
 
             onCompleted?.Invoke(this);
 
@@ -183,7 +222,8 @@ namespace SK.Quests
         private void OnSuccessChanged(Task task, int currentSuccess, int prevSuccess)
             => onTaskSuccessChanged?.Invoke(this, task, currentSuccess, prevSuccess);
 
-        [Conditional("UNITY_EDITOR")] // 유니티 에디터 상에서만 실행될 수 있도록 어트리뷰트 세팅_220520
+        // 유니티 에디터 상에서만 실행될 수 있도록 어트리뷰트 세팅_220520
+        [Conditional("UNITY_EDITOR")]
         private void CheckIsRunning()
         {
             // 퀘스트 중복 등록 방지 위한 디버그
