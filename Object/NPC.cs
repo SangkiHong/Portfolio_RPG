@@ -13,26 +13,38 @@ namespace SK
         }
 
         [SerializeField] private string codeName;
-        [SerializeField] private NPCType npctype;
-        [SerializeField] private Collider _thisCollider;
-        [SerializeField] private Quests.Quest[] npcQuests;
+        [SerializeField] private NPCType npctype; // NPC 타입
+        [SerializeField] private Collider _thisCollider; // NPC의 콜라이더
+        [SerializeField] private Quests.Quest[] npcQuests; // NPC의 퀘스트
 
+        [Header("Looking")]
+        [SerializeField] private bool canRotating; // 대화 시 플레이어를 바라볼 수 있는 지의 여부
+        [SerializeField] private float lookTime = 1; // 플레이어 바라보는 시간
+
+        // 프로퍼티
         public NPCType NpcType => npctype;
         public IReadOnlyList<Quests.Quest> NpcQuests => npcQuests;
 
-        private Transform _thisTransform;
-        private Transform _playerTransform;
-        private CapsuleCollider _playerCollider;
+        private Transform _thisTransform; // 트랜스폼 캐싱
+        private Transform _playerTransform; // 플레이어 트랜스폼
+        private CapsuleCollider _playerCollider; // 플레이어의 콜라이더
 
-        private float _dialgueAngle;
-        private bool _onBoundsPlayer, _isActive;
+        private Vector3 _rotateDirection;
+        private float _dialgueAngle; // 대화 가능 각도
+        private float _elapsed; // 플레이어를 향해 회전하는 경과 시간
+        private bool _isActive; // 대화 가능 상태 활성화 여부
+        private bool _isRotating; // 플레이어를 향해 회전중인지의 여부
 
         private void Awake()        
-            => _thisTransform = transform;        
+            => _thisTransform = transform;
 
-        // 생성 시 씬 매니저의 딕셔너리에 추가(키: 코드네임, 값: NPC)
-        private void Start()       
-            => SceneManager.Instance.AddNPC(codeName, this);
+        private void Start()
+        {
+            // 생성 시 씬 매니저의 딕셔너리에 추가(키: 코드네임, 값: NPC)
+            SceneManager.Instance.AddNPC(codeName, this);
+            // 콜라이더의 트리거 체크
+            if (!_thisCollider.isTrigger) _thisCollider.isTrigger = true;
+        }
         
         public void FixedTick()
         {
@@ -46,20 +58,14 @@ namespace SK
                 _dialgueAngle = GameManager.Instance.UIManager.dialogManager.dialogueAngle;
             }
 
-            // Bounds를 이용한 콜라이더의 AABB 충돌체크
+            #region Bounds를 이용한 콜라이더의 AABB 충돌체크
             if (_thisCollider.bounds.Intersects(_playerCollider.bounds))
-                _onBoundsPlayer = true;
-            else
-                _onBoundsPlayer = false;
-
-            // 플레이어의 콜라이더와 충돌된 경우
-            if (_onBoundsPlayer)
             {
                 // NPC의 위치에서 플레이어를 향한 방향
-                var dir = _playerTransform.position - _thisTransform.position;
+                var dir = _thisTransform.position - _playerTransform.position;
 
                 // 플레이어와의 각도가 대화 가능한 각도가 되었을 경우 활성화
-                if (Vector3.Angle(_thisTransform.forward, dir) <= _dialgueAngle)
+                if (Vector3.Angle(_playerTransform.forward, dir) <= _dialgueAngle)
                 {
                     // 활성화가 안되어 있는 경우
                     if (!_isActive)
@@ -91,6 +97,14 @@ namespace SK
                     NpcActivate(false);
                 }
             }
+            #endregion
+
+            // 플레이어를 향해 회전
+            if (_isRotating)
+            {
+                _elapsed += Time.fixedDeltaTime;
+                _thisTransform.rotation = Quaternion.Lerp(_thisTransform.rotation, Quaternion.LookRotation(_rotateDirection), _elapsed / lookTime);
+            }
         }
 
         private void NpcActivate(bool isActive)
@@ -112,6 +126,17 @@ namespace SK
 
                 // Dialog Manager에게 NPC 대화 상대 할당 해제
                 GameManager.Instance.UIManager.dialogManager.UnassignNPC();
+            }
+        }
+
+        public void StartConversation()
+        {
+            if (canRotating)
+            {
+                _elapsed = 0;
+                _rotateDirection = (_playerTransform.position - _thisTransform.position).normalized;
+                _rotateDirection.y = 0;
+                _isRotating = true;
             }
         }
     }

@@ -14,11 +14,11 @@ namespace SK.UI
         // 슬롯에 아이템 할당(아이템 정보, 수량, 데이터 변경 여부)_220510
         public bool AssignEquipment(Item item)
         {
-            if (!item.equipmentType.Equals(slotEquipmentType))
+            if (!item.EquipmentType.Equals(slotEquipmentType))
                 return false;
 
             this.Unassign(); // 슬롯 초기화
-            base.Assign(item.itemIcon); // 베이스 슬롯 할당(이미지 변경 등)
+            base.Assign(item.ItemIcon); // 베이스 슬롯 할당(이미지 변경 등)
             AssignedItem = item; // 아이템 정보 할당
 
             return true;

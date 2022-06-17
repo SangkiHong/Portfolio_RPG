@@ -23,7 +23,7 @@ namespace SK.Data
         public void AddItem(Item slotItem, int slotID, uint amount)
         {
             // 아이템이 수량 중첩이 가능한 경우
-            if (slotItem.isStackable)
+            if (slotItem.IsStackable)
             {
                 foreach (var item in items)
                 {

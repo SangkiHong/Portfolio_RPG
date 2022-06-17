@@ -13,7 +13,7 @@ namespace SK.Data
             {
                 for (int j = 0; j < itemLists[i].itemList.Count; j++)
                 {
-                    if (itemLists[i].itemList[j].id == id) 
+                    if (itemLists[i].itemList[j].Id == id) 
                         return itemLists[i].itemList[j];
                 }
             }
@@ -26,7 +26,7 @@ namespace SK.Data
         {
             for (int i = 0; i < itemList.itemList.Count; i++)
             {
-                if (itemList.itemList[i].id == id) 
+                if (itemList.itemList[i].Id == id) 
                     return itemList.itemList[i];
             }
 
@@ -38,7 +38,7 @@ namespace SK.Data
         {
             for (int i = 0; i < itemLists[itemListIndex].itemList.Count; i++)
             {
-                if (itemLists[itemListIndex].itemList[i].id == id)
+                if (itemLists[itemListIndex].itemList[i].Id == id)
                     return itemLists[itemListIndex].itemList[i];
             }
 
@@ -48,24 +48,22 @@ namespace SK.Data
         // 아이템 id, type 등의 정보로 아이템 불러오기_220504
         public Item GetItem(int id, ItemType itemType, EquipmentType equipType)
         {
-            int selectListIndex = 0; // 기본값으로 장비 아이템 리스트 선택
+            // 기본값으로 장비 아이템 리스트 인덱스 값
+            int selectListIndex = 0; 
 
             if (itemType == ItemType.Equipment)
             {
-                // 무기 아이템일 경우 List Index는 1
+                // 무기 아이템일 경우
                 if (equipType == EquipmentType.Weapon)
                     selectListIndex = 1;
             }
-            else
-            {
-                // 기타 아이템일 경우 List Index는 2
+            else // 기타 아이템일 경우
                 selectListIndex = 2;
-            }
 
             // 선택된 리스트 인덱스를 통해 아이템 리스트 검색
             for (int i = 0; i < itemLists[selectListIndex].itemList.Count; i++)
             {
-                if (itemLists[selectListIndex].itemList[i].id == id)
+                if (itemLists[selectListIndex].itemList[i].Id == id)
                     return itemLists[selectListIndex].itemList[i];
             }
 

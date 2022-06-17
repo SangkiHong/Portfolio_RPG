@@ -141,8 +141,10 @@ namespace SK
             // Target Check
             if (combat.Target && TargetCheck())
             {
-                // 타겟과의 거리
-                targetDistance = Vector3.Distance(combat.Target.transform.position, mTransform.position);
+                // 타겟의 위치 값, 트랜스폼의 위치 값을 변수에 저장
+
+                // 타겟과의 거리 업데이트하여 변수에 저장
+                targetDistance = MyMath.Instance.GetDistance(mTransform.position, combat.Target.transform.position);
             }
 
             // Nav Control

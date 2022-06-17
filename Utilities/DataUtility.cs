@@ -30,6 +30,7 @@ namespace SK.Data
         private static readonly char _comma = ',';
         
         private static List<QuestInfo> questDatas;
+        private static string questDataPath;
 
 #if UNITY_EDITOR
         // 오브젝트 정보 CSV파일로 저장(에디터 전용)_220329
@@ -242,17 +243,17 @@ namespace SK.Data
 
                         stringBuilder.Clear();
                         stringBuilder.Append(_comma);
-                        stringBuilder.Append(item.item.id);
+                        stringBuilder.Append(item.item.Id);
                         sr.Write(stringBuilder.ToString());
 
                         stringBuilder.Clear();
                         stringBuilder.Append(_comma);
-                        stringBuilder.Append((int)item.item.itemType);
+                        stringBuilder.Append((int)item.item.ItemType);
                         sr.Write(stringBuilder.ToString());
 
                         stringBuilder.Clear();
                         stringBuilder.Append(_comma);
-                        stringBuilder.Append((int)item.item.equipmentType);
+                        stringBuilder.Append((int)item.item.EquipmentType);
                         sr.Write(stringBuilder.ToString());
 
                         stringBuilder.Clear();
@@ -309,24 +310,62 @@ namespace SK.Data
             SerializationQuestInfo<QuestInfo> tempInst = new SerializationQuestInfo<QuestInfo>(questDatas);
             string questJsonData = JsonUtility.ToJson(tempInst);
 
-            File.WriteAllText(Path.Combine(Application.dataPath, Path.Combine("Resources", "Data", "QuestJsonData")) + ".json", questJsonData);
+            // 데이터 파일 경로 초기화
+            if (string.IsNullOrEmpty(questDataPath))
+                questDataPath = Path.Combine(Application.dataPath, Path.Combine("Resources", "Data", "QuestJsonData")) + ".json";
+
+            // 파일이 있는지 확인 후 없으면 생성
+            if (!File.Exists(questDataPath))
+            {                
+                using (File.Create(questDataPath))
+                {
+                    Debug.Log("퀘스트 데이터 파일 생성 완료");
+                }
+            }
+
+            // Json 확장자 파일에 Json 데이터 쓰기
+            File.WriteAllText(questDataPath, questJsonData);
         }
 
 #if UNITY_EDITOR
         // 아이템을 플레이어 CSV 데이터에 추가(데이터 전용)_220508
-        public static void AddItem(Item addItem)
+        public static void AddItem(Item addItem, string amount)
         {
+            Debug.Log($"플레이어 아이템 추가: {addItem.ItemName}");
+
             string path = Path.Combine(Application.dataPath, Path.Combine("Resources", "Data", "Player", "PlayerData")) + ".csv";
+            int lastIndex = 0;
+            using (StreamReader sr = new StreamReader(path))
+            {
+                string line = string.Empty;
+
+                while ((line = sr.ReadLine()) != null)
+                {
+                    string[] row = line.Split(new char[] { _comma });
+                    if (row[0] == "Index")
+                        lastIndex = 0;
+                    else
+                        lastIndex++;
+                }
+                sr.Close();
+            }
+            Debug.Log($"마지막 인덱스: {lastIndex}");
+
             using (StreamWriter sr = new StreamWriter(path, true))
             {
                 // 인벤토리 아이템 정보 추가
                 sr.WriteLine();
-                sr.Write(_comma + addItem.id);
-                sr.Write(_comma + (int)addItem.itemType);
-                sr.Write(_comma + (int)addItem.equipmentType);
-                sr.Write(_comma + 1);
-                sr.Write(_comma + -1);
-                sr.Write(_comma + 0);
+                sr.Write(lastIndex);
+                sr.Write(_comma + addItem.Id.ToString());
+                int itemtype = (int)addItem.ItemType;
+                Debug.Log("itemtype: " + itemtype);
+                sr.Write(_comma + itemtype.ToString());
+                int equiptype = (int)addItem.EquipmentType;
+                Debug.Log("equiptype: " + equiptype);
+                sr.Write(_comma + equiptype.ToString());
+                sr.Write(_comma + amount);
+                sr.Write(_comma + "-1");
+                sr.Write(_comma + "0");
                 sr.Close();
             }
         }

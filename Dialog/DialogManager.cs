@@ -93,6 +93,7 @@ namespace SK.Dialog
             _scriptingBuilder = new StringBuilder();
 
             // 단축키 이벤트 할당
+            _Input_Conversation.started += StartConversation;
             _Input_ContinueDialogue.started += ContinueDialogue;
             _Input_CloseDialogue.started += CloseDialogue;
 
@@ -108,9 +109,6 @@ namespace SK.Dialog
         // NPC와 대화 가능 상태에서 호출될 함수(NPC의 코드네임)
         public void AssignNPC(string codeName)
         {
-            // 단축키 이벤트 할당
-            _Input_Conversation.started += StartConversation;
-
             _currentNpcCodeName = codeName;
             _assignedNum++;
             _scriptsIndex = 0;
@@ -121,7 +119,7 @@ namespace SK.Dialog
         {
             // 단축키 이벤트 할당 해제
             if (--_assignedNum == 0)
-                _Input_Conversation.started -= StartConversation;
+                _currentNpcCodeName = null;
         }
 
         #region 버튼 이벤트 함수
@@ -129,7 +127,8 @@ namespace SK.Dialog
         public void RewindDialogue()
         {
             _scriptsIndex = 0;
-            Scripting(dialogsDic[_currentNpcCodeName].scripts[_scriptsIndex++]);
+            _targetDialogKey = _currentNpcCodeName;
+            Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
         }
 
         // 대화를 이어가거나 대화를 즉시 표시하는 함수
@@ -162,19 +161,17 @@ namespace SK.Dialog
         public void CloseButton()
         {
             // 대화 창 닫기
-            window_Dialog.alpha = 0;
-            window_Dialog.blocksRaycasts = false;
+            if (_uiManager.CloseAllWindows())
+            {
+                // 인덱스 초기화
+                _scriptsIndex = 0;
 
-            // 인덱스 초기화
-            _scriptsIndex = 0;
+                // 카메로 회전 고정
+                _cameraManager.CameraRotatingHold(false);
 
-            // 카메로 회전 고정
-            _cameraManager.CameraRotatingHold(false);
-            // 마우스 화면에 표시 전환
-            GameManager.Instance.SwitchMouseState(false);
-
-            // 인풋 모드를 게임플레이로 변경
-            _inputManager.SwitchInputMode(InputMode.GamePlay);
+                // 인풋 모드를 게임플레이로 변경
+                _inputManager.SwitchInputMode(InputMode.GamePlay);
+            }
         }
 
         // 상점 버튼의 함수
@@ -182,23 +179,30 @@ namespace SK.Dialog
         {
             // 일반 상점 오픈
             if (_currentNPC.NpcType == NPC.NPCType.PropShop)
-            {
-
-            }
+                _uiManager.shopManager.OpenShop(UI.ShopType.Props);
             // 장비 상점 오픈
             else
-            {
-
-            }
+                _uiManager.shopManager.OpenShop(UI.ShopType.Equipments);
         }
 
         #region 퀘스트 관련 함수
-
         // 퀘스트 버튼의 함수
         private void QuestButton()
         {
-            _isQuestDialog = true;
             _scriptsIndex = 0;
+
+            // 이미 NPC에게 받은 퀘스트가 있는 경우
+            for (int i = 0; i < _currentNPC.NpcQuests.Count; i++)
+            {
+                if (_questManager.IsActivated(_currentNPC.NpcQuests[i]))
+                {
+                    _targetDialogKey = _selectedQuestName + "_Accept";
+                    Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
+                    return;
+                }
+            }
+
+            _isQuestDialog = true;
             // 퀘스트 관련 대화 스크립팅 시작
             _targetDialogKey = _selectedQuestName;
             Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
@@ -238,6 +242,9 @@ namespace SK.Dialog
             // 'R' 버튼의 이벤트 함수를 일반 대화로 전환
             _Input_ContinueDialogue.started += ContinueDialogue;
             _Input_ContinueDialogue.started -= QuestDialogue;
+
+            // 해당 퀘스트를 활성화
+            _questManager.AddSelectedQuest();
         }
 
         // 퀘스트 거절 버튼의 함수
@@ -262,18 +269,21 @@ namespace SK.Dialog
         // 대화를 시작
         private void StartConversation(InputAction.CallbackContext context)
         {
+            if (_currentNpcCodeName == null) return;
+
             // 대화 창 열기 전에 모든 창 닫기
-            _uiManager.CloseAllWindows();
+            _uiManager.CloseAllWindows(true);
             // 인풋 모드를 대화로 변경
             _inputManager.SwitchInputMode(InputMode.Conversation);
 
             // 카메로 회전 고정
             _cameraManager.CameraRotatingHold(true);
-            // 마우스 화면에 표시 전환
-            GameManager.Instance.SwitchMouseState(true);
 
             // npc에게 퀘스트를 받을 수 있는 경우 퀘스트 버튼 표시
             _currentNPC = SceneManager.Instance.GetNPC(_currentNpcCodeName);
+
+            // NPC에게 대화 시작을 알리는 함수 호출
+            _currentNPC.StartConversation();
 
             // 버튼 초기화
             button_Quest.gameObject.SetActive(false);

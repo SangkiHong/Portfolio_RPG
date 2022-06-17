@@ -102,20 +102,20 @@ namespace SK.UI
         // 아이템 정보 표시_220508
         private void SetInfo(Item item)
         {
-            text_ItemName.text = item.itemName;
-            text_ItemGrade.text = item.itemGrade.ToString();
-            text_ItemIcon.sprite = item.itemIcon;
+            text_ItemName.text = item.ItemName;
+            text_ItemGrade.text = item.ItemGrade.ToString();
+            text_ItemIcon.sprite = item.ItemIcon;
 
 
-            text_ItemRequireLevel.text = item.requiredLevel.ToString();
+            text_ItemRequireLevel.text = item.RequiredLevel.ToString();
 
             // 아이템이 장비류인 경우 기본 능력치 표시
-            if (item.itemType == ItemType.Equipment)
+            if (item.ItemType == ItemType.Equipment)
             {
                 text_ItemBaseAbility.gameObject.SetActive(true);
                 
                 // 아이템이 방어구 인 경우
-                if (item.equipmentType != EquipmentType.Weapon)
+                if (item.EquipmentType != EquipmentType.Weapon)
                 {
                     text_ItemBaseAbility.text = _text_Defense;
                     text_ItemSubAbility.text = _text_EvasivePower;
@@ -127,37 +127,37 @@ namespace SK.UI
                     text_ItemSubAbility.text = _text_CriticalHit;
                 }
                 // 기본 능력 수치 표시
-                text_ItemBaseAbility_Value.text = item.baseAbility.ToString();
+                text_ItemBaseAbility_Value.text = item.BaseAbility.ToString();
                 // 추가 능력 수치 표시
-                text_ItemSubAbility_Value.text = item.subAbility.ToString();
+                text_ItemSubAbility_Value.text = item.SubAbility.ToString();
 
             }
             else
                 text_ItemBaseAbility.gameObject.SetActive(false);
 
             // 아이템 무게 수치 표시
-            text_ItemWeight_Value.text = item.weight.ToString();
+            text_ItemWeight_Value.text = item.Weight.ToString();
 
             // 아이템 속성 표시
             text_ItemAttributes.text = _text_DefaultAttributes;
             // 아이템 설명 텍스트 표시
-            text_ItemDescription.text = item.description;
+            text_ItemDescription.text = item.Description;
 
             // 아이템 추가 착용 효과 표시
-            if (item.bonus_Str > 0)
+            if (item.Bonus_Str > 0)
             {
                 _stringBuilder.Append("추가 힘 + ");
-                _stringBuilder.Append(item.bonus_Str);
+                _stringBuilder.Append(item.Bonus_Str);
             }
-            if (item.bonus_Dex > 0)
+            if (item.Bonus_Dex > 0)
             {
                 _stringBuilder.Append("추가 민첩 + ");
-                _stringBuilder.Append(item.bonus_Dex);
+                _stringBuilder.Append(item.Bonus_Dex);
             }
-            if (item.bonus_Int > 0)
+            if (item.Bonus_Int > 0)
             {
                 _stringBuilder.Append("추가 지능 + ");
-                _stringBuilder.Append(item.bonus_Int);
+                _stringBuilder.Append(item.Bonus_Int);
             }
             
             if (_stringBuilder.Length > 0)
@@ -169,11 +169,11 @@ namespace SK.UI
                 itemDurabilityParent.SetActive(false);
 
             // 장비 아이템인 경우 내구도 표시
-            if (item.itemType == ItemType.Equipment)
+            if (item.ItemType == ItemType.Equipment)
             {
                 itemDurabilityParent.SetActive(true);
-                text_ItemCurrentDurability.text = item.durability.ToString();
-                text_ItemMaxDurability.text = item.durability.ToString();
+                text_ItemCurrentDurability.text = item.Durability.ToString();
+                text_ItemMaxDurability.text = item.Durability.ToString();
             }
             else
                 itemDurabilityParent.SetActive(false);

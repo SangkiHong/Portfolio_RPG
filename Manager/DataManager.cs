@@ -18,9 +18,12 @@ namespace SK.Data
         private ItemListManager _itemListManager;
         private UI.InventoryManager _inventoryManager;
 
-        private readonly string _prefabs = "Prefabs";
-        private readonly string _enemyTag = "Enemy";
-        private readonly string _grassTag = "Grass";
+        private readonly string _string_Resources = "Resources";
+        private readonly string _string_Prefabs = "Prefabs";
+        private readonly string _string_Data = "Data";
+        private readonly string _string_CSV = ".csv";
+        private readonly string _tag_Enemy = "Enemy";
+        private readonly string _tag_Grass = "Grass";
         private readonly char _comma = ',';
 
         private bool isCompleteLoad;
@@ -56,7 +59,7 @@ namespace SK.Data
         /// <returns></returns>
         public GameObject LoadResource(string dataName, string prefabFolderName, Transform parentTransform = null)
         {
-            string path = Path.Combine(Application.dataPath, Path.Combine("Resources", "Data", dataName)) + ".csv";
+            string path = Path.Combine(Application.dataPath, Path.Combine(_string_Resources, _string_Data, dataName)) + _string_CSV;
 
             using (StreamReader sr = new StreamReader(path))
             {
@@ -69,7 +72,7 @@ namespace SK.Data
                     string[] row = line.Split(new char[] { _comma }); // ,단위로 Split
                     if (row[0] == "Index") continue;
 
-                    obj = Resources.Load(Path.Combine(_prefabs, prefabFolderName, row[1])) as GameObject;
+                    obj = Resources.Load(Path.Combine(_string_Prefabs, prefabFolderName, row[1])) as GameObject;
                     obj = parentTransform != null ? Instantiate(obj, parentTransform) : Instantiate(obj);
                     // 소수점 2자리까지 위치, 회전 값 받기
                     objPos.x = float.Parse(string.Format("{0:0.#}", row[2]));
@@ -82,11 +85,11 @@ namespace SK.Data
                     obj.transform.localScale = new Vector3(float.Parse(row[8]), float.Parse(row[9]), float.Parse(row[10]));
 
                     // Enemy Information
-                    if (obj.CompareTag(_enemyTag))
+                    if (obj.CompareTag(_tag_Enemy))
                         obj.GetComponent<Enemy>().isPatrol = bool.Parse(row[11]);
 
                     // Grass Add List
-                    if (obj.CompareTag(_grassTag))
+                    if (obj.CompareTag(_tag_Grass))
                         GameManager.Instance.GrassManager.AddGrass(obj.GetComponent<ProceduralGrassRenderer>());
                 }
                 sr.Close();
@@ -100,7 +103,7 @@ namespace SK.Data
         {
             string s_player = "Player";
 
-            GameObject player = Resources.Load(Path.Combine(_prefabs, s_player, s_player)) as GameObject;
+            GameObject player = Resources.Load(Path.Combine(_string_Prefabs, s_player, s_player)) as GameObject;
             player = Instantiate(player);
             player.transform.position = playerData.RecentLocation;
             player.name = s_player;
@@ -117,7 +120,7 @@ namespace SK.Data
         // 플레이어 정보를 CSV 데이터 파일로 읽은 후에 Scriptable Obejct(PlayerData, PlayerItemData)로 데이터 옮기기_220503
         private bool LoadPlayerData()
         {
-            string path = Path.Combine(Application.dataPath, Path.Combine("Resources", "Data", "Player", "PlayerData")) + ".csv";
+            string path = Path.Combine(Application.dataPath, Path.Combine(_string_Resources, _string_Data, "Player", "PlayerData")) + _string_CSV;
 
             if (!File.Exists(path))
                 return false;
@@ -248,14 +251,19 @@ namespace SK.Data
         // 퀘스트 Json 데이터를 퀘스트 리스트로 파싱_220524
         public bool LoadQuestData(ref List<Quest> ActivedQuestList, ref List<Quest> completedQuestList)
         {
-            TextAsset textAsset = Resources.Load<TextAsset>(Path.Combine("Data", "QuestJsonData"));
+            TextAsset textAsset = Resources.Load<TextAsset>(Path.Combine(_string_Data, "QuestJsonData"));
+            
+            // 파일이 없는 경우
+            if (textAsset == null) 
+                return false;
+
             JSONNode root = JSON.Parse(textAsset.text)["QuestInfo"];
             Quest tempQuest;
 
             for (int i = 0; i < root.Count; i++)
             {
                 // 퀘스트 이름을 통해 퀘스트 파일 로드
-                tempQuest = Resources.Load<Quest>(Path.Combine("Data", "Quests", root[i]["QuestName"]));
+                tempQuest = Resources.Load<Quest>(Path.Combine(_string_Data, "Quests", root[i]["QuestName"]));
 
                 // 퀘스트 이름을 통해 퀘스트 파일 로드
                 tempQuest.SetState((QuestState)root[i]["QuestState"].AsInt);
@@ -287,13 +295,13 @@ namespace SK.Data
         }
 
         // 리소스 폴더에서 퀘스트 에셋을 로드하여 반환하는 함수_220524
-        public Quest GetQuest(string questName) { return Resources.Load<Quest>(Path.Combine("Data", "Quests", questName)); }
+        public Quest GetQuest(string questName) { return Resources.Load<Quest>(Path.Combine(_string_Data, "Quests", questName)); }
         #endregion
 
         #region DIALOG DATA
         public void LoadDialogData(ref Dialog.SerializableDicDialog dialogsDic)
         {
-            string path = Path.Combine(Application.dataPath, Path.Combine("Resources", "Data", "DialogData")) + ".csv";
+            string path = Path.Combine(Application.dataPath, Path.Combine(_string_Resources, _string_Data, "DialogData")) + _string_CSV;
 
             if (!File.Exists(path))
                 return;
@@ -323,6 +331,40 @@ namespace SK.Data
                         tempDialog.scripts.Add(row[1]);
                 }
 
+                sr.Close();
+            }
+        }
+        #endregion
+
+        #region SHOP DATA
+        /// <summary>
+        /// 상점 판매 아이템 정보 파일(CSV)로부터 데이터를 파싱하여 리스트에 추가_220615
+        /// </summary>
+        /// <param name="shopType">상점 타입(0: 잡화상점, 1: 장비상점)</param>
+        /// <param name="itemList">아이템 목록을 추가할 아이템 리스트</param>
+        public void GetShopList(int shopType, ref List<Item> itemList)
+        {
+            string dataPath = string.Empty;
+
+            // 잡화 상점 데이터 불러오기
+            if (shopType == 0)            
+                dataPath = Path.Combine(Application.dataPath, Path.Combine(_string_Resources, _string_Data, "ShopData_Props")) + _string_CSV;            
+            // 장비 상점 데이터 불러오기
+            else if (shopType == 1)
+                dataPath = Path.Combine(Application.dataPath, Path.Combine(_string_Resources, _string_Data, "ShopData_Equipments")) + _string_CSV;
+
+            using (StreamReader sr = new StreamReader(dataPath))
+            {
+                string line = string.Empty;
+
+                while ((line = sr.ReadLine()) != null)
+                {
+                    string[] row = line.Split(new char[] { _comma }); // ,단위로 Split
+                    if (row[0] == "Index") continue;
+
+                    // 파싱한 데이터를 토대로 아이템 정보를 가져와 리스트에 추가
+                    itemList.Add(_itemListManager.GetItembyID(int.Parse(row[1]), int.Parse(row[2])));
+                }
                 sr.Close();
             }
         }

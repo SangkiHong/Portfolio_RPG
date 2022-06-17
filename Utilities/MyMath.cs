@@ -1,4 +1,5 @@
-﻿namespace SK.Utilities
+﻿using UnityEngine;
+namespace SK.Utilities
 {
     public class MyMath
     {
@@ -41,6 +42,18 @@
                 return sineLookupTable[degree];
             else
                 return sineLookupTable[degree % 360];
+        }
+
+        // 거리 계산하여 반환하는 함수
+        public float GetDistance(Vector3 currentPos, Vector3 targetPos)
+        {
+            // 거리 계산하기 위한 좌표 계산
+            var x = targetPos.x - currentPos.x;
+            var y = targetPos.y - currentPos.y;
+            var z = targetPos.z - currentPos.z;
+
+            // 타겟과의 거리 업데이트하여 변수에 저장
+            return (x * 2) + (y * 2) + (z * 2);
         }
     }
 }

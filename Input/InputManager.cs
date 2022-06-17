@@ -48,12 +48,19 @@ namespace SK
             // 인풋 시스템 Action Map을 UI로 변경_220525
             if (inputMode == InputMode.GamePlay)
             {
+                // 마우스 화면에 표시 전환
+                GameManager.Instance.SwitchMouseState(false);
+
                 playerInput.SwitchCurrentActionMap(_ActionMapGamePlay);
             }
             else if (inputMode == InputMode.UI)
             {
                 if (playerInput.currentActionMap.name != _ActionMapUI)
-                { 
+                {
+                    // 마우스 화면에 표시 전환
+                    GameManager.Instance.SwitchMouseState(true);
+
+                    // 인풋액션 세팅
                     playerInput.SwitchCurrentActionMap(_ActionMapUI);
                     _input_UI_Inventory.Enable();
                     _input_UI_CharacterStats.Enable();
@@ -65,6 +72,10 @@ namespace SK
             }
             else if (inputMode == InputMode.Conversation)
             {
+                // 마우스 화면에 표시 전환
+                GameManager.Instance.SwitchMouseState(true);
+
+                // 인풋액션 세팅
                 playerInput.SwitchCurrentActionMap(_ActionMapUI);
                 _input_UI_Inventory.Disable();
                 _input_UI_CharacterStats.Disable();

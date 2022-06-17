@@ -21,7 +21,7 @@ namespace SK.UI
             // slot ID 할당 및 슬롯의 포인터 이벤트 등록_220515
             for (int i = 0; i < _equipSlots.Length; i++)
             {
-                _equipSlots[i].slotID = i; // 슬롯 고유 ID 지정
+                _equipSlots[i].SetSlotID(i); // 슬롯 고유 ID 지정
                 _equipSlots[i].OnLeftClickEvent += OpenItemSpecificsPanel; // 슬롯을 단순 좌클릭 시 발동 이벤트 등록
             }
         }
@@ -41,16 +41,16 @@ namespace SK.UI
                     // 해당 데이터 아이템의 장비 타입에 맞는 장비 슬롯을 탐색하여 할당
                     for (int j = 0; j < _equipSlots.Length; j++)
                     {
-                        if (!_equipSlots[j].IsAssigned && _equipSlots[j].slotEquipmentType.Equals(_tempItem.equipmentType))
+                        if (!_equipSlots[j].IsAssigned && _equipSlots[j].slotEquipmentType.Equals(_tempItem.EquipmentType))
                         {
                             _equipSlots[j].AssignEquipment(_tempItem);
 
                             // 무기 또는 방패 아이템인 경우 착용 모델 반영
-                            if (_tempItem.equipmentData && (_tempItem.equipmentType.Equals(EquipmentType.Weapon) ||
-                                                            _tempItem.equipmentType.Equals(EquipmentType.Shield)))
+                            if (_tempItem.EquipmentData && (_tempItem.EquipmentType.Equals(EquipmentType.Weapon) ||
+                                                            _tempItem.EquipmentType.Equals(EquipmentType.Shield)))
                             {
                                 GameManager.Instance.Player.equipmentHolder
-                                    .AssignEquipment(_tempItem.equipmentData, _equipSlots[j].isPrimaryWeapon);
+                                    .AssignEquipment(_tempItem.EquipmentData, _equipSlots[j].isPrimaryWeapon);
                             }
                         }
                     }
@@ -67,7 +67,7 @@ namespace SK.UI
             for (int i = 0; i < _equipSlots.Length; i++)
             {
                 // 아이템 장비 타입과 동일한 슬롯 탐색
-                if (_equipSlots[i].slotEquipmentType.Equals(item.equipmentType))
+                if (_equipSlots[i].slotEquipmentType.Equals(item.EquipmentType))
                 {
                     // 이미 다른 장비가 할당되어 있는 경우 할당된 장비를 인벤토리 슬롯에서 착용 해제
                     if (_equipSlots[i].IsAssigned)
@@ -97,7 +97,7 @@ namespace SK.UI
             for (int i = 0; i < _equipSlots.Length; i++)
             {
                 // 아이템 장비 타입과 동일한 슬롯 탐색
-                if (_equipSlots[i].IsAssigned && _equipSlots[i].slotEquipmentType.Equals(item.equipmentType))
+                if (_equipSlots[i].IsAssigned && _equipSlots[i].slotEquipmentType.Equals(item.EquipmentType))
                 {
 
                     // 슬롯에 할당된 장비를 착용 해제
@@ -125,9 +125,9 @@ namespace SK.UI
             for (int i = 0; i < _equipSlots.Length; i++)
             {
                 // 착용된 무기 탐색
-                if (_equipSlots[i].IsAssigned && _equipSlots[i].AssignedItem.equipmentType.Equals(EquipmentType.Weapon))
+                if (_equipSlots[i].IsAssigned && _equipSlots[i].AssignedItem.EquipmentType.Equals(EquipmentType.Weapon))
                 {
-                    _usingWeapon = _equipSlots[i].AssignedItem.equipmentData as Weapon;
+                    _usingWeapon = _equipSlots[i].AssignedItem.EquipmentData as Weapon;
 
                     minDamage += _usingWeapon.AttackMinPower + baseDamage;
                     maxDamage += _usingWeapon.AttackMaxPower + baseDamage;
@@ -148,9 +148,9 @@ namespace SK.UI
             for (int i = 0; i < _equipSlots.Length; i++)
             {
                 // 착용된 장비 탐색
-                if (_equipSlots[i].IsAssigned && !_equipSlots[i].AssignedItem.equipmentType.Equals(EquipmentType.Weapon))
+                if (_equipSlots[i].IsAssigned && !_equipSlots[i].AssignedItem.EquipmentType.Equals(EquipmentType.Weapon))
                 {
-                    totalDefense += _equipSlots[i].AssignedItem.baseAbility;
+                    totalDefense += _equipSlots[i].AssignedItem.BaseAbility;
                 }
             }
 

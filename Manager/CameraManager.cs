@@ -1,6 +1,7 @@
 using UnityEngine;
 using Cinemachine;
 using UnityEngine.Animations.Rigging;
+using SK.Utilities;
 
 namespace SK
 {
@@ -73,7 +74,8 @@ namespace SK
             #region Targeting
             if (_isTargeting && _enemy)
             {
-                _targetDistance = Vector3.Distance(_playerTranform.position, _enemy.transform.position);
+                // 타겟과의 거리 업데이트하여 변수에 저장
+                _targetDistance = MyMath.Instance.GetDistance(_playerTranform.position, _enemy.transform.position);
 
                 // 타겟 상태 확인
                 if (_enemy.isDead || _targetDistance > targetingLimitDistance)

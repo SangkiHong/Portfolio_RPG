@@ -9,10 +9,12 @@ namespace SK.UI
      * 내용: 퀘스트 UI와 데이터에 대한 전반적인 기능의 관리자 클래스
      * 작성일: 22년 5월 24일
      */
+
     public class QuestManager : MonoBehaviour
     {
         [Header("Reference")]
         [SerializeField] private UIManager uiManager;
+        [SerializeField] private QuestMiniInfoManager miniInfoManager;
         [SerializeField] private QuestInfo questInfo;
 
         [Header("Quest")]
@@ -56,18 +58,30 @@ namespace SK.UI
         public void Initialize()
         {
             // 데이터 매지저 클래스틑 통해 리스트에 퀘스트 할당
-            GameManager.Instance.DataManager.LoadQuestData(ref activeQuestsList, ref completedQuestsList);
+            if (!GameManager.Instance.DataManager.LoadQuestData(ref activeQuestsList, ref completedQuestsList))
+                return; // 파일이 존재하지 않으면 즉시 반환
 
             // 퀘스트 리스트를 토대로 UI 생성
             if (activeQuestsList.Count > 0)
             {
                 for (int i = 0; i < activeQuestsList.Count; i++)
-                    AddQuest(activeQuestsList[i]);
+                    AddQuestUIList(activeQuestsList[i]);
             }
         }
 
+        public bool ClosePanel()
+        {
+            if (questInfo.gameObject.activeSelf)
+            {
+                questInfo.gameObject.SetActive(false);
+                return true;
+            }
+            else
+                return false;
+        }
+
         // 퀘스트를 리스트에 추가
-        public void AddQuest(Quest newQuest)
+        public void AddQuestUIList(Quest newQuest)
         {
             // 퀘스트 초기화
             newQuest.OnRegister();
@@ -84,6 +98,19 @@ namespace SK.UI
             questTitles[lastIndex].OnClickQuest += OpenQuestInfo;
             // 퀘스트 완료 시 실행할 이벤트 함수 등록
             newQuest.onCompleted += CompleteQuest;
+
+            // 미니 퀘스트 정보 UI 표시
+            miniInfoManager.AddMiniInfo(newQuest);
+        }
+
+        // 퀘스트를 받아 활성화 퀘스트 리스트에 추가_220614
+        public void AddSelectedQuest()
+        {
+            if (SelectedQuest != null)
+            {
+                AddQuestUIList(SelectedQuest);
+                activeQuestsList.Add(SelectedQuest);
+            }
         }
 
         // 퀘스트 완료 시 할당된 퀘스트타이틀 할당 해제
@@ -112,6 +139,21 @@ namespace SK.UI
             {
                 SelectedQuest = quest;
                 return true; 
+            }
+
+            return false;
+        }
+
+        // 해당 퀘스트가 활성화 된 퀘스트 리스트에 포함되었는 지에 대한 여부를 반환하는 함수_220613
+        public bool IsActivated(Quest quest)
+        {
+            foreach (var _quest in activeQuestsList)
+            {
+                if (quest == _quest)
+                {
+                    SelectedQuest = _quest;
+                    return true; 
+                }
             }
 
             return false;

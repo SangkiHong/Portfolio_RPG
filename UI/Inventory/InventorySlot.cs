@@ -4,6 +4,11 @@ using UnityEngine.EventSystems;
 
 namespace SK.UI
 {
+    /* 작성자: 홍상기
+     * 내용: 인벤토리 아이템의 정보를 표시할 슬롯 UI
+     * 작성일: 22년 5월 2일
+     */
+
     public class InventorySlot : SlotBase
     {
         [SerializeField] internal Text amountText;
@@ -20,12 +25,12 @@ namespace SK.UI
         public void AssignItem(Item item, uint amount, bool isEquiped, bool addData = false)
         {
             this.Unassign(); // 슬롯 초기화
-            base.Assign(item.itemIcon); // 베이스 슬롯 할당(이미지 변경 등)
+            base.Assign(item.ItemIcon); // 베이스 슬롯 할당(이미지 변경 등)
             AssignedItem = item; // 아이템 정보 할당
             itemAmount = amount; // 아이템 수량 할당
             
             // 아이템이 장비인 경우
-            if (item.itemType.Equals(ItemType.Equipment))
+            if (item.ItemType.Equals(ItemType.Equipment))
                 EquipItem(isEquiped); // 아이템 착용 여부_220512
             else
                 UpdateAmount(); // 수량 텍스트 표시 업데이트
@@ -114,7 +119,7 @@ namespace SK.UI
         {
             base.OnRightClick();
             // 좌클릭 시 장비 아이템인 경우 이벤트 호출
-            if (IsAssigned && AssignedItem.itemType == ItemType.Equipment)
+            if (IsAssigned && AssignedItem.ItemType == ItemType.Equipment)
             {
                 OnRightClickEvent?.Invoke(slotID);
             }
@@ -137,7 +142,7 @@ namespace SK.UI
         {
             if (!IsAssigned || !canDrag) return;
             base.OnBeginDrag(eventData);
-
+            OnBeginDragEvent?.Invoke(eventData);
             // 모든 슬롯의 하이라이트 꺼짐
             OnLeftClickEvent?.Invoke(-1);
         }
@@ -149,7 +154,6 @@ namespace SK.UI
             IsOnLeftClick = false;
             if (!canDrag) return;
             base.OnDrag(eventData);
-
         }
 
         // 드래그 종료 시 이벤트 호출_220503
@@ -181,7 +185,7 @@ namespace SK.UI
             else
             {
                 // 같은 종류의 아이템인지 확인 후 장비 아이템이 아닌 경우 수량만 증가
-                if (this.AssignedItem == source.AssignedItem && this.AssignedItem.itemType != ItemType.Equipment)
+                if (this.AssignedItem == source.AssignedItem && this.AssignedItem.ItemType != ItemType.Equipment)
                 {
                     var addAmount = source.itemAmount + this.itemAmount;
 
@@ -205,8 +209,8 @@ namespace SK.UI
                 // 임시 슬롯에 타겟 슬롯 정보 저장
                 tempSlot.AssignedItem = source.AssignedItem;
                 tempSlot.itemAmount = source.itemAmount;
-                tempSlot.slotID = source.slotID;
                 tempSlot.IsEquiped = source.IsEquiped;
+                tempSlot.SetSlotID(source.slotID);
 
                 // 타겟 슬롯에 현재 슬롯 정보 할당(데이터 업데이트 X)
                 source.AssignItem(AssignedItem, itemAmount, IsEquiped);

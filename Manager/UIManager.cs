@@ -14,15 +14,18 @@ namespace SK.UI
         [SerializeField] internal EquipSlotManager equipSlotManager;
         [SerializeField] internal QuestManager questManager;
         [SerializeField] internal DialogManager dialogManager;
+        [SerializeField] internal ShopManager shopManager;
+        [SerializeField] internal CurrencySyncHandler currencySyncHandler;
 
         [Header("Canvas Group")]
         public CanvasGroup window_CharacterStatus;
         public CanvasGroup window_Invenroty;
         public CanvasGroup window_Quest;
         public CanvasGroup window_Dialog;
+        public CanvasGroup window_Shop;
 
         private PlayerInput _playerInput;
-        private List<CanvasGroup> _windowsList; // 윈도우를 관리하기 위한 캔버스그룹 리스트
+        [SerializeField] private List<CanvasGroup> _windowsList; // 윈도우를 관리하기 위한 캔버스그룹 리스트
 
         private void Start()
         {
@@ -37,6 +40,7 @@ namespace SK.UI
             _windowsList.Add(window_Invenroty);
             _windowsList.Add(window_Quest);
             _windowsList.Add(window_Dialog);
+            _windowsList.Add(window_Shop);
 
             // 초기화
             StartCoroutine(InitializeManagers());
@@ -76,7 +80,10 @@ namespace SK.UI
             if (targetWindow.alpha == 0)
             {
                 targetWindow.alpha = 1;
-                targetWindow.blocksRaycasts = true; 
+                targetWindow.blocksRaycasts = true;
+
+                // 최근 열은 창이 가장 앞에 보일 수 있도록 Sibling 순서를 제일 아래 둠
+                VisibleWindowAtFront(targetWindow);
                 
                 GameManager.Instance.InputManager.SwitchInputMode(InputMode.UI);
             }
@@ -90,25 +97,35 @@ namespace SK.UI
                 if (!window_Invenroty.blocksRaycasts && !window_CharacterStatus.blocksRaycasts)
                     inventoryManager.itemSpecificsPanel.gameObject.SetActive(false);
 
+                // 퀘스트 창이 닫혀지는 경우 퀘스트 세부 정보도 닫음
+                if (!window_Quest.blocksRaycasts)
+                    questManager.ClosePanel();
+
                 // 모든 창이 닫혔는지 검사하는 함수
                 CheckAllWindowsClosed();
             }
         }
 
+        // 인자로 받은 캔버스그룹이 가장 앞에 보일 수 있도록 Sibling 순서를 제일 아래 둠
+        public void VisibleWindowAtFront(CanvasGroup targetWindow)
+            => targetWindow.transform.SetAsLastSibling();
+
         // 열려진 모든 창, 패널 닫음_220511
-        public void CloseAllWindows()
+        public bool CloseAllWindows(bool forceClose = false)
         {
+            if (inventoryManager.CloseAllPanel() && !forceClose) return false;
+            if (questManager.ClosePanel() && !forceClose) return false;
+            if (shopManager.ClosePanelAndWindow() && !forceClose) return false;
+
             foreach (var window in _windowsList)
             {
                 window.alpha = 0;
                 window.blocksRaycasts = false;
-            }
-
-            inventoryManager.CancelEraseMode();
-            inventoryManager.itemSpecificsPanel.gameObject.SetActive(false);
+            }            
 
             // 마우스 모드를 해제
             GameManager.Instance.InputManager.SwitchInputMode(InputMode.GamePlay);
+            return true;
         }
 
         // 모든 창이 닫혔는지 확인 후 Action Map을 GamePlay로 변경_220525
@@ -137,7 +154,9 @@ namespace SK.UI
             inventoryManager.Initialize();
             equipSlotManager.Initialize();
             questManager.Initialize();
+            shopManager.Initialize();
             dialogManager.Initialize(questManager);
+            currencySyncHandler.Initialize();
         }
     }
 }

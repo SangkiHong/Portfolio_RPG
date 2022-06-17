@@ -1,12 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SK
+namespace SK.UI
 {
-    public class EraseInputPanel : MonoBehaviour
+    public class AmountInputPanel : MonoBehaviour
     {
-        [Header("Reference")]
-        [SerializeField] private UI.InventoryManager inventoryManager;
+        public delegate void ConfirmHandler(uint amount);
 
         [Header("Buttons")]
         [SerializeField] private Button[] button_InputAmount;
@@ -15,11 +14,24 @@ namespace SK
         [SerializeField] private Button button_Cancel;
         [SerializeField] private Button button_Confirm;
 
-        [Header("Buttons")]
-        [SerializeField] private Text text_eraseAmount;
+        [Header("Text")]
+        [SerializeField] private Text text_ItemAmount;
+        [SerializeField] private Text text_Title;
+        [SerializeField] private Text text_Info;
+
+        public event ConfirmHandler OnConfirmAmount;
 
         private RectTransform _transform;
         private Vector3 panelPos;
+
+        private readonly string _titleText_Erase = "삭제할 수량 입력";
+        private readonly string _titleText_ShopBuy = "구매할 수량 입력";
+        private readonly string _titleText_ShopSell = "판매할 수량 입력";
+        private readonly string _infoText_Erase = "삭제할 수량";
+        private readonly string _infoText_ShopBuy = "구매할 수량";
+        private readonly string _infoText_ShopSell = "판매할 수량";
+
+        private int _panelMode; // 0: 인벤토리 아이템 삭제, 1: 상점 구매, 2: 상점 판매
         private uint _maxAmount;
         private uint _inputNumber;
 
@@ -32,7 +44,7 @@ namespace SK
             for (uint i = 0; i < button_InputAmount.Length; i++)
             {
                 uint tempIndex = i; // Closuer problem 으로 인해 임시 인덱스 값을 생성
-                // 숫자 입력에 따른 삭제할 수량 업데이트 함수릴 버튼 이벤트로 할당
+                // 숫자 입력에 따른 수량 업데이트 함수를 버튼 이벤트에 할당
                 button_InputAmount[i].onClick.AddListener(delegate { InputAmountNumber(tempIndex); });
             }
 
@@ -42,20 +54,40 @@ namespace SK
             // 입력 값을 리셋하는 버튼 이벤트 할당
             button_Reset.onClick.AddListener(ResetAmount);
 
-            // 입력에 따른 아이템 삭제하는 버튼 이벤트 할당
-            button_Confirm.onClick.AddListener(ConfirmEraseItem);
+            // 선택 수량 확정 버튼 이벤트 할당
+            button_Confirm.onClick.AddListener(ConfirmItemAmount);
 
             // 입력 취소 버튼 이벤트 할당
             button_Cancel.onClick.AddListener(CancelSelectAmount);
         }
 
-        // 인벤토리매니저로부터 슬롯 정보를 받아서 초기화_220507
-        public void SetPaenl(uint maxAmount)
+        // 최대 갯수를 전달받아 초기화_220507
+        public void SetPanel(int panelMode, uint maxAmount)
         {
+            // 패널 모드
+            _panelMode = panelMode;
             // 입력 수량 초기화
             ResetAmount();
             // 슬롯 아이템의 최대값을 변수에 저장
             _maxAmount = maxAmount;
+
+            // 타이틀, 안내 Text 변경
+            switch (_panelMode)
+            {
+                case 0:
+                    text_Title.text = _titleText_Erase;
+                    text_Info.text = _infoText_Erase;
+                    break;
+                case 1:
+                    text_Title.text = _titleText_ShopBuy;
+                    text_Info.text = _infoText_ShopBuy;
+                    break;
+                case 2:
+                    text_Title.text = _titleText_ShopSell;
+                    text_Info.text = _infoText_ShopSell;
+                    break;
+            }
+
             gameObject.SetActive(true);
 
             // 수정된 위치 값을 저장할 변수 초기화
@@ -85,8 +117,8 @@ namespace SK
             if (_inputNumber > _maxAmount)
                 _inputNumber = _maxAmount;
 
-            // 삭제 수량 텍스트에 표시
-            text_eraseAmount.text = _inputNumber.ToString();
+            // 입력 수량을 텍스트에 표시
+            text_ItemAmount.text = _inputNumber.ToString();
         }
 
         // 1자리 숫자를 지워주는 이벤트 함수_220507
@@ -100,8 +132,8 @@ namespace SK
                 float fInputNumber = _inputNumber * 0.1f;
                 _inputNumber = (uint)Mathf.Floor(fInputNumber);
             }
-            // 삭제 수량 텍스트에 표시
-            text_eraseAmount.text = _inputNumber.ToString();
+            // 입력 수량을 텍스트에 표시
+            text_ItemAmount.text = _inputNumber.ToString();
         }
 
         // 입력된 값을 리셋하는 이벤트 함수_220507
@@ -109,21 +141,23 @@ namespace SK
         {
             _inputNumber = 0;
 
-            // 삭제 수량 텍스트에 표시
-            text_eraseAmount.text = _inputNumber.ToString();
+            // 입력 수량을 수량 텍스트에 표시
+            text_ItemAmount.text = _inputNumber.ToString();
         }
 
-        // 입력 값에 따른 아이템 삭제하는 이벤트 함수_220507
-        private void ConfirmEraseItem()
+        // 입력 값을 확정하는 이벤트 함수_220507
+        private void ConfirmItemAmount()
         {
-            inventoryManager.ConfirmEraseAmount(_inputNumber);
+            OnConfirmAmount?.Invoke(_inputNumber);
+            OnConfirmAmount = null;
             gameObject.SetActive(false);
         }
 
         // 입력 취소하여 패널을 닫고 선택 취소하는 이벤트 함수_220507
         private void CancelSelectAmount()
         {
-            inventoryManager.ConfirmEraseAmount(0);
+            OnConfirmAmount?.Invoke(0);
+            OnConfirmAmount = null;
             gameObject.SetActive(false);
         }
     }

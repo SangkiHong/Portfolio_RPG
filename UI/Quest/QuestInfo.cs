@@ -3,6 +3,11 @@ using UnityEngine.UI;
 
 namespace SK.Quests
 {
+    /* 작성자: 홍상기
+     * 내용: 퀘스트 정보를 표시할 UI 패널
+     * 작성일: 22년 5월 25일
+     */
+
     public class QuestInfo : MonoBehaviour
     {
         // 퀘스트 정보 UI 패널 오브젝트
@@ -43,9 +48,6 @@ namespace SK.Quests
 
                 // 퀘스트 완료 시 받을 보상을 슬롯으로 표시
                 Reward questReward = _assignedQuest.Reward;
-                var exp = questReward.exp;
-                var gold = questReward.gold;
-                var gem = questReward.gem;
                 int slotIndex = 0;
 
                 // 슬롯 초기화
@@ -53,11 +55,14 @@ namespace SK.Quests
                     _rewardSlots[i].Unassign();
 
                 // 획득 경험치
-                if (exp > 0) _rewardSlots[slotIndex++].Assign(sprite_Exp, exp);
+                if (questReward.exp > 0) 
+                    _rewardSlots[slotIndex++].Assign(sprite_Exp, questReward.exp);
                 // 획득 골드량
-                if (gold > 0) _rewardSlots[slotIndex++].Assign(sprite_Gold, gold);
+                if (questReward.gold > 0)
+                    _rewardSlots[slotIndex++].Assign(sprite_Gold, questReward.gold);
                 // 획득 보석량
-                if (gem > 0) _rewardSlots[slotIndex++].Assign(sprite_Gem, gem);
+                if (questReward.gem > 0) 
+                    _rewardSlots[slotIndex++].Assign(sprite_Gem, questReward.gem);
 
                 // 획득 아이템
                 Item tempItem;
@@ -73,7 +78,7 @@ namespace SK.Quests
                         {
                             tempRewardItem = questReward.rewardItems[i];
                             tempItem = _itemListManager.GetItembyID((int)tempRewardItem.itemList, tempRewardItem.itemId);
-                            _rewardSlots[slotIndex++].Assign(tempItem.itemIcon, tempRewardItem.itemAmount);
+                            _rewardSlots[slotIndex++].Assign(tempItem.ItemIcon, tempRewardItem.itemAmount);
                         }
                     }
                 }

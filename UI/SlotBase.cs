@@ -5,34 +5,27 @@ using UnityEngine.EventSystems;
 
 namespace SK.UI
 {
+    /* 작성자: 홍상기
+     * 내용: 기본 슬롯의 기능을 가진 컴포넌트 클래스
+     * 작성일: 22년 5월 2일
+     */
+
     public abstract class SlotBase : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        /// <summary>
-        /// 슬롯을 단순 우클릭 했을 시 발생 이벤트(슬롯 ID)
-        /// </summary>
+        // 슬롯 할당 시 발생 이벤트(슬롯 정보, 아이템 수량)
+        public UnityAction <SlotBase, uint> OnAssignEvent;
+        // 슬롯 교환(교체) 시 발생 이벤트(현재 슬롯 ID, 이동할 슬롯 ID)
+        public UnityAction <int, int> OnSwapEvent;
+        // 드래그를 시작할 경우 발생할 이벤트
+        public UnityAction<PointerEventData> OnBeginDragEvent;
+        // 드래그 종료 시 발생 이벤트(슬롯 ID, 포인터 이벤트 데이터)
+        public UnityAction <int, PointerEventData> OnDragEndEvent;
+        // 슬롯을 단순 우클릭 했을 시 발생 이벤트(슬롯 ID)
         public UnityAction<int> OnRightClickEvent;
-
-        /// <summary>
-        /// 슬롯을 단순 좌클릭 했을 시 발생 이벤트(슬롯 ID)
-        /// </summary>
+        // 슬롯을 단순 좌클릭 했을 시 발생 이벤트(슬롯 ID)
         public UnityAction<int> OnLeftClickEvent;
 
-        /// <summary>
-        /// 슬롯 할당 시 발생 이벤트(슬롯 정보, 아이템 수량)
-        /// </summary>
-        public UnityAction <SlotBase, uint> OnAssignEvent;
-
-        /// <summary>
-        /// 슬롯 교환(교체) 시 발생 이벤트(현재 슬롯 ID, 이동할 슬롯 ID)
-        /// </summary>
-        public UnityAction <int, int> OnSwapEvent;
-
-        /// <summary>
-        /// 드래그 종료 시 발생 이벤트(슬롯 ID, 포인터 이벤트 데이터)
-        /// </summary>
-        public UnityAction <int, PointerEventData> OnDragEndEvent;
-
-        [System.NonSerialized] public int slotID; // 슬롯 고유 ID
+        public int slotID { get; private set; } // 슬롯 고유 ID
 
         [SerializeField] internal bool canDrag; // 슬롯이 드래그 가능한지 여부
         [SerializeField] internal Image iconImage; // 아이콘 이미지
@@ -48,8 +41,8 @@ namespace SK.UI
         private static RectTransform CurrentDraggingTransform; // 임시 드래그 아이콘 트렌스폼
         private static Image CurrentDraggingIconImage; // 임시 드래그 아이콘 이미지
 
-        // 슬롯 초기화
-        private void Awake() => Unassign();        
+        // 슬롯 아이디 할당
+        public void SetSlotID(int id) => slotID = id;
 
         // 슬롯 할당 함수(이미지 스프라이트)_220504
         public virtual void Assign(Sprite sptire)
@@ -98,6 +91,9 @@ namespace SK.UI
 
         public virtual void OnBeginDrag(PointerEventData eventData)
         {
+            // 드래그 불가 슬롯인 경우
+            if (!canDrag) return;
+
             IsOnLeftClick = false;
             IsOnRightClick = false;
             IsDragging = true;
@@ -107,11 +103,17 @@ namespace SK.UI
 
         public virtual void OnDrag(PointerEventData eventData)
         {
+            // 드래그 불가 슬롯인 경우
+            if (!canDrag) return;
+
             CurrentDraggingTransform.position = eventData.position;
         }
 
         public virtual void OnEndDrag(PointerEventData eventData)
         {
+            // 드래그 불가 슬롯인 경우
+            if (!canDrag) return;
+
             IsDragging = false;
             CurrentDraggedObject.SetActive(false);
 
