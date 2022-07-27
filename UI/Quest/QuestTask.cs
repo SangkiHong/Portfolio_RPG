@@ -15,6 +15,8 @@ namespace SK.UI
         public Text requireLevelText;
         // 업무 타이틀을 표시하는 텍스트
         public Text taskTitleText;
+        // 퀘스트 네비게이션 버튼
+        [SerializeField] Button navButton;
 
         // 할당된 업무를 저장할 변수
         internal Task _assignedTask;
@@ -32,7 +34,7 @@ namespace SK.UI
             _stringBuilder.Append("[ 권장 레벨 ");
         }
 
-        public void Assign(Task task)
+        public void Assign(Task task, bool isCompletedQuest)
         {
             _isAssigned = true;
 
@@ -48,6 +50,12 @@ namespace SK.UI
             requireLevelText.text = _stringBuilder.ToString();
             // 업무 타이틀 텍스트에 표시
             taskTitleText.text = _assignedTask.Description;
+
+            // 네비게이션 버튼 표시
+            if (!isCompletedQuest)
+                navButton.gameObject.SetActive(true);
+            else // 완료된 경우 숨김
+                navButton.gameObject.SetActive(false);
         }
 
         public void Unassign()

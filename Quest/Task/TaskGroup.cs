@@ -60,10 +60,23 @@ namespace SK.Quests
         // 업무가 해당 카테고리와 타겟을 가지고 있으면 목표 대상이므로 보고를 받는 함수
         public void ReceiveReport(QuestCategory category, object target, int successCount)
         {
+            Debug.Log("TraskGroup ReceiveReport");
             foreach (var task in tasks)
             {
                 if (task.IsTarget(category, target))
                     task.ReceiveReport(successCount);
+            }
+        }
+
+        // 모든 업무를 취소하며 초기화하는 함수
+        public void Cancel()
+        {
+            State = TaskGroupState.Inactive;
+
+            foreach (var task in tasks)
+            {
+                if (!task.IsComplete)
+                    task.Cancel();
             }
         }
 

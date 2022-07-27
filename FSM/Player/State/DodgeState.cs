@@ -15,8 +15,8 @@
         public override void StateInit()
         {
             _player.isDodge = true;
-            _player.health.CanDamage = false; // 무적 상태
-            _player.combat.attackExcuted = true; // 공격 취소
+            _player.health.SetDamagableState(false); // 무적 상태
+            //_player.combat.attackExcuted = true; // 공격 취소
 
             _elapsed = 0;
             isBackward = directionAngle == 135 || directionAngle == 180 || directionAngle == 225;
@@ -83,7 +83,7 @@
         public override void StateExit()
         {
             _player.isDodge = false;
-            _player.health.CanDamage = true;
+            _player.health.SetDamagableState(true);
         }
     }
 }

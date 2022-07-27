@@ -45,14 +45,14 @@ namespace SK.Quests
         [SerializeField] private InitialSuccessValue initialSuccessValue;
         
         // 퀘스트가 완료되기 위한 성공 횟수
-        [SerializeField] private int needSuccessToComplte; 
+        [SerializeField] private int needSuccessToComplete; 
         
         // 퀘스트가 완료되었어도 계속해서 성공 횟수를 보고 받을 지에 대한 옵션
         [SerializeField] private bool canReceiveReportsDuringCompletion; 
 
         // 퀘스트 업무 상태
-        private TaskState taskState;
-        private int currentSuccess;
+        private TaskState _taskState;
+        private int _currentSuccess;
 
         // 퀘스트 상태 변화 시 호출 이벤트
         public event StateChangedHandler onStateChanged;
@@ -61,19 +61,19 @@ namespace SK.Quests
         // 현재 완수한 카운트
         public int CurrentSuccess 
         {
-            get => currentSuccess;
+            get => _currentSuccess;
             set
             {
                 // 변경 전 완료 횟수를 변수에 저장
-                int prevSuccess = currentSuccess;
+                int prevSuccess = _currentSuccess;
                 // 필요 횟수 안에서 현재 완료 횟수를 업데이트
-                currentSuccess = Mathf.Clamp(value, 0, needSuccessToComplte);
-                if (currentSuccess != prevSuccess)
+                _currentSuccess = Mathf.Clamp(value, 0, needSuccessToComplete);
+                if (_currentSuccess != prevSuccess)
                 {
                     // 완료 횟수가 필요 횟수와 같으면 업무 상태를 완료로, 그렇지 않으면 업무중으로 변경
-                    State = currentSuccess == needSuccessToComplte ? TaskState.Complete : TaskState.Running;
+                    State = _currentSuccess == needSuccessToComplete ? TaskState.Complete : TaskState.Running;
                     // 완료 횟수 변경에 따른 이벤트 호출
-                    onSuccessChanged?.Invoke(this, currentSuccess, prevSuccess);
+                    onSuccessChanged?.Invoke(this, _currentSuccess, prevSuccess);
                 }
             }
         }
@@ -81,18 +81,18 @@ namespace SK.Quests
         public string CodeName => codeName;
         public string Description => description;
         public int RequireLevel => requireLevel;
-        public int NeedSuccessToComplete => needSuccessToComplte;
+        public int NeedSuccessToComplete => needSuccessToComplete;
         public TaskState State
         {
-            get => taskState;
+            get => _taskState;
             set
             {
-                var prevState = taskState;
-                taskState = value;
-                onStateChanged?.Invoke(this, taskState, prevState);
+                var prevState = _taskState;
+                _taskState = value;
+                onStateChanged?.Invoke(this, _taskState, prevState);
             }
         }
-        public bool IsComplete => taskState == TaskState.Complete;
+        public bool IsComplete => _taskState == TaskState.Complete;
         public Quest OwnerQuest { get; private set; }
 
         // 업무의 퀘스트를 할당
@@ -106,7 +106,7 @@ namespace SK.Quests
 
             // 초기 완료 횟수가 있으면 완료 횟수에 할당
             if (initialSuccessValue)
-                currentSuccess = initialSuccessValue.GetValue(this);
+                _currentSuccess = initialSuccessValue.GetValue(this);
         }
 
         // 업무가 종료되는 함수
@@ -117,13 +117,39 @@ namespace SK.Quests
             onSuccessChanged = null;
         }
 
+        public void SetCurrentSuccess(int data)
+        {
+            _currentSuccess = data;
+            if (_currentSuccess >= needSuccessToComplete)
+                _taskState = TaskState.Complete;
+        }
+
         // TaskAction의 현재 완수 횟수와 인자로 받은 횟수를 더하여 현재 완수 횟수를 업데이트_220519
-        public void ReceiveReport(int successCount)
-            => CurrentSuccess = action.Run(this, CurrentSuccess, successCount);
+        public bool ReceiveReport(int successCount)
+        {
+            CurrentSuccess = action.Run(this, CurrentSuccess, successCount);
+            Debug.Log($"타겟 확인 완료 후 리포팅: {successCount}, 현재 완료 횟수: {_currentSuccess}");
+
+            // 업무 완수 횟수가 충족된 경우
+            if (_currentSuccess >= needSuccessToComplete)
+            {
+                _taskState = TaskState.Complete;
+                return true;
+            }
+
+            return false;
+        }
+
+        // 퀘스트 업무를 취소하는 함수
+        public void Cancel()
+        {
+            _currentSuccess = 0;
+            _taskState = TaskState.Inactive;
+        }
 
         // 퀘스트 즉시 완료하는 함수
         public void Complete()
-            => currentSuccess = needSuccessToComplte;
+            => _currentSuccess = needSuccessToComplete;
 
         // 타겟 전체를 돌며 비교하여 동일한지를 반환하는 함수_220519
         public bool IsTarget(QuestCategory category, object target)

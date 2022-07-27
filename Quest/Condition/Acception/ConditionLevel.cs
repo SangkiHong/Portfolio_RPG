@@ -13,7 +13,7 @@ namespace SK.Quests
         [SerializeField] private int acceptablePlayerLevel;
         public override bool IsPass(Quest quest)
         {
-            if (GameManager.Instance.Player.playerData.Level >= acceptablePlayerLevel)
+            if (Data.DataManager.Instance.PlayerData.Level >= acceptablePlayerLevel)
                 return true;
             else
                 return false;

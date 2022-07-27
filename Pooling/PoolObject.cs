@@ -15,7 +15,7 @@ public class PoolObject : MonoBehaviour
 	protected void Done(bool isUI = false) 
 	{
 
-		if (!isUI) PoolManager.instance.ReturnObjectToQueue(gameObject, this);
+		if (!isUI) PoolManager.Instance.ReturnObjectToQueue(gameObject, this);
 		else UIPoolManager.Instance.ReturnObjectToQueue(gameObject, this);
 	}
 }

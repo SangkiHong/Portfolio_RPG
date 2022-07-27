@@ -37,17 +37,31 @@ namespace SK.UI
         [SerializeField] private Text text_ItemCurrentDurability;
         [SerializeField] private Text text_ItemMaxDurability;
 
+        [Header("Item Grade Color")]
+        [SerializeField] private Color[] color_ItemGrade;
+
+        private Item _assignedItem;
         private RectTransform _transform;
         private StringBuilder _stringBuilder;
         private Vector3 _panelPos;
 
-        private readonly string _text_AttackPower = "공격력";
-        private readonly string _text_Defense = "방어력";
-        private readonly string _text_CriticalHit = "치명타";
-        private readonly string _text_EvasivePower = "회피력";
+        private readonly char _text_Space = ' ';
+        private readonly string _text_Plus = " + ";
+        private readonly string _text_Increase = " 증가";
+        private readonly string _text_AttackPower = "공격력 :";
+        private readonly string _text_Defense = "방어력 :";
+        private readonly string _text_CriticalHit = "치명타 :";
+        private readonly string _text_EvasivePower = "회피력 :";
+        private readonly string _text_ItemEffect_STR = " 힘 ";
+        private readonly string _text_ItemEffect_DEX = " 민첩 ";
+        private readonly string _text_ItemEffect_INT = " 지능 ";
+        private readonly string _text_ItemEffect_Hp = " HP ";
+        private readonly string _text_ItemEffect_Recover = " 회복";
+        private readonly string _text_ItemEffect_Buff = "초 동안 증가";
         private readonly string _text_DefaultAttributes = "- 수리 가능 장비" + System.Environment.NewLine + "- 장비 강화 가능";
 
         private float _centerPosX, _panelHalfWidth;
+        public bool IsOpen { get; private set; }
 
         private void Awake()
         {
@@ -64,7 +78,19 @@ namespace SK.UI
         // 인벤토리매니저로부터 아이템 정보를 받아서 초기화_220508
         public void SetPanel(Item item, float slotPosX)
         {
+            // 같은 슬롯을 다시 클릭한 경우 패널 닫음
+            if (_assignedItem != null && _assignedItem == item)
+            {
+                Close();
+                return;
+            }
+
+            _assignedItem = item;
             gameObject.SetActive(true);
+            IsOpen = true;
+
+            // 패널을 위에 표시
+            _transform.SetAsLastSibling();
 
             _stringBuilder.Clear();
 
@@ -99,11 +125,22 @@ namespace SK.UI
             _transform.position = _panelPos;
         }
 
+        public void Close()
+        {
+            if (gameObject.activeSelf)
+                gameObject.SetActive(false);
+
+            _assignedItem = null;
+            IsOpen = false;
+        }
+
         // 아이템 정보 표시_220508
         private void SetInfo(Item item)
         {
             text_ItemName.text = item.ItemName;
+            text_ItemName.color = color_ItemGrade[(int)item.ItemGrade];
             text_ItemGrade.text = item.ItemGrade.ToString();
+            text_ItemGrade.color = color_ItemGrade[(int)item.ItemGrade];
             text_ItemIcon.sprite = item.ItemIcon;
 
 
@@ -143,30 +180,70 @@ namespace SK.UI
             // 아이템 설명 텍스트 표시
             text_ItemDescription.text = item.Description;
 
+            _stringBuilder.Clear();
+
             // 아이템 추가 착용 효과 표시
-            if (item.Bonus_Str > 0)
+            if (item.Bonus_Str != 0)
             {
-                _stringBuilder.Append("추가 힘 + ");
+                _stringBuilder.Append(_text_ItemEffect_STR);
+                _stringBuilder.Append(_text_Plus);
                 _stringBuilder.Append(item.Bonus_Str);
+                _stringBuilder.Append(_text_Increase);
             }
-            if (item.Bonus_Dex > 0)
+            if (item.Bonus_Dex != 0)
             {
-                _stringBuilder.Append("추가 민첩 + ");
+                _stringBuilder.Append(_text_ItemEffect_DEX);
+                _stringBuilder.Append(_text_Plus);
                 _stringBuilder.Append(item.Bonus_Dex);
+                _stringBuilder.Append(_text_Increase);
             }
-            if (item.Bonus_Int > 0)
+            if (item.Bonus_Int != 0)
             {
-                _stringBuilder.Append("추가 지능 + ");
+                _stringBuilder.Append(_text_ItemEffect_INT);
+                _stringBuilder.Append(_text_Plus);
                 _stringBuilder.Append(item.Bonus_Int);
+                _stringBuilder.Append(_text_Increase);
+            }
+
+            // 회복 물약 효과 표시
+            if (item.ItemType == ItemType.Food)
+            {
+                _stringBuilder.Append(_text_ItemEffect_Hp);
+                _stringBuilder.Append(item.RecoverHPAmount);
+                _stringBuilder.Append(_text_ItemEffect_Recover);
+            }
+
+            // 버프 물약 효과 표시
+            if (item.ItemType == ItemType.Buff)
+            {
+                if (item.Buff_Str > 0)
+                {
+                    _stringBuilder.Append(_text_ItemEffect_STR);
+                    _stringBuilder.Append(item.Buff_Str);
+                }
+                if (item.Buff_Dex > 0)
+                {
+                    _stringBuilder.Append(_text_ItemEffect_DEX);
+                    _stringBuilder.Append(item.Buff_Dex);
+                }
+                if (item.Buff_Int > 0)
+                {
+                    _stringBuilder.Append(_text_ItemEffect_INT);
+                    _stringBuilder.Append(item.Buff_Int);
+                }
+
+                _stringBuilder.Append(_text_Space);
+                _stringBuilder.Append(item.Buff_Duration);
+                _stringBuilder.Append(_text_ItemEffect_Buff);
             }
             
             if (_stringBuilder.Length > 0)
             {
-                itemDurabilityParent.SetActive(true);
+                itemEffectParent.SetActive(true);
                 text_ItemEffectSpecific.text = _stringBuilder.ToString();
             }
             else
-                itemDurabilityParent.SetActive(false);
+                itemEffectParent.SetActive(false);
 
             // 장비 아이템인 경우 내구도 표시
             if (item.ItemType == ItemType.Equipment)

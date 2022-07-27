@@ -5,8 +5,10 @@ namespace SK.FSM
     public class CharacterMovement : StateAction
     {
         private readonly Player _player;
-        
+
+        private Transform _transform;
         private RaycastHit _raycastHit;
+
         private Vector3 _tranformPos;
         private Vector3 _targetVelocity, _origin, _targetDir;
         private Quaternion _targetRotation;
@@ -14,16 +16,29 @@ namespace SK.FSM
         private readonly int _animHashForward = Animator.StringToHash("Forward");
         private readonly int _animHashSideways = Animator.StringToHash("Sideways");
 
-        private float _frontY, _speed, _moveAmount, _elapsed, _gravityAccel;
+        private float _frontY, _speed, _moveAmount;
+        private float _elapsed, _gravityAccel;
+        private float _movementsSpeed, _runSpeed;
+        private uint _runningUseSp, _againRunningSp;
+        private float _runElapsed;
+        private bool _canRunning = true;
 
-        public CharacterMovement(Player player) => _player = player;
+        public CharacterMovement(Player player, Transform transform) 
+        { 
+            _player = player; 
+            _transform = transform;
+            _movementsSpeed = player.movementsSpeed;
+            _runSpeed = player.runSpeed;
+            _runningUseSp = player.useSp_Run;
+            _againRunningSp = _runningUseSp * 5;
+        }
 
         public override void Execute()
         {
             if (_player == null) return;
 
             _moveAmount = _player.moveAmount;
-            _tranformPos = _player.mTransform.position;
+            _tranformPos = _transform.position;
 
             HandleMovement();
             HandleRotation();
@@ -36,12 +51,44 @@ namespace SK.FSM
 
         private void HandleMovement()
         {
+            // 돌진 상태인 경우
+            if (_player.isOnRushAttack)
+            {
+                // 카메라의 전방을 기준으로 전후방 이동
+                _speed = _runSpeed;
+                _targetVelocity = _speed * _transform.forward;
+                // 플레이어의 전방을 기준으로 좌우 이동(30% 감속)
+                _targetVelocity += 0.7f * _player.horizontal * _speed * _transform.right;
+                _targetVelocity.y = 0;
+            }
             // 피격 상태이거나 움직임이 없을 경우
-            if (_player.isDamaged || _moveAmount < 0.1f)
+            else if (_player.isDamaged || _moveAmount < 0.1f)
+            {
                 _targetVelocity = Vector3.zero;
+            }
             else
             {
-                _speed = _player.isRunning ? _player.runSpeed : _player.movementsSpeed; // 달릴 시 속도 변경
+                // 달릴 시 속도 변경
+                if (_canRunning && _player.isRunning)
+                {
+                    _speed = _runSpeed;
+
+                    _runElapsed += _player.fixedDeltaTime;
+                    if (_runElapsed >= 1)
+                    {
+                        _runElapsed = 0;
+                        // SP 소모
+                        _canRunning = _player.stamina.UseSp(_runningUseSp);
+                    }
+                }
+                else
+                {
+                    _speed = _movementsSpeed;
+
+                    // 달리기 불가한 상태인 경우 SP 체크
+                    if (!_canRunning && _player.stamina.CurrentSp >= _againRunningSp)
+                        _canRunning = true;
+                }
 
                 // 타겟팅 모드가 아닌 경우
                 if (!_player.targeting.isTargeting)
@@ -55,15 +102,15 @@ namespace SK.FSM
                         if (_player.vertical < 0)
                             overrideMove *= -_player.slowDownBackward;
 
-                        _targetVelocity = _speed * overrideMove * _player.mTransform.forward;
+                        _targetVelocity = _speed * overrideMove * _transform.forward;
                     }
                     // 전투 모드인 경우
                     else
                     {
                         // 카메라의 전방을 기준으로 전후방 이동
                         _targetVelocity = _player.vertical * _speed * _player.cameraManager.transform.forward;
-                        // 플레이어의 전방을 기준으로 좌우 이동(30% 감속)
-                        _targetVelocity += 0.7f * _player.horizontal * _speed * _player.mTransform.right;
+                        // 플레이어의 전방을 기준으로 좌우 이동(65% 감속)
+                        _targetVelocity += 0.65f * _player.horizontal * _speed * _transform.right;
                         _targetVelocity.y = 0;
                     }
                 }
@@ -73,8 +120,8 @@ namespace SK.FSM
                     // 타겟팅 시 이동 속도 감속
                     _speed *= _player.slowDownTargeting;
 
-                    _targetVelocity = _player.vertical * _speed * _player.mTransform.forward;
-                    _targetVelocity += _player.horizontal * _speed * _player.mTransform.right;
+                    _targetVelocity = _player.vertical * _speed * _transform.forward;
+                    _targetVelocity += _player.horizontal * _speed * _transform.right;
                 }
 
                 _origin = _tranformPos + (_targetVelocity * _player.frontRayOffset);
@@ -101,7 +148,7 @@ namespace SK.FSM
                     else if (absY < 1f) // 높이 차 1 미만의 경사 지형에 대한 계산
                     {
                         var dir = _raycastHit.point - _tranformPos;
-                        var angle = Vector3.Angle(dir, _player.mTransform.forward);
+                        var angle = Vector3.Angle(dir, _transform.forward);
                         if (angle > _player.slopeLimitAngle)
                         {
                             _player.isSlipping = true;
@@ -119,8 +166,17 @@ namespace SK.FSM
             float forward = _player.vertical;
             float sideways = _player.horizontal;
 
+            // 돌진 상태인 경우
+            if (_player.isOnRushAttack)
+            {
+                // 애니메이션 회전
+                moveOverride = 1f;
+                _targetDir = _player.cameraManager.transform.forward;
+                _targetDir.y = 0;
+                _targetRotation = Quaternion.LookRotation(_targetDir);
+            }
             // 타겟팅 모드인 경우
-            if (_player.targeting.isTargeting)
+            else if (_player.targeting.isTargeting)
             {
                 _targetDir = _player.targeting.target.position - _tranformPos;
                 moveOverride = 1;
@@ -158,7 +214,7 @@ namespace SK.FSM
                 _targetRotation = Quaternion.LookRotation(_targetDir);
             }
                         
-            _player.mTransform.rotation = Quaternion.Slerp(_player.mTransform.rotation, _targetRotation,
+            _transform.rotation = Quaternion.Slerp(_transform.rotation, _targetRotation,
                                             _player.fixedDeltaTime * moveOverride * _player.rotationSpeed);
         }
 
@@ -175,6 +231,9 @@ namespace SK.FSM
                     _elapsed = 0;
                     _player.isJumping = false;
                     _player.anim.SetTrigger(Strings.AnimPara_Land);
+
+                    // 사운드 효과
+                    AudioManager.Instance.PlayAudio(Strings.Audio_FX_Player_Land, _transform);
                     return;
                 }
 
@@ -191,6 +250,9 @@ namespace SK.FSM
         {
             if (_player.isGrounded)
             {
+                float currentForward = Mathf.Abs(_player.anim.GetFloat(_animHashForward));
+                float currentSideway = Mathf.Abs(_player.anim.GetFloat(_animHashSideways));
+
                 // 타겟팅 중이거나 전투 모드 상태의 애니메이션
                 if (_player.targeting.isTargeting || _player.onCombatMode)
                 {
@@ -203,7 +265,7 @@ namespace SK.FSM
 
                     if (_player.vertical < 0) forward = -forward;
                     
-                    if (!_player.isRunning)
+                    if (!_canRunning || !_player.isRunning)
                     {
                         if (forward > 0.5f) forward = 0.5f;
                         else if (forward < -0.5f) forward = -0.5f;
@@ -218,14 +280,31 @@ namespace SK.FSM
 
                     if (_player.horizontal < 0) sideway = -1;
                     
-                    if (!_player.isRunning)
+                    if (!_canRunning || !_player.isRunning)
                     {
                         if (sideway > 0.5f) sideway = 0.5f;
                         else if (sideway < -0.5f) sideway = -0.5f;
                     }
 
-                    _player.anim.SetFloat(_animHashForward, forward, 0.2f, _player.fixedDeltaTime);
-                    _player.anim.SetFloat(_animHashSideways, sideway, 0.2f, _player.fixedDeltaTime);
+                    if (forward != 0)
+                        _player.anim.SetFloat(_animHashForward, forward, 0.2f, _player.fixedDeltaTime);
+                    else
+                    {
+                        if (currentForward > 0.1f)
+                            _player.anim.SetFloat(_animHashForward, 0, 0.2f, _player.fixedDeltaTime);
+                        else
+                            _player.anim.SetFloat(_animHashForward, 0);
+                    }
+
+                    if (sideway != 0)
+                        _player.anim.SetFloat(_animHashSideways, sideway, 0.2f, _player.fixedDeltaTime);
+                    else
+                    {
+                        if (currentSideway > 0.1f)
+                            _player.anim.SetFloat(_animHashSideways, 0, 0.2f, _player.fixedDeltaTime);
+                        else
+                            _player.anim.SetFloat(_animHashSideways, 0);
+                    }
                 }
                 // 일반 이동의 애니메이션
                 else
@@ -246,17 +325,27 @@ namespace SK.FSM
                         // 뒤로 이동 중인 경우 forward 값을 반전
                         if (_player.vertical < 0) forward *= -1;
 
-                        if (!_player.isRunning)
+                        if (!_canRunning || !_player.isRunning)
                         {
                             if (forward > 0.5f) forward = 0.5f;
                             else if (forward < -0.5f) forward = -0.5f;
                         }
                     }
 
-                    if (_player.anim.GetFloat(_animHashForward) != forward)
+                    if (forward != 0)
                         _player.anim.SetFloat(_animHashForward, forward, 0.2f, _player.fixedDeltaTime);
-                    if (_player.anim.GetFloat(_animHashSideways) != 0)
+                    else
+                    {
+                        if (currentForward > 0.1f)
+                            _player.anim.SetFloat(_animHashForward, 0, 0.2f, _player.fixedDeltaTime);
+                        else
+                            _player.anim.SetFloat(_animHashForward, 0);
+                    }
+
+                    if (currentSideway > 0.1f)
                         _player.anim.SetFloat(_animHashSideways, 0, 0.2f, _player.fixedDeltaTime);
+                    else
+                        _player.anim.SetFloat(_animHashSideways, 0);
                 }
             }
         }

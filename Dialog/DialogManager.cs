@@ -29,6 +29,7 @@ namespace SK.Dialog
 
         [Header("UI")]
         [SerializeField] private CanvasGroup window_Dialog;
+        [SerializeField] private Text text_NPCName;
         [SerializeField] private Text text_dialog;
         [SerializeField] private Button button_Continue;
         [SerializeField] private Button button_Rewind;
@@ -52,17 +53,24 @@ namespace SK.Dialog
         private InputManager _inputManager;
         private UI.UIManager _uiManager;
         private CameraManager _cameraManager;
-        private UI.QuestManager _questManager;
+        private Quests.QuestManager _questManager;
+        private Data.ItemListManager _itemListManager;
         
         // 대사를 담을 스트링빌더
         private StringBuilder _scriptingBuilder;
         
         // 현재 선택된 NPC
         private NPC _currentNPC;
-                
+
         // '/'가 있는 경우 '\n'으로 변환
         private readonly char _signNewLine = '/';
         private readonly char _changeNewLine = '\n';
+        // 퀘스트 수락 시에 "NPC이름" 뒤에 추가하여 대화 키를 찾음
+        private readonly string _string_Accept = "_Accept";
+        // 퀘스트 거절 시에 "NPC이름" 뒤에 추가하여 대화 키를 찾음
+        private readonly string _string_Decline = "_Decline";
+        // 퀘스트 완료 시에 "NPC이름" 뒤에 추가하여 대화 키를 찾음
+        private readonly string _string_Success = "_Success";
 
         private string _targetDialogKey, _currentNpcCodeName, _currentScript, _selectedQuestName;
 
@@ -71,12 +79,13 @@ namespace SK.Dialog
         private bool _isScripting, _isQuestDialog;
 
         // UI 매니저를 통해 호출될 초기화 함수
-        public void Initialize(UI.QuestManager questManager)
+        public void Initialize(Quests.QuestManager questManager)
         {
             _questManager = questManager;
             _inputManager = GameManager.Instance.InputManager;
-            _uiManager = GameManager.Instance.UIManager;
+            _uiManager = UI.UIManager.Instance;
             _cameraManager = GameManager.Instance.Player.cameraManager;
+            _itemListManager = GameManager.Instance.ItemListManager;
 
             dialogsDic = new SerializableDicDialog();
 
@@ -129,6 +138,12 @@ namespace SK.Dialog
             _scriptsIndex = 0;
             _targetDialogKey = _currentNpcCodeName;
             Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
+
+            // 버튼 초기화
+            acceptQuestParent.SetActive(false);
+
+            // 수락 가능 퀘스트 확인
+            HasNpcAcceptableQuest();
         }
 
         // 대화를 이어가거나 대화를 즉시 표시하는 함수
@@ -138,6 +153,7 @@ namespace SK.Dialog
             if (_isScripting)
             {
                 _isScripting = false;
+                SceneManager.Instance.OnFixedUpdate -= FixedTick;
 
                 _scriptingBuilder.Clear();
                 _scriptingBuilder.Append(_currentScript);
@@ -166,8 +182,8 @@ namespace SK.Dialog
                 // 인덱스 초기화
                 _scriptsIndex = 0;
 
-                // 카메로 회전 고정
-                _cameraManager.CameraRotatingHold(false);
+                // 인터렉팅 카메라 해제
+                _cameraManager.ChangeInteractingCamera(false);
 
                 // 인풋 모드를 게임플레이로 변경
                 _inputManager.SwitchInputMode(InputMode.GamePlay);
@@ -186,33 +202,89 @@ namespace SK.Dialog
         }
 
         #region 퀘스트 관련 함수
-        // 퀘스트 버튼의 함수
-        private void QuestButton()
+        // 수락 가능한 퀘스트가 있는 지 확인
+        private void HasNpcAcceptableQuest()
         {
-            _scriptsIndex = 0;
-
-            // 이미 NPC에게 받은 퀘스트가 있는 경우
-            for (int i = 0; i < _currentNPC.NpcQuests.Count; i++)
+            // NPC에게 Quest가 있는 경우
+            if (_currentNPC.NpcQuests != null)
             {
-                if (_questManager.IsActivated(_currentNPC.NpcQuests[i]))
+                for (int i = 0; i < _currentNPC.NpcQuests.Count; i++)
                 {
-                    _targetDialogKey = _selectedQuestName + "_Accept";
-                    Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
-                    return;
+                    if (_questManager.IsActivated(_currentNPC.NpcQuests[i]) || _questManager.IsAcceptable(_currentNPC.NpcQuests[i]))
+                    {
+                        _selectedQuestName = _currentNPC.NpcQuests[i].name;
+                        button_Quest.gameObject.SetActive(true);
+                        return;
+                    }
                 }
             }
 
-            _isQuestDialog = true;
-            // 퀘스트 관련 대화 스크립팅 시작
-            _targetDialogKey = _selectedQuestName;
-            Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
+            // 퀘스트가 없다면 변수 할당 해제
+            _selectedQuestName = null;
+            button_Quest.gameObject.SetActive(false);
+        }
 
-            // 'R' 버튼의 이벤트 함수를 퀘스트 대화로 전환
-            _Input_ContinueDialogue.started -= ContinueDialogue;
-            _Input_ContinueDialogue.started += QuestDialogue;
+        // 퀘스트 대화 버튼의 함수
+        private void QuestButton()
+        {
+            // 수락 거절 버튼 숨김
+            acceptQuestParent.SetActive(false);
 
-            // 퀘스트 정보 표시
-            DisplayQuestInfo();
+            _scriptsIndex = 0;
+            int questCount = _currentNPC.NpcQuests.Count;
+            Quests.Quest selectedQuest;
+
+            for (int i = 0; i < _currentNPC.NpcQuests.Count; i++)
+            {
+                selectedQuest = _currentNPC.NpcQuests[i];
+
+                // 이미 NPC에게 받은 퀘스트를 받은 경우
+                if (_questManager.IsActivated(selectedQuest))
+                {
+                    // 아직 완료하지 않은 경우
+                    if (!selectedQuest.IsCompletable)
+                        _targetDialogKey = _selectedQuestName + _string_Accept;
+                    // 완료한 경우
+                    else
+                    {
+                        // 퀘스트 완료 가능한 경우
+                        if (UI.UIManager.Instance.questManager.CompleteQuest(selectedQuest))
+                        {
+                            // 보상 아이템 목록 표시
+                            _uiManager.questManager.OpenRewardInfo(selectedQuest);
+
+                            _targetDialogKey = _selectedQuestName + _string_Success;
+
+                            // 수락 가능 퀘스트 확인
+                            HasNpcAcceptableQuest();
+
+                            // 사운드 효과
+                            AudioManager.Instance.PlayAudio(Strings.Audio_UI_CompleteQuest);
+                        }
+                        // 보상 수락이 불가한 경우
+                        else 
+                            _targetDialogKey = Strings.Dialog_InventoryFull;
+                    }
+                    Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
+                    return;
+                }
+                // 아직 NPC에게 퀘스트를 받지 않은 경우
+                else
+                {
+                    _isQuestDialog = true;
+                    // 퀘스트 관련 대화 스크립팅 시작
+                    _targetDialogKey = _selectedQuestName;
+                    Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
+
+                    // 'R' 버튼의 이벤트 함수를 퀘스트 대화로 전환
+                    _Input_ContinueDialogue.started -= ContinueDialogue;
+                    _Input_ContinueDialogue.started += QuestDialogue;
+
+                    // 퀘스트 정보 표시
+                    DisplayQuestInfo();
+                    break;
+                }
+            }
         }
 
         // 퀘스트 정보 표시 및 수락 버튼 표시
@@ -236,7 +308,7 @@ namespace SK.Dialog
             acceptQuestParent.SetActive(false);
 
             // 수락에 대한 대화 표시
-            _targetDialogKey = _selectedQuestName + "_Accept";
+            _targetDialogKey = _selectedQuestName + _string_Accept;
             Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
 
             // 'R' 버튼의 이벤트 함수를 일반 대화로 전환
@@ -244,7 +316,10 @@ namespace SK.Dialog
             _Input_ContinueDialogue.started -= QuestDialogue;
 
             // 해당 퀘스트를 활성화
-            _questManager.AddSelectedQuest();
+            _questManager.AddNewQuest();
+
+            // 사운드 효과
+            AudioManager.Instance.PlayAudio(Strings.Audio_UI_QuestAccept);
         }
 
         // 퀘스트 거절 버튼의 함수
@@ -255,7 +330,7 @@ namespace SK.Dialog
             acceptQuestParent.SetActive(false);
 
             // 거절에 대한 대화 표시
-            _targetDialogKey = _selectedQuestName + "_Decline";
+            _targetDialogKey = _selectedQuestName + _string_Decline;
             Scripting(dialogsDic[_targetDialogKey].scripts[_scriptsIndex++]);
 
             // 'R' 버튼의 이벤트 함수를 일반 대화로 전환
@@ -273,35 +348,31 @@ namespace SK.Dialog
 
             // 대화 창 열기 전에 모든 창 닫기
             _uiManager.CloseAllWindows(true);
+
+            // 수락 거절 버튼 숨김
+            acceptQuestParent.SetActive(false);
+
             // 인풋 모드를 대화로 변경
             _inputManager.SwitchInputMode(InputMode.Conversation);
 
-            // 카메로 회전 고정
-            _cameraManager.CameraRotatingHold(true);
-
-            // npc에게 퀘스트를 받을 수 있는 경우 퀘스트 버튼 표시
+            // 씬매니저를 통해 NPC 정보를 가져옴
             _currentNPC = SceneManager.Instance.GetNPC(_currentNpcCodeName);
+
+            // NPC 이름 할당
+            if (_currentNPC) text_NPCName.text = _currentNPC.DisplayName;
+            else text_NPCName.text = string.Empty;
+
+            // 인터렉팅 카메라 켜짐
+            _cameraManager.ChangeInteractingCamera(true, _currentNPC);
 
             // NPC에게 대화 시작을 알리는 함수 호출
             _currentNPC.StartConversation();
 
             // 버튼 초기화
-            button_Quest.gameObject.SetActive(false);
             button_Shop.gameObject.SetActive(false);
 
-            // NPC에게 Quest가 있는 경우
-            if (_currentNPC.NpcQuests != null)
-            {
-                for (int i = 0; i < _currentNPC.NpcQuests.Count; i++)
-                {
-                    if (_questManager.IsAcceptable(_currentNPC.NpcQuests[i]))
-                    {
-                        _selectedQuestName = _currentNPC.NpcQuests[i].name;
-                        button_Quest.gameObject.SetActive(true);
-                        break;
-                    }
-                }
-            }
+            // 수락 가능 퀘스트 확인
+            HasNpcAcceptableQuest();
 
             // 상점 이용 가능 NPC인 경우 상점 이용 버튼 표시
             if (_currentNPC.NpcType == NPC.NPCType.PropShop ||
@@ -327,6 +398,7 @@ namespace SK.Dialog
         // 퀘스트 관련 대화 표시
         private void QuestDialogue(InputAction.CallbackContext context)
         {
+            // 선택된 퀘스트이름을 타겟 대화 키로 저장
             _targetDialogKey = _selectedQuestName;
             ContinueDialogue();
 
@@ -356,40 +428,39 @@ namespace SK.Dialog
             _scriptingIndex = 0;
             _elapsed = 0;
             _isScripting = true;
+            SceneManager.Instance.OnFixedUpdate += FixedTick;
         }
 
-        private void FixedUpdate()
+        private void FixedTick()
         {
-            // 스크립팅 중이라면 일정 간격으로 대화 스트링 값을 추가하며 출력
-            if (_isScripting)
+            // 일정 간격으로 대화 스트링 값을 추가하며 출력
+            _elapsed += Time.fixedDeltaTime;
+
+            if (_scriptingIndex < _currentScript.Length && _elapsed >= scriptingSpeed)
             {
-                _elapsed += Time.fixedDeltaTime;
-
-                if (_elapsed >= scriptingSpeed)
+                if (_currentScript[_scriptingIndex] != _signNewLine)
+                    _scriptingBuilder.Append(_currentScript[_scriptingIndex++]);
+                else
                 {
-                    if (_currentScript[_scriptingIndex] != _signNewLine)
-                        _scriptingBuilder.Append(_currentScript[_scriptingIndex++]);
-                    else
-                    {
-                        _scriptingBuilder.AppendLine();
-                        _scriptingIndex++;
-                        return;
-                    }
+                    _scriptingBuilder.AppendLine();
+                    _scriptingIndex++;
+                    return;
+                }
 
-                    text_dialog.text = _scriptingBuilder.ToString();
+                text_dialog.text = _scriptingBuilder.ToString();
 
-                    // 대화 스크립트를 모두 출력한 경우
-                    if (_scriptingIndex >= _scriptLength)
-                    {
-                        _isScripting = false;
-                        if (dialogsDic[_targetDialogKey].scripts.Count > _scriptsIndex)
-                            button_Continue.gameObject.SetActive(true);
-                    }
+                // 대화 스크립트를 모두 출력한 경우
+                if (_scriptingIndex >= _scriptLength)
+                {
+                    _isScripting = false;
+                    SceneManager.Instance.OnFixedUpdate -= FixedTick;
+                    if (dialogsDic[_targetDialogKey].scripts.Count > _scriptsIndex)
+                        button_Continue.gameObject.SetActive(true);
                 }
             }
         }
 
-        private void OnApplicationQuit()
+        private void OnDisable()
         {
             _Input_Conversation.started -= StartConversation;
             _Input_ContinueDialogue.started -= ContinueDialogue;

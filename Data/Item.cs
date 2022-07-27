@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace SK
 {
@@ -57,7 +58,7 @@ namespace SK
         public int Durability;
 
         // 아이템 구매 가격
-        public int ItemPrice;
+        public uint ItemPrice;
 
         // 아이템 설명
         public string Description;
@@ -86,5 +87,31 @@ namespace SK
         public int Buff_Dex;
         // 아이템 사용 시 지능 상승
         public int Buff_Int;
+
+        public override bool Equals(object obj)
+        {
+            Item targetItem = obj as Item;
+
+            // 같은 타입이 아닌 경우 캐스팅에 실패
+            if (obj == null) return false;
+
+            return ItemType == targetItem.ItemType && 
+                   EquipmentType == targetItem.EquipmentType && 
+                   Id == targetItem.Id;
+        }
+
+        public static bool operator ==(Item lhs, Item rhs)
+        {
+            if (lhs is null) // lhs가 널이면 레퍼런스 비교 반환
+                return ReferenceEquals(rhs, null);
+            if (rhs is null) // rhs가 널이면 레퍼런스 비교 반환
+                return ReferenceEquals(lhs, null);
+            // 둘 다 null이 아닌 경우
+            return lhs.Id == rhs.Id && lhs.ItemType == rhs.ItemType
+                && lhs.EquipmentType == rhs.EquipmentType;
+        }
+
+        // 대칭 연산자
+        public static bool operator !=(Item lhs, Item rhs) => !(lhs == rhs);
     }
 }

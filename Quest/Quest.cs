@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
+//using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
+using SK.UI;
 using Debug = UnityEngine.Debug;
 
 namespace SK.Quests
@@ -46,6 +47,7 @@ namespace SK.Quests
         #region Events
         public delegate void NewTaskGroupHandler(Quest quest, TaskGroup currentTaskGroup, TaskGroup prevTaskGroup);
         public delegate void TaskSuccessChangedHandler(Quest quest, Task task, int currentSuccess, int prevSuccess);
+        public delegate void UpdateQuestStateHandler(Quest quest);
         public delegate void CompletedHandler(Quest quest);
         public delegate void CanceledHandler(Quest quest);
         #endregion
@@ -117,17 +119,14 @@ namespace SK.Quests
         internal void SetTaskGroupIndex(int index) { currentTaskGroupindex = index; }
         internal void SetTaskGroupState(TaskGroupState state) { CurrentTaskGroup.State = state; }
 
-        public event NewTaskGroupHandler onNewTaskGroup;
-        public event TaskSuccessChangedHandler onTaskSuccessChanged;
-        public event CompletedHandler onCompleted;
-        public event CanceledHandler onCanceled;
+        public event NewTaskGroupHandler OnNewTaskGroup;
+        public event TaskSuccessChangedHandler OnTaskSuccessChanged;
+        public event UpdateQuestStateHandler OnUpdateQuestState;
+        public event CanceledHandler OnCanceled;
 
         // 퀘스트가 시스템 등록되었을 Awake역할의 함수_220520
-        public void OnRegister()
+        public void OnRegister(bool isNew)
         {
-            // 퀘스트 중복 등록 방지 위한 디버그
-            //Debug.Assert(!IsRegistered, "This quest has already been registered.");
-
             foreach (var taskGroup in taskGroups)
             {
                 // 업무 그룹에 퀘스트 할당_220520
@@ -138,15 +137,27 @@ namespace SK.Quests
                     task.onSuccessChanged += OnSuccessChanged;
             }
 
-            QuestState = QuestState.Running;
-            CurrentTaskGroup.Start();
+            if (isNew)
+            {
+                QuestState = QuestState.Running;
+                CurrentTaskGroup.Start();
+            }
+        }
+
+        // 퀘스트를 새로 추가 시 내부 데이터를 초기화하는 함수_220716
+        public void Initialize()
+        {
+            // 퀘스트 업무 초기화
+            foreach (var taskGroup in taskGroups)
+                taskGroup.Cancel();
+
+            QuestState = QuestState.Inactive;
         }
 
         // 퀘스트 완수를 보고받는 함수_220520
-        public void ReceiveReport(QuestCategory category, object target, int successCount)
+        public void ReceiveReport(object target, int successCount)
         {
-            // 퀘스트 중복 등록 방지 위한 디버그
-            Debug.Assert(!IsRegistered, "This quest has already been registered.");
+            Debug.Log("ReceiveReport");
             // 퀘스트가 취소되었는 지에 대한 디버그
             Debug.Assert(!IsCancel, "This quest has  been canceled.");
 
@@ -165,9 +176,13 @@ namespace SK.Quests
                 {
                     // 완료 대기 상태로 전환
                     QuestState = QuestState.WaitingForCompletion;
+
                     // 자동 완료 옵션인 경우 즉시 완료
                     if (useAutoComplete)
-                        Complete();
+                    {
+                        // TODO: 보상이 지급되지 못한 경우 보상 수령 버튼을 통해 보상 지급 받도록 전환
+                        UIManager.Instance.questManager.CompleteQuest(this);
+                    }
                 }
                 else
                 {
@@ -178,17 +193,34 @@ namespace SK.Quests
                     // 새로 할당된 업무 시작 함수 호출
                     CurrentTaskGroup.Start();
                     // 새로운 업무 등록 콜백 함수 호출
-                    onNewTaskGroup?.Invoke(this, CurrentTaskGroup, prevTaskGroup);
+                    OnNewTaskGroup?.Invoke(this, CurrentTaskGroup, prevTaskGroup);
                 }
             }
             else
                 QuestState = QuestState.Running;
+
+            // 상태 변경에 따른 이벤트 호출(미니 UI 정보 변경)
+            OnUpdateQuestState?.Invoke(this);
+        }
+
+        // 퀘스트를 취소(포기)하는 함수_220520
+        public void Cancel()
+        {
+            //CheckIsRunning();
+            Debug.Assert(IsCancelable, "This quest can't be canceled");
+
+            // 퀘스트 업무 초기화
+            foreach (var taskGroup in taskGroups)
+                taskGroup.Cancel();
+
+            QuestState = QuestState.Cancel;
+            OnCanceled?.Invoke(this);
         }
 
         // 퀘스트 완료하는 함수_220520
         public void Complete()
         {
-            CheckIsRunning();
+            //CheckIsRunning();
 
             // 모든 업무 그룹을 완료하는 함수 호출
             foreach (var taskGroup in taskGroups)
@@ -197,41 +229,26 @@ namespace SK.Quests
             // 퀘스트를 완료 상태로 변경
             QuestState = QuestState.Complete;
 
-            // 보상 지급
-            GameManager.Instance.DataManager.GetReward(reward);
-
-            onCompleted?.Invoke(this);
-
-            onTaskSuccessChanged = null;
-            onCompleted = null;
-            onCanceled = null;
-            onNewTaskGroup = null;
-        }
-
-        // 퀘스트를 취소(포기)하는 함수_220520
-        public void Cancel()
-        {
-            CheckIsRunning();
-            Debug.Assert(IsCancelable, "This quest can't be canceled");
-
-            QuestState = QuestState.Cancel;
-            onCanceled?.Invoke(this);
+            OnTaskSuccessChanged = null;
+            OnUpdateQuestState = null;
+            OnCanceled = null;
+            OnNewTaskGroup = null;
         }
 
         // 업무 이벤트에 퀘스트의 이벤트를 등록하기 위한 콜백 함수_220520
         private void OnSuccessChanged(Task task, int currentSuccess, int prevSuccess)
-            => onTaskSuccessChanged?.Invoke(this, task, currentSuccess, prevSuccess);
+            => OnTaskSuccessChanged?.Invoke(this, task, currentSuccess, prevSuccess);
 
         // 유니티 에디터 상에서만 실행될 수 있도록 어트리뷰트 세팅_220520
-        [Conditional("UNITY_EDITOR")]
+        /*[Conditional("UNITY_EDITOR")]
         private void CheckIsRunning()
         {
             // 퀘스트 중복 등록 방지 위한 디버그
-            Debug.Assert(!IsRegistered, "This quest has already been registered.");
+            Debug.Assert(IsRegistered, "This quest has already been registered.");
             // 퀘스트가 취소되었는 지에 대한 디버그
-            Debug.Assert(!IsCancel, "This quest has  been canceled.");
+            Debug.Assert(IsCancel, "This quest has  been canceled.");
             // 완료 가능한 퀘스트인지 확인하기 위한 디버그
-            Debug.Assert(!IsCompletable, "This quest has already been completed.");
-        }
+            Debug.Assert(IsCompletable, "This quest has already been completed.");
+        }*/
     }
 }

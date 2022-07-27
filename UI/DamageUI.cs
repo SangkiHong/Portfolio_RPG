@@ -17,13 +17,10 @@ namespace SK
         private Transform _transform;
         private Vector3 _anchoredPosition, _tempPos;
         private float _timers;
-        private bool _isAssigned;
 
         private void Awake()
         {
             _transform = transform;
-
-            
             _tempPos.y = offsetY;
         }
 
@@ -32,20 +29,17 @@ namespace SK
             if (!_camera) _camera = Camera.main;
         }
 
-        private void FixedUpdate()
+        private void FixedTick()
         {
-            if (_isAssigned)
-            {
-                // Updating UI Position
-                _transform.position = _camera.WorldToScreenPoint(_anchoredPosition);
-                
-                FloatingText();
-            }
+            // Updating UI Position
+            _transform.position = _camera.WorldToScreenPoint(_anchoredPosition);
+
+            FloatingText();
         }
 
         public void Assign(Vector3 position, uint damageValue, bool isCriticalHit)
         {
-            _isAssigned = true;
+            SceneManager.Instance.OnFixedUpdate += FixedTick;
 
             // Set UI Position
             _tempPos.x = Random.Range(-randomPosValue, randomPosValue + 0.1f);
@@ -53,13 +47,6 @@ namespace SK
             _anchoredPosition = position + _tempPos;
             
             SetUI(damageValue, isCriticalHit);
-        }
-        
-        public void Unassign()
-        {
-            _isAssigned = false;
-            textDamage.gameObject.SetActive(false);
-            Done(true);
         }
 
         private void SetUI(uint value, bool isCriticalHit)
@@ -78,8 +65,11 @@ namespace SK
                 _transform.localPosition += Vector3.up * EasingFunction.EaseOutQuart(0, floatingHeight, _timers / floatingTime);
 
                 // Text off
-                if (_timers>= floatingTime)
-                    UIPoolManager.Instance.ReturnObjectToQueue(gameObject, this);
+                if (_timers >= floatingTime)
+                {
+                    SceneManager.Instance.OnFixedUpdate -= FixedTick;
+                    Done(true);
+                }
             }
         }
     }

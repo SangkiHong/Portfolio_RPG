@@ -11,6 +11,8 @@
 
         internal readonly Enemy enemy;
 
+        private StateBase _puaseState;
+
         public EnemyStateMachine(Enemy enemy)
         {
             this.enemy = enemy;
@@ -25,7 +27,7 @@
         public override void ChangeState(StateBase state)
         {
             // 넉백 중일 경우 다른 상태로 변경 불가
-            if (CurrentState == stateKnockBack)
+            if (enemy.isDead || (CurrentState == stateKnockBack && state != stateCombat))
                 return;
 
             base.ChangeState(state);
@@ -34,8 +36,10 @@
             enemy.currentStateName = state.GetType().Name;
         }
 
+        // 머신 중지
         public void StopMachine(bool withNavAgent = false)
         {
+            _puaseState = CurrentState;
             base.CurrentState = null;
             
             // Stop NavAgent
@@ -44,6 +48,23 @@
                 enemy.navAgent.isStopped = true;
                 enemy.navAgent.updatePosition = false;
                 enemy.navAgent.updateRotation = false;
+            }
+        }
+
+        // 머신 재작동
+        public void RecoverMachine(bool withNavAgent = false)
+        {
+            if (_puaseState != null)
+            {
+                ChangeState(_puaseState);
+
+                // Recover NavAgent
+                if (withNavAgent && enemy.navAgent.isStopped)
+                {
+                    enemy.navAgent.isStopped = false;
+                    enemy.navAgent.updatePosition = true;
+                    enemy.navAgent.updateRotation = true;
+                }
             }
         }
 

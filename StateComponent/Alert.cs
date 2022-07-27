@@ -23,6 +23,7 @@ namespace SK.Behavior
 
         public void SendAlert(GameObject target)
         {
+            // OverlapSphereNonAlloc함수를 이용하여 범위 내 몬스터들의 콜라이더를 받아와서 버프에 저장
             if (Physics.OverlapSphereNonAlloc(_transform.position, _alertRange, _colliderBuff,
                 _enemyLayerMask, QueryTriggerInteraction.Collide) > 0)
             {
@@ -34,9 +35,9 @@ namespace SK.Behavior
                         _temp = (Enemy)SceneManager.Instance.GetUnit(col.gameObject.GetInstanceID());
 
                         // 유닛이 죽지 않고 선택된 타겟이 없으며 경계 알림이 가능하다면
-                        if (!_temp.isDead && !_temp.combat.Target && _temp.canAlert)
+                        if (_temp != null && !_temp.isDead && !_temp.combat.Target && _temp.canAlert)
                             // 유닛의 GetAlrert 함수를 호출하여 현재 타겟을 전달
-                            _temp.GetAlert(target);
+                            _temp.RecieveAlert(target);
                     }
                 }
             }

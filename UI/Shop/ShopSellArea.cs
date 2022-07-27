@@ -15,7 +15,7 @@ namespace SK.UI
 
         private void Start()
         {
-            _inventoryManager = GameManager.Instance.UIManager.inventoryManager;
+            _inventoryManager = UI.UIManager.Instance.inventoryManager;
             _defaultColor = areaImage.color;
             _init = true;
         }

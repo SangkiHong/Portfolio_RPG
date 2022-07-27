@@ -9,11 +9,15 @@ namespace SK.FSM
         private readonly EnemyStateMachine _stateMachine;
 
         private NavMeshHit _hit;
+        private float _fleeDist;
 
         public EnemyStateFlee(Enemy enemyControl, EnemyStateMachine stateMachine)
         {
             _enemy = enemyControl;
             _stateMachine = stateMachine;
+            _fleeDist = _enemy.fleeDistance;
+            // 거리 비교 연산을 위해 제곱
+            _fleeDist *= _fleeDist;
         }
 
         public override void StateInit()
@@ -34,23 +38,26 @@ namespace SK.FSM
             // Set Anim State
             _enemy.anim.SetBool(Strings.AnimPara_onCombat, false);
 
+            // Hp 회복
+            _enemy.health.Recovering();
+
             // 도주할 포인트 탐색
             _enemy.navAgent.SetDestination(GetFleePosition());
         }
 
         public override void FixedTick()
         {
-            if (_enemy.navAgent.remainingDistance < 3)
+            if (!_enemy.isDead)
             {
-                if (_enemy.targetDistance < _enemy.fleeDistance) // Continue Flee
-                    _enemy.navAgent.SetDestination(GetFleePosition());
-                else // End Flee
+                if (_enemy.targetDistance > _fleeDist)
                 {
                     _enemy.UnassignTarget();
                     _enemy.anim.SetBool(Strings.AnimPara_onCombat, true);
                     _stateMachine.ResetPatrol();
                 }
             }
+            else
+                StateExit();
         }
 
         public override void StateExit()
@@ -61,7 +68,7 @@ namespace SK.FSM
 
         private Vector3 GetFleePosition()
         {
-            if (NavMesh.SamplePosition(GetFleePoint(90), out _hit, 3, NavMesh.AllAreas))
+            if (NavMesh.SamplePosition(GetFleePoint(90), out _hit, _enemy.fleeDistance * 0.5f, NavMesh.AllAreas))
             {
                 return _hit.position;
             }
@@ -70,10 +77,11 @@ namespace SK.FSM
 
         private Vector3 GetFleePoint(float angle)
         {
-            float randomVal = UnityEngine.Random.Range(-1f, 1f); // 반원에서 방향을 랜덤 값으로 정함
-            angle = randomVal * angle; // 0 ~ angle 사이의 각을 구함
+            float randomVal = Random.Range(-1f, 1f); // 반원에서 방향을 랜덤 값으로 정함
+            angle = randomVal * (angle * 0.5f); // angle 사이의 각을 구함
 
-            return _enemy.mTransform.position + (_enemy.combat.Target.transform.rotation * Quaternion.Euler(0, angle, 0)) * (Vector3.forward * _enemy.fleeDistance);
+            return _enemy.mTransform.position 
+                + (_enemy.combat.Target.transform.rotation * Quaternion.Euler(0, angle, 0)) * (Vector3.forward * _enemy.fleeDistance);
         }
     }
 }

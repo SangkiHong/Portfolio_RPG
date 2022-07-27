@@ -1,122 +1,196 @@
 using UnityEngine;
-using UnityEngine.Events;
-using System.Collections;
 
-namespace SK
+namespace SK.State
 {
+    [RequireComponent(typeof(HitFX))]
     public sealed class Health : MonoBehaviour
     {
-        public UnityAction onDead;
+        public delegate void onDamagedHandler(uint amount);
+        public delegate void onChangedHandler(uint amount);
+        public delegate void onDeadHandler();
+        public event onDamagedHandler OnDamaged;
+        public event onChangedHandler OnChanged;
+        public event onDeadHandler OnDead;
 
-        [SerializeField] private bool canHitFx;
-        [SerializeField] private bool canDeadFx;
-        [SerializeField] private float hitColorDuration = 0.8f;
-        [SerializeField] private float deadFxDuration = 1.5f;
-        [SerializeField] private uint bonusHpPerLevel;
-        [SerializeField] private uint bonusHpPerSTR;
-        [SerializeField] private uint bonusHpPerDEX;
-        [SerializeField] private uint bonusHpPerINT;
+        [Header("Player Stat Bonus HP")]
+        [SerializeField] private uint bonusHpPerSTR = 5;
+        [SerializeField] private uint bonusHpPerDEX = 3;
+        [SerializeField] private uint bonusHpPerINT = 3;
 
-        private FSM.Unit _unit;
+        private UI.DamagePointUIManager _damagePointUIManager;
+
+        private Data.UnitBaseData _unitData;
         private Transform _transform;
-        private Material material;
-        private Color _hitEmision = new Color(1, 0, 0, 0);
-        private Color _currentEmision;
-        private WaitForSeconds ws;
 
-        private readonly string _emissionColor = "_EmissionColor"; 
-        private readonly string _cutoffHeight = "_CutoffHeight";
-
+        private uint _maxHp, _currentHp;
         private bool _canDamage = true;
-        private uint _currentHp;
-        private float _timer;
+        private bool _isPlayer;
 
-        public uint CurrentHp => _currentHp;
-        public bool CanDamage { set { _canDamage = value; } }
+        // Hp 회복 관련
+        private bool _isRecovering;
+        private float _elapsed;
+        private float _recoverHpAmount; // 초당 Hp 회복량
+        private float _leftRecoverAmount; // 잔여 소수점 Hp 회복량
 
-        public void Init(Transform tr, FSM.Unit unit)
+        // 프로퍼티
+        public uint MaxHp => _maxHp;
+        public uint CurrentHp
         {
-            _unit = unit;
+            get => _currentHp;
+            private set
+            {
+                _currentHp = value;
+
+                // 최대 HP 보다 많아진 경우 제한
+                if (_currentHp > _maxHp)
+                    _currentHp = _maxHp;
+            }
+        }
+        public bool CanDamage => _canDamage;
+
+        // 컴포넌트 초기화
+        public void Initialize(Data.UnitBaseData data, Transform tr, bool isPlayer = false)
+        {
+            _unitData = data;
             _transform = tr;
 
-            if (canHitFx || canDeadFx)
-            {
-                // Materials Instancing
-                SkinnedMeshRenderer[] skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
-                material = skinnedMeshRenderers[0].material;
-                material.EnableKeyword("_EMISSION");
-                material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
-                foreach (var renderer in skinnedMeshRenderers)
-                    renderer.material = material;
+            // 현재 체력 초기화
+            uint unitHp = _unitData.Hp;
 
-                ws = new WaitForSeconds(0.05f);
+            // 플레이어인 경우 스탯 보너스 효과 추가
+            if (_isPlayer = isPlayer)
+            {
+                // 최대 체력 설정
+                _maxHp = (_unitData.Level * 10)
+                    + ((_unitData.Str - 1) * bonusHpPerSTR)
+                    + ((_unitData.Dex - 1) * bonusHpPerDEX)
+                    + ((_unitData.Int - 1) * bonusHpPerINT);
+
+                if (unitHp > 0) _currentHp = unitHp;
+                else _currentHp = _maxHp;
+                UI.UIManager.Instance.playerStateUIHandler.UpdateHp(_currentHp);
+
+                // HP 수치가 최대값보다 적은 경우 회복 시작
+                if (_currentHp < _maxHp)
+                    Recovering();
             }
+            // 몬스터인 경우 데이터의 HP를 그대로 사용
+            else
+            {
+                // 최대 체력 설정
+                _maxHp = _currentHp = data.Hp;
+            }
+
+            // 초당 Hp 회복량
+            _recoverHpAmount = _unitData.RecoverHp;
         }
 
         private void Tick()
         {
-            if (_timer < hitColorDuration)
+            // 현재 수치가 최대값보다 작은 경우
+            if (_currentHp < _maxHp)
             {
-                _timer += Time.deltaTime;
-                _currentEmision.r = Mathf.Lerp(1, 0, _timer / hitColorDuration);
-                material.SetColor(_emissionColor, _currentEmision);
+                _elapsed += Time.deltaTime;
+
+                // 초당 Hp 회복
+                if (_elapsed >= 1)
+                {
+                    RecoverHp(_recoverHpAmount);
+                    _elapsed = 0;
+                }
             }
-            else
-                // 유닛의 업데이트 이벤트 함수에서 해제
-                _unit.OnUpdate -= Tick;
+            else // 최대 값에 다다랐을 경우 업데이트 해제
+                Recovering(false);
         }
 
-        public void Init(uint maxHp) => _currentHp = maxHp;
-
-        public void Init(uint level, uint s, uint d, uint i)
+        // 최대 체력 설정
+        public void SetMaxHp(Data.UnitBaseData data)
         {
-            _currentHp = (level * bonusHpPerLevel)
-                      + ((s - 1) * bonusHpPerSTR)
-                      + ((d - 1) * bonusHpPerDEX)
-                      + ((i - 1) * bonusHpPerINT);
+            _maxHp = (data.Level * 10) + ((data.Str - 1) * bonusHpPerSTR)
+                   + ((data.Dex - 1) * bonusHpPerDEX) + ((data.Int - 1) * bonusHpPerINT);
+            UI.UIManager.Instance.playerStateUIHandler.SetMaxHp(_maxHp);
+            _currentHp = _maxHp;
+            OnChanged?.Invoke(_currentHp);
         }
+
+        // 타격 가능 상태 변경
+        public void SetDamagableState(bool isOn) => _canDamage = isOn;
 
         // 타격 입을 지에 대한 판정에 따라 호출됨
         public void OnDamage(uint damage, bool isCritical)
         {
-            _currentHp -= damage;
+            if (_currentHp == 0 || !_canDamage) return;
+
+            if (_currentHp <= damage) _currentHp = 0;
+            else _currentHp -= damage;
+            Debug.Log($"{name}가 {damage}의 데미지를 받아 HP가 {CurrentHp} 가 되었습니다.");
+
+            // 초기화
+            if (_damagePointUIManager == null)
+                _damagePointUIManager = UI.UIManager.Instance.damagePointUIManager;
 
             // 데미지 수치 UI 표시
-            UIPoolManager.Instance.GetObject(Strings.PoolName_DamagePoint, Vector3.zero).GetComponent<DamageUI>().
-                Assign(_transform.position, damage, isCritical);
+            _damagePointUIManager.DisplayPoint(_transform.position, damage, isCritical);
 
-            // 피격 시 Emission 효과 발동
-            if (canHitFx)
+            // 피격 당한 경우
+            if (_currentHp > 0)
             {
-                material.SetColor(_emissionColor, _hitEmision);
+                // 플레이어인 경우 피격 즉시 HP 회복 시작
+                if (_isPlayer)
+                {
+                    Recovering();
+                }
 
-                _timer = 0;
-                // 유닛의 업데이트 이벤트 함수에 등록
-                _unit.OnUpdate += Tick;
+                OnDamaged?.Invoke(_currentHp);
             }
-
-            // HP가 0이 되었을 경우 죽음
-            if (CurrentHp <= 0) 
+            // HP가 0이 된 경우
+            else
             {
-                onDead?.Invoke();
+                // HP 회복 중단
+                Recovering(false);
+
+                OnDead?.Invoke();
             }
         }
 
-        public void PlayDeadFx() => StartCoroutine(DeadFx());
-
-        IEnumerator DeadFx()
+        // 회복 시작 또는 중단
+        public void Recovering(bool isRecovering = true)
         {
-            _timer = deadFxDuration + 1.5f;
-            while (_timer > -1)
+            if (_isRecovering != isRecovering)
             {
-                _timer -= 0.05f;
-                if (_timer <= 1.5f)
-                {
-                    material.SetFloat(_cutoffHeight, _timer);
-                }
-                yield return ws;
+                _isRecovering = isRecovering;
+                if (_isRecovering) SceneManager.Instance.OnUpdate += Tick;
+                else SceneManager.Instance.OnUpdate -= Tick;
             }
-            gameObject.SetActive(false);
+        }
+
+        // 체력 회복
+        public void RecoverHp(float amount)
+        {
+            // 정수부, 소수부 분리
+            uint integerAmount = (uint)amount;
+            float leftAmount = amount - integerAmount;
+
+            // 잔여 회복량에 소수부 추가
+            _leftRecoverAmount += leftAmount;
+
+            // 잔여 회복량이 1보다 크면 정수부 분리
+            if (_leftRecoverAmount > 1)
+            {
+                uint integerLeftAmount = (uint)_leftRecoverAmount;
+                // 잔여량에서 정수부 차감
+                _leftRecoverAmount -= integerLeftAmount;
+                integerAmount += integerLeftAmount;
+            }
+            CurrentHp += integerAmount;
+            OnChanged?.Invoke(_currentHp);
+        }
+
+        // 체력 회복
+        public void RecoverHp(uint amount)
+        {
+            CurrentHp += amount;
+            OnChanged?.Invoke(_currentHp);
         }
     }
 }

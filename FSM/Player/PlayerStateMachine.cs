@@ -16,5 +16,8 @@
 
             ChangeState(locomotionState);
         }
+
+        public void StopMachine()
+            => CurrentState = null;
     }
 }

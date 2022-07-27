@@ -12,7 +12,8 @@ namespace SK
             EquipmentShop
         }
 
-        [SerializeField] private string codeName;
+        [SerializeField] private string codeName; // 코드 내부 사용할 NPC 이름
+        [SerializeField] private string displayName; // UI에 표시될 NPC 이름
         [SerializeField] private NPCType npctype; // NPC 타입
         [SerializeField] private Collider _thisCollider; // NPC의 콜라이더
         [SerializeField] private Quests.Quest[] npcQuests; // NPC의 퀘스트
@@ -20,8 +21,10 @@ namespace SK
         [Header("Looking")]
         [SerializeField] private bool canRotating; // 대화 시 플레이어를 바라볼 수 있는 지의 여부
         [SerializeField] private float lookTime = 1; // 플레이어 바라보는 시간
+        public Transform lookTarget;
 
         // 프로퍼티
+        public string DisplayName => displayName;
         public NPCType NpcType => npctype;
         public IReadOnlyList<Quests.Quest> NpcQuests => npcQuests;
 
@@ -55,7 +58,7 @@ namespace SK
             {
                 _playerCollider = GameManager.Instance.Player.thisCollider;
                 _playerTransform = GameManager.Instance.Player.transform;
-                _dialgueAngle = GameManager.Instance.UIManager.dialogManager.dialogueAngle;
+                _dialgueAngle = UI.UIManager.Instance.dialogManager.dialogueAngle;
             }
 
             #region Bounds를 이용한 콜라이더의 AABB 충돌체크
@@ -116,7 +119,7 @@ namespace SK
 
 
                 // Dialog Manager에게 NPC 대화 상대 할당
-                GameManager.Instance.UIManager.dialogManager.AssignNPC(codeName);
+                UI.UIManager.Instance.dialogManager.AssignNPC(codeName);
             }
             // 비활성화인 경우
             else
@@ -125,7 +128,7 @@ namespace SK
 
 
                 // Dialog Manager에게 NPC 대화 상대 할당 해제
-                GameManager.Instance.UIManager.dialogManager.UnassignNPC();
+                UI.UIManager.Instance.dialogManager.UnassignNPC();
             }
         }
 

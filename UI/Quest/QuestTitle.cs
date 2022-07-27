@@ -21,6 +21,7 @@ namespace SK.UI
         public Text titleText;
         // 퀘스트 폴드 버튼
         public Button foldButton;
+
         // 퀘스트에 속한 업무 클래스 리스트
         internal List<QuestTask> tasks;
 
@@ -50,10 +51,12 @@ namespace SK.UI
         public void AssignQuest(Quest quest)
         {
             _isAssigned = true;
+            _assignedQuest = quest;
 
             gameObject.SetActive(true);
 
-            _assignedQuest = quest;
+            bool isCompleted = _assignedQuest.QuestState == QuestState.Complete;
+
             for (int i = 0; i < _assignedQuest.TaskGroups.Count; i++)
             {
                 // 업무 그룹이 활성화되지 않았으면 루프문 빠져나옴
@@ -71,12 +74,12 @@ namespace SK.UI
                     }
 
                     // 퀘스트 업무 할당
-                    tasks[j].Assign(_assignedQuest.TaskGroups[i].Tasks[j]);
+                    tasks[j].Assign(_assignedQuest.TaskGroups[i].Tasks[j], isCompleted);
                 }
             }
 
             // 퀘스트의 카테고리를 텍스트로 표시
-            categoryText.text = _assignedQuest.QuestState != QuestState.Complete ?
+            categoryText.text = !isCompleted ? 
                 _categoryTexts[(int)_assignedQuest.Category.questCategory] : _categoryTexts[3];
 
             // 퀘스트의 타이틀을 텍스트로 표시

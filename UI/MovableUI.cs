@@ -18,7 +18,7 @@ namespace SK.UI
             => _targetWindow = targetUI.GetComponent<CanvasGroup>();
 
         private void Start()
-            => _uiManager = GameManager.Instance.UIManager;
+            => _uiManager = UI.UIManager.Instance;
         
         public void OnBeginDrag(PointerEventData eventData)
             => _offsetPos = targetUI.position - (Vector3)eventData.position;
@@ -32,6 +32,9 @@ namespace SK.UI
 
         // 해당 UI 창이 가장 앞으로 오도록 Sibling 변경
         public void OnPointerDown(PointerEventData eventData)
-            => _uiManager.VisibleWindowAtFront(_targetWindow);        
+        {
+            if (_targetWindow)
+                _uiManager.VisibleWindowAtFront(_targetWindow);
+        }
     }
 }

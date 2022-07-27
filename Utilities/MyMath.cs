@@ -53,7 +53,7 @@ namespace SK.Utilities
             var z = targetPos.z - currentPos.z;
 
             // 타겟과의 거리 업데이트하여 변수에 저장
-            return (x * 2) + (y * 2) + (z * 2);
+            return (x * x) + (y * y) + (z * z);
         }
     }
 }

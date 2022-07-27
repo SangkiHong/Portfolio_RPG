@@ -4,15 +4,20 @@ using SK.Quests;
 
 namespace SK.UI
 {
+    /* 작성자: 홍상기
+     * 내용: 플레이 화면에 표시될 퀘스트 미니 정보창 관리자 클래스
+     * 작성일: 22년 6월 16일
+     */
+
     public class QuestMiniInfoManager : MonoBehaviour
-    {
+    {        
         [Header("Prefab")]
         [SerializeField] private GameObject miniInfoPrefab;
 
         [Header("Component")]
         [SerializeField] private Transform listParent;
 
-        // 퀘스트 미니 인포를 담을 딕셔너리
+        // 퀘스트 미니 인포를 담을 딕셔너리(키: 퀘스트의 인스턴스ID, 값: 컴포넌트)
         private Dictionary<int, QuestMiniInfo> _questMiniDic;
         // 사용 후 재사용 대기할 큐
         private Queue<QuestMiniInfo> _restingQuestMiniQueue;
@@ -23,6 +28,8 @@ namespace SK.UI
         {
             _questMiniDic = new Dictionary<int, QuestMiniInfo>();
             _restingQuestMiniQueue = new Queue<QuestMiniInfo>();
+
+            Invoke("UpdateVerticalLayout", 1.2f);
         }
 
         public void AddMiniInfo(Quest quest)
@@ -39,6 +46,9 @@ namespace SK.UI
 
             // 인포 딕셔너리에 추가
             _questMiniDic.Add(quest.GetInstanceID(), _tempInfo);
+
+            // 레이아웃 업데이트
+            UpdateVerticalLayout();
         }
 
         public void RemoveMiniInfo(Quest quest)
@@ -51,6 +61,23 @@ namespace SK.UI
             // 할당 해제 후 재사용 대기 큐에 추가
             _tempInfo.Unassign();
             _restingQuestMiniQueue.Enqueue(_tempInfo);
+        }
+
+        private void UpdateVerticalLayout()
+        {
+            Transform tempTr;
+            Vector3 tempLocalPos;
+            float yPos = -30;
+            float gap = 5;
+
+            foreach (KeyValuePair<int, QuestMiniInfo> miniInfo in _questMiniDic)
+            {
+                tempTr = miniInfo.Value.transform;
+                tempLocalPos = tempTr.localPosition;
+                tempLocalPos.y = yPos;
+                tempTr.localPosition = tempLocalPos;
+                yPos -= (tempTr as RectTransform).sizeDelta.y + gap;
+            }
         }
     }
 }

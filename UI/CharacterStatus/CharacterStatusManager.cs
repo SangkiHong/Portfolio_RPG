@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using SK.State;
 
 namespace SK.UI
 {
@@ -18,6 +19,7 @@ namespace SK.UI
 
         [SerializeField] private StatsText text_Level;
         [SerializeField] private StatsText text_Exp;
+        [SerializeField] private StatsText text_StatPoint;
 
         [Space]
 
@@ -49,13 +51,20 @@ namespace SK.UI
         [SerializeField] private StatsText text_RecoverMP;
         [SerializeField] private StatsText text_RecoverSP;
 
+        private Health _playerHealth;
+        private Mana _playerMana;
+        private Stamina _playerStamina;
         private Data.PlayerData _playerData;
         private Vector2 _attackRange;
 
         public void Initialize()
         {
             _playerData = GameManager.Instance.DataManager.PlayerData;
+            _playerHealth = GameManager.Instance.Player.health;
+            _playerMana = GameManager.Instance.Player.mana;
+            _playerStamina = GameManager.Instance.Player.stamina;
 
+            PlayerLevelManager.Instance.OnLevelUp += UpdateInformaion;
             UpdateInformaion();
         }
 
@@ -63,13 +72,14 @@ namespace SK.UI
         public void UpdateInformaion()
         {
             // Text Ç¥½Ã
-            text_CharacterName.text = _playerData.Name;
+            text_CharacterName.text = _playerData.DisplayName;
             text_Level.statsValue.text = _playerData.Level.ToString();
             text_Exp.statsValue.text = _playerData.Exp.ToString();
+            text_StatPoint.statsValue.text = _playerData.StatPoint.ToString();
 
-            text_MaxHp.statsValue.text = _playerData.MaxHp.ToString();
-            text_MaxMp.statsValue.text = _playerData.MaxMp.ToString();
-            text_MaxSp.statsValue.text = _playerData.MaxSp.ToString();
+            text_MaxHp.statsValue.text = _playerHealth.MaxHp.ToString();
+            text_MaxMp.statsValue.text = _playerMana.MaxMp.ToString();
+            text_MaxSp.statsValue.text = _playerStamina.MaxSp.ToString();
 
             text_Str.statsValue.text = _playerData.Str.ToString();
             text_Dex.statsValue.text = _playerData.Dex.ToString();

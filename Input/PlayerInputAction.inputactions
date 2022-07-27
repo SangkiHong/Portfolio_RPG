@@ -586,45 +586,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "GamePlay_Inventory",
-                    "type": "Button",
-                    "id": "417ed44e-f67d-4a55-9700-26d437006be9",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Press",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "GamePlay_CharacterStats",
-                    "type": "Button",
-                    "id": "f70792d3-3d76-4a90-93c9-0532fc50eefc",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Press",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "GamePlay_Quest",
-                    "type": "Button",
-                    "id": "4a059088-2eb1-4754-babc-9ed761d14200",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Press",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "GamePlay_CloseAll",
-                    "type": "Button",
-                    "id": "3f7da6c8-f818-433f-9ecf-6acb8016075f",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Press",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Conversation",
                     "type": "Button",
                     "id": "f59f1be8-b9e9-414c-881a-487b1a348092",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Confirm",
+                    "type": "Button",
+                    "id": "40a08688-c879-405a-bd2f-82e535ff0553",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -1041,39 +1014,6 @@
                 },
                 {
                     "name": "",
-                    "id": "520115c4-5067-4d21-99a7-16f56d6022fd",
-                    "path": "<Keyboard>/i",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "GamePlay_Inventory",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "f20b8c63-e398-4059-9042-ce7eba4276a0",
-                    "path": "<Keyboard>/c",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "GamePlay_CharacterStats",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "bbe26568-d14a-491f-ac71-32b039cf63d1",
-                    "path": "<Keyboard>/escape",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "GamePlay_CloseAll",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "997b421b-e9e3-4a37-8551-6f7294ab2286",
                     "path": "<Mouse>/rightButton",
                     "interactions": "Tap(duration=0.3)",
@@ -1096,23 +1036,23 @@
                 },
                 {
                     "name": "",
-                    "id": "9179382d-de39-4b2a-b8a0-fbabe1ab4299",
-                    "path": "<Keyboard>/j",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "GamePlay_Quest",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "851e662c-75b9-4c02-a998-193ed8bad4c5",
                     "path": "<Keyboard>/r",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Conversation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "931f8569-a643-44dd-acb9-d535546a3b9c",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Confirm",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -1258,6 +1198,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "UI_Skill",
+                    "type": "Button",
+                    "id": "994d1e76-5c61-4de2-9f73-26ae8270d954",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "CloseDialogue",
                     "type": "Button",
                     "id": "987f433e-d537-4891-a114-b9ff3ef379a6",
@@ -1270,6 +1219,24 @@
                     "name": "ContinueDialogue",
                     "type": "Button",
                     "id": "db0303f1-1307-4e63-be2a-915069eb3f05",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "UI_ZoomIn",
+                    "type": "Button",
+                    "id": "eabec4bc-c412-4ed6-b5f6-3130b0b9040c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "UI_ZoomOut",
+                    "type": "Button",
+                    "id": "5be2ce53-d009-458b-985c-401e98a92926",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -1769,6 +1736,425 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "CloseDialogue",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a8300f93-d30c-4c37-9f4f-6e51da2dd51c",
+                    "path": "<Keyboard>/k",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "UI_Skill",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5446dfd3-74fa-40d2-aff9-304f0bf8264a",
+                    "path": "<Keyboard>/equals",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "UI_ZoomIn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e1d813d9-b762-41f5-ba2f-d08371dbe81b",
+                    "path": "<Keyboard>/numpadPlus",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "UI_ZoomIn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5a9601d6-bd16-472a-aabd-6e1ef409f1ef",
+                    "path": "<Keyboard>/minus",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "UI_ZoomOut",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "08e6fa7f-d92a-4131-bfba-5260c076b58c",
+                    "path": "<Keyboard>/numpadMinus",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "UI_ZoomOut",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "QuickSlot",
+            "id": "01f027ec-0abb-4bf1-9474-1b176f4c2ffe",
+            "actions": [
+                {
+                    "name": "QuickSlot_SkillQ",
+                    "type": "Button",
+                    "id": "542dd851-5ebb-415e-b6a8-400c9b8f5f2d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_SkillE",
+                    "type": "Button",
+                    "id": "edd0ed1c-56d5-42d2-b2d0-ed25b5261cfd",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_1",
+                    "type": "Button",
+                    "id": "cfe38e17-d9e8-448b-927c-4aa3f1b3367f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_2",
+                    "type": "Button",
+                    "id": "3832bfc7-0f33-45d3-abf7-618829f1e8cb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_3",
+                    "type": "Button",
+                    "id": "b09847fb-1edc-4c76-b706-e9bbe34720dd",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_4",
+                    "type": "Button",
+                    "id": "ea112452-c0da-4787-a691-1ab79797ce37",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_5",
+                    "type": "Button",
+                    "id": "176f2365-8a81-46ab-b367-f616c5adabfb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_6",
+                    "type": "Button",
+                    "id": "af2d140f-23ca-4053-b717-46bfb1eb5fce",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_7",
+                    "type": "Button",
+                    "id": "90339555-0d44-4d25-9e52-abae733cd228",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_8",
+                    "type": "Button",
+                    "id": "401f04fb-4776-4f66-8693-4bd9be3c696d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_9",
+                    "type": "Button",
+                    "id": "9b7923b4-cc20-4bf8-bd23-51322b3d9161",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot_0",
+                    "type": "Button",
+                    "id": "600641ec-61ac-4abd-9721-11d20b669374",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "4464ab7f-183c-4be2-9d48-c24afde702fe",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1de27a7c-ddb5-4ec7-b6bc-4aa770255ecb",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "35b510bc-4f84-498e-b1fe-6054fc09ea88",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cd41d4f6-0c3e-4004-9591-482d0afe0dcd",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "09f4be44-7448-4dc4-8425-770a1523182c",
+                    "path": "<Keyboard>/5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2269e852-f926-4ae2-b2f0-e1f6467cc3b4",
+                    "path": "<Keyboard>/6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_6",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1c259c56-be66-4289-baee-d086438a0866",
+                    "path": "<Keyboard>/7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_7",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e3dd84d7-fdca-4f56-83a0-f0cda3859bf2",
+                    "path": "<Keyboard>/8",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_8",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "59a23c20-1a18-4abd-a13b-c2379b7695b6",
+                    "path": "<Keyboard>/9",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_9",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1e986efb-00b2-40aa-86c7-fa21c0f298a3",
+                    "path": "<Keyboard>/0",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_0",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d7b9e70c-c1de-4d53-8ddc-1c663e628edb",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_SkillQ",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eaa2f25a-aaae-49d6-8e70-5461fdf3dc38",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "QuickSlot_SkillE",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Looting",
+            "id": "53bfcb64-e79d-4182-bb14-3f225e4a2b27",
+            "actions": [
+                {
+                    "name": "OpenLootItemList",
+                    "type": "Button",
+                    "id": "cb7b474a-dba9-4f66-8ac7-547957b3bcb9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LootAllItems",
+                    "type": "Button",
+                    "id": "a7a1b077-4662-456c-b0eb-858944252a17",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CloseList",
+                    "type": "Button",
+                    "id": "ed6b568b-6cd3-421b-9a94-251ef6d99ff6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "4bccd4bb-2cdc-4b4a-b7aa-7deceecf642c",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "OpenLootItemList",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "04c6a33f-6e10-45b8-a092-8c010f7b130e",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "LootAllItems",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4b186f4-137a-484f-84c6-530505175bf9",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "CloseList",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Targeting",
+            "id": "f681ef79-cf6a-4b7b-b3bc-4e61f884909c",
+            "actions": [
+                {
+                    "name": "TargetChange_Left",
+                    "type": "Button",
+                    "id": "8a043b04-6fc4-43dd-9597-2b7831a5b802",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TargetChange_Right",
+                    "type": "Button",
+                    "id": "5f6732b5-03c4-42cd-a54a-692c97ede90f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "918fe365-8418-47ff-8d2d-5b94f9258225",
+                    "path": "<Keyboard>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "TargetChange_Left",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "78eac030-ce8f-4843-b0ac-ad855eabb7d0",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "TargetChange_Right",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

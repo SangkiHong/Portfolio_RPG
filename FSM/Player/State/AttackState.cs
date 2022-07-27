@@ -13,12 +13,15 @@ namespace SK.FSM
         public override void StateInit()
         {
             _player.onCombatMode = true;
-            _player.combat.canComboAttack = false;
+            _player.combat.SetComboState(false);
             _player.anim.SetBool(Strings.animPara_isInteracting, true);
+            // 방패 해제
+            _player.inputActions.Unshielding();
 
-            if (_player.combat.currentAttack.onRootMotion)
+            if (_player.combat.CurrentAttack.onRootMotion)
                 _player.EnableRootMotion();
 
+            // 카메라 전방 방향을 목표 회전 값으로 저장
             _targetDir = _player.cameraManager.transform.forward;
             _targetDir.y = 0;
             _lookRot = Quaternion.LookRotation(_targetDir);
@@ -39,7 +42,8 @@ namespace SK.FSM
         }
         public override void StateExit()
         {
-            _player.combat.canComboAttack = true;
+            _player.onUninterruptible = false;
+            _player.combat.SetComboState(true);
             _player.DisableRootMotion();
         }
     }

@@ -15,17 +15,7 @@ public class PoolManager : MonoBehaviour
 
 	static PoolManager _instance;
 
-	public static PoolManager instance 
-	{
-		get 
-		{
-			if (_instance == null) 
-			{
-				_instance = FindObjectOfType<PoolManager>();
-			}
-			return _instance;
-		}
-	}
+	public static PoolManager Instance { get; private set; }
 
 	[Serializable]
 	public struct PoolList
@@ -38,8 +28,16 @@ public class PoolManager : MonoBehaviour
 	private List<PoolList> poolLists;
 
     private void Awake()
-    {
-        if (poolLists.Count != 0)
+	{
+		if (Instance == null)
+		{
+			Instance = this;
+			DontDestroyOnLoad(this);
+		}
+		else
+			Destroy(gameObject);
+
+		if (poolLists.Count != 0)
         {
             for (int i = 0; i < poolLists.Count; i++)
 				CreatePool(poolLists[i].prefab.name, poolLists[i].prefab, poolLists[i].seedSize);

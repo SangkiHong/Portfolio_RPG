@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using SK.Data;
 
 namespace SK.UI
 {
@@ -22,8 +23,8 @@ namespace SK.UI
     public class ShopManager : MonoBehaviour
     {
         [Header("Reference")]
-        [SerializeField] private AmountInputPanel inputPanel;
         [SerializeField] private ShopTabHandler tabHandler;
+        [SerializeField] private AmountInputPanel inputPanel;
 
         [Header("Component")]
         [SerializeField] private CanvasGroup shopWindow;
@@ -37,7 +38,7 @@ namespace SK.UI
         [Header("UI Setting")]
         [SerializeField] private Color highlightColor;
 
-        public int ShopMode { get; private set; } // 0: 구매, 1: 판매
+        public int ShopMode { get; private set; } // -1: None, 0: 구매, 1: 판매
 
         private List<ShopItemSlot> shopItemSlots;
         private List<Item> _propsItemList;
@@ -49,11 +50,24 @@ namespace SK.UI
         private ShopItemSlot _selectedSlot;
         private InventorySlot _sellItemSlot;
 
+        private DataManager _dataManager;
+        private UIManager _uiManager;
+        private InventoryManager _inventoryManager;
+
         private CanvasGroup _inventoryWindow;
         private RectTransform _sellAreaRT;
 
+        // 상점 아이템 수량을 저장할 변수
         private int _propsItemCount, _equipmentsItemCount;
+        // 슬롯 인덱스
         private int _addSlotIndex, _selectedSlotIndex = -1;
+        // 판매 아이템 수량
+        private uint _confirmAmount;
+
+        private void Awake()
+        {
+            _sellAreaRT = sellArea.transform as RectTransform;
+        }
 
         private void OnDisable()
         {
@@ -67,27 +81,27 @@ namespace SK.UI
             }
         }
 
-        private void Awake()
-        {
-            _sellAreaRT = sellArea.transform as RectTransform;
-        }
-
         // 상점 데이터 정보 초기화
         public void Initialize()
         {
+            // 레퍼런스 저장
+            _dataManager = GameManager.Instance.DataManager;
+            _uiManager = UI.UIManager.Instance;
+            _inventoryManager = _uiManager.inventoryManager;
+
             // 리스트 초기화
             if (_propsItemList == null) _propsItemList = new List<Item>();
             if (_equipmentsItemList == null) _equipmentsItemList = new List<Item>();
 
             // 잡화 상점의 판매 아이템 리스트 데이터를 가져와서 리스트에 저장
-            GameManager.Instance.DataManager.GetShopList(0, ref _propsItemList);
+            _dataManager.GetShopList(0, ref _propsItemList);
             // 장비 상점의 판매 아이템 리스트 데이터를 가져와서 리스트에 저장
-            GameManager.Instance.DataManager.GetShopList(1, ref _equipmentsItemList);
+            _dataManager.GetShopList(1, ref _equipmentsItemList);
 
             _currentShopType = ShopType.None;
 
             // 인벤토리 창 변수 저장
-            _inventoryWindow = GameManager.Instance.UIManager.window_Invenroty;
+            _inventoryWindow = UI.UIManager.Instance.window_Invenroty;
 
             // 슬롯 초기화
             var slotArr = slotParent.GetComponentsInChildren<ShopItemSlot>();
@@ -135,10 +149,47 @@ namespace SK.UI
             tabHandler.OnChanged += ChangeTab;
         }
 
+        // 상점 관련 창, 패널 닫음
+        public void ClosePanelAndWindowButton()
+        {
+            if(_uiManager.confirmPanel.IsShow)
+                _uiManager.confirmPanel.Cancel();
+
+            if (_uiManager.inventoryManager.itemSpecificsPanel.IsOpen)
+                _uiManager.inventoryManager.itemSpecificsPanel.Close();
+
+            if (inputPanel.gameObject.activeSelf)
+            {
+                shopItemSlots[_selectedSlotIndex].Highlight(false);
+                inputPanel.gameObject.SetActive(false);
+                inputPanel.OnConfirmAmount -= ConfirmAmount;
+            }
+
+            if (shopWindow.blocksRaycasts)
+            {
+                // 상점 창 닫음
+                shopWindow.alpha = 0;
+                shopWindow.blocksRaycasts = false;
+
+                // 인벤토리 창도 함께 닫음
+                _inventoryWindow.alpha = 0;
+                _inventoryWindow.blocksRaycasts = false;
+
+                // 상점 모드 초기화
+                ShopMode = -1;
+                tabHandler.Reset();
+            }
+        }
+
         // 상점 관련 창, 패널 UI 닫음
         public bool ClosePanelAndWindow()
         {
-            if (inputPanel.gameObject.activeSelf)
+            if (_uiManager.confirmPanel.IsShow)
+            {
+                _uiManager.confirmPanel.Cancel();
+                return true;
+            }
+            else if (inputPanel.gameObject.activeSelf)
             {
                 shopItemSlots[_selectedSlotIndex].Highlight(false);
                 inputPanel.gameObject.SetActive(false);
@@ -154,13 +205,14 @@ namespace SK.UI
                 // 인벤토리 창도 함께 닫음
                 _inventoryWindow.alpha = 0;
                 _inventoryWindow.blocksRaycasts = false;
-                    
+
                 // 상점 모드 초기화
+                ShopMode = -1;
                 tabHandler.Reset();
                 return true;
             }
-            else
-                return false;
+
+            return false;
         }
 
         // 상점 창 여는 함수
@@ -178,7 +230,10 @@ namespace SK.UI
 
             // 상점 모드 초기화
             if (ShopMode != 0)
+            {
+                ShopMode = 0;
                 tabHandler.Reset();
+            }
 
             // 이전에 열었던 상점과 동일하면 상점 UI 업데이트를 하지 않음
             if (_currentShopType == shopType) 
@@ -215,17 +270,18 @@ namespace SK.UI
             // 수량이 0 이상인 경우
             if (amount != 0)
             {
+                _confirmAmount = amount;
                 // 구매 모드
                 if (ShopMode == 0)
                 {
-                    Debug.Log($"구매 아이템: {shopItemSlots[_selectedSlotIndex].AssignedItem.ItemName}, 수량: {amount}");
+                    BuyItem();
                 }
                 // 판매 모드
                 else
                 {
-                    Debug.Log($"아이템 판매: {_sellItemSlot.AssignedItem.ItemName}, 수량: {amount}");
-                    // TODO: 판매 확정 안내 UI 표시
-
+                    // 판매 확정 안내 UI 표시
+                    _uiManager.confirmPanel.ShowInfo(InfoType.SellItem);
+                    _uiManager.confirmPanel.OnConfirmed += SellItem;
                 }
             }
             else
@@ -236,10 +292,78 @@ namespace SK.UI
                 shopItemSlots[_selectedSlotIndex].Highlight(false);
         }
 
+        // 아이템 구매_220617
+        private void BuyItem()
+        {
+            Debug.Log($"구매 아이템: {shopItemSlots[_selectedSlotIndex].AssignedItem.ItemName}, 수량: {_confirmAmount}");
+
+            _selectedItem = shopItemSlots[_selectedSlotIndex].AssignedItem;
+            // 구매한 아이템 데이터, 인벤토리 추가
+            if (_dataManager.AddItem(_selectedItem, _confirmAmount, true))
+                _dataManager.SubtractGold(_selectedItem.ItemPrice * _confirmAmount); // 구매 금액을 플레이어 소지 금액에서 차감
+            else // 아이템 지급이 안된 경우
+                _uiManager.confirmPanel.ShowInfo(InfoType.NotEnoughSlot);
+
+            // 효과음 재생
+            AudioManager.Instance.PlayAudio(Strings.Audio_UI_BuyItem);
+        }
+
+        // 아이템 판매 시도_220617
+        public void TrySellItem(InventorySlot itemSlot)
+        {
+            // 아이템을 착용한 상태인 경우
+            if (itemSlot.IsEquiped)
+            {
+                // 착용 해제 요구 안내 UI 표시
+                _uiManager.confirmPanel.ShowInfo(InfoType.UnequipItem);
+                return;
+            }
+
+            _sellItemSlot = itemSlot;
+
+            var itemAmount = _sellItemSlot.GetItemAmount();
+            // 아이템 갯수가 2개 이상인 경우
+            if (itemAmount > 1)
+            {
+                // 판매 모드로 수량 확인 패널 열기
+                inputPanel.SetPanel(2, itemAmount);
+                // 이벤트 할당
+                inputPanel.OnConfirmAmount += ConfirmAmount;
+            }
+            else
+            {
+                _confirmAmount = itemAmount;
+                // 판매 확정 안내 UI 표시
+                _uiManager.confirmPanel.ShowInfo(InfoType.SellItem);
+                // 이벤트 할당
+                _uiManager.confirmPanel.OnConfirmed += SellItem;
+            }
+        }
+
+        // 아이템 판매_220617
+        private void SellItem()
+        {
+            Debug.Log($"아이템 판매: {_sellItemSlot.AssignedItem.ItemName}, 수량: {_confirmAmount}");
+
+            // 판매 금액 플레이어 소지 금액에 추가
+            _dataManager.AddGold(_sellItemSlot.AssignedItem.ItemPrice * _confirmAmount);
+            // 데이터에서 아이템 수량 차감 또는 삭제
+            _dataManager.DeleteItemData(_sellItemSlot, _sellItemSlot.OriginSlotID == -1 ? 
+                            _sellItemSlot.slotID : _sellItemSlot.OriginSlotID, _confirmAmount);
+            // 인벤토리 슬롯의 수량 차감 또는 슬롯 할당 해제
+            _inventoryManager.DeleteItem(_sellItemSlot.slotID, _confirmAmount);
+
+            // 효과음 재생
+            AudioManager.Instance.PlayAudio(Strings.Audio_UI_SellItem);
+        }
+
         // 구매 판매 탭 전환
         public void ChangeTab(int index)
         {
             ShopMode = index;
+
+            // 아이템 상세 UI 꺼짐
+            _uiManager.inventoryManager.itemSpecificsPanel.Close();
 
             // 구매 모드
             if (ShopMode == 0)
@@ -258,6 +382,9 @@ namespace SK.UI
         // 판매할 아이템을 드랍영역에 떨어뜨렸는지 확인하는 함수_220616
         public void CheckSellItemDropArea(PointerEventData eventData, InventorySlot itemSlot)
         {
+            // 할당되지 않은 슬롯인 경우 즉시 반환
+            if (!itemSlot.IsAssigned) return;
+
             var dropPos = eventData.position;
 
             var rectPos = _sellAreaRT.position;
@@ -266,33 +393,8 @@ namespace SK.UI
 
             // 드랍영역에 아이템을 드랍한 경우 아이템 판매
             if (rectPos.x - width <= dropPos.x && dropPos.x <= rectPos.x + width &&
-                rectPos.y - height <= dropPos.y && dropPos.y <= rectPos.y + height)
-            {
-                // 아이템을 착용한 상태인 경우
-                if (itemSlot.IsEquiped)
-                {
-                    // TODO: 착용 해제 요구 안내 UI 표시
-
-                    return;
-                }
-
-                _sellItemSlot = itemSlot;
-
-                var itemAmount = _sellItemSlot.GetItemAmount();
-                // 아이템 갯수가 2개 이상인 경우
-                if (itemAmount > 1)
-                {
-                    // 판매 모드로 수량 확인 패널 열기
-                    inputPanel.SetPanel(2, itemAmount);
-                    // 이벤트 할당
-                    inputPanel.OnConfirmAmount += ConfirmAmount;
-                }
-                else
-                {
-                    // TODO: 판매 확정 안내 UI 표시
-
-                }
-            }
+                    rectPos.y - height <= dropPos.y && dropPos.y <= rectPos.y + height)
+                TrySellItem(itemSlot);
         }
 
         #region Event
@@ -303,18 +405,22 @@ namespace SK.UI
             if (_selectedSlotIndex != -1)
                 shopItemSlots[_selectedSlotIndex].Highlight(false);
 
+            // 아이템 상세 UI 꺼짐
+            _uiManager.inventoryManager.itemSpecificsPanel.Close();
+
             _selectedSlotIndex = slotID;
 
             _selectedSlot = shopItemSlots[slotID];
             _selectedItem = _selectedSlot.AssignedItem;
-            int itemPrice = _selectedItem.ItemPrice;
-            uint currentGold = GameManager.Instance.DataManager.PlayerData.Gold;
+            uint itemPrice = _selectedItem.ItemPrice;
+            uint currentGold = _dataManager.PlayerData.Gold;
 
             // 현재 플레이어가 소유한 골드가 아이템 가격보다 적은 경우
             if (currentGold < itemPrice)
             {
                 Debug.Log("현재 골드가 부족하여 구매할 수 없습니다.");
-                // TODO: 금액 부족 UI 표시
+                // 금액 부족 UI 표시
+                _uiManager.confirmPanel.ShowInfo(InfoType.NotEnoughCurruncy);
             }
             else
             {
@@ -325,16 +431,17 @@ namespace SK.UI
                     if (currentGold >= itemPrice * 2)
                     {
                         // 복수 구매 패널 열기(최대 구매 수량 전달)
-                        inputPanel.SetPanel(1, (uint)(currentGold / itemPrice));
+                        inputPanel.SetPanel(1, currentGold / itemPrice);
                         // 이벤트 할당
                         inputPanel.OnConfirmAmount += ConfirmAmount;
-                    }
 
-                    // 슬롯 선택 효과
-                    _selectedSlot.Highlight(true);
+                        // 슬롯 선택 효과
+                        _selectedSlot.Highlight(true);
+                        return;
+                    }
                 }
-                else
-                    ConfirmAmount(1);
+
+                ConfirmAmount(1);
             }
         }
 

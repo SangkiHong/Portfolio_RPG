@@ -12,15 +12,16 @@ namespace SK
         [Range(0, 1)] 
         public float dodgeChance = 0.3f;
         [Range(0, 180)] 
-        [SerializeField] private float dodgeAngle = 30;
-        [SerializeField] private float dodgeDistance = 5f;
+        [SerializeField] private float dodgeAngle = 30f;
+        [SerializeField] private float dodgeDistance = 3f;  
         [SerializeField] private float dodgeTime = 1f;
-        
+
         [Header("Counter Attack")]
+        [SerializeField] private Behavior.Attack counterAttack;
         [Range(0, 1)]
         [SerializeField] private float CAChance = 0.3f;
-        [SerializeField] private float CAJumpSpeed = 1.5f;
-        [SerializeField] private float CAJumpForce = 1;
+        [SerializeField] private float CAJumpSpeed = 1f;
+        [SerializeField] private float CAJumpForce = 3f;
         
         private Enemy _enemy;
         private Transform _transform;
@@ -37,8 +38,10 @@ namespace SK
             _transform = GetComponent<Transform>();
         }
 
-        private void Update()
+        private void Tick()
         {
+            if (!_enemy.combat.Target) return;
+
             if (isDodge)
                 Move();
 
@@ -64,6 +67,7 @@ namespace SK
                 _enemy.anim.SetBool(Strings.animPara_isInteracting, true);
                 _enemy.anim.CrossFade(Strings.AnimName_RollBack, 0.2f);
                 isDodge = true;
+                SceneManager.Instance.OnUpdate += Tick;
                 return true;
             }
             return false;
@@ -87,19 +91,20 @@ namespace SK
                 _enemy.navAgent.isStopped = false;
 
                 // 이동 완료 후 타격 반응 가능
-                _enemy.health.CanDamage = true;
+                _enemy.health.SetDamagableState(true);
 
                 // 닷지 후 반격
-                CounterAttack();
+                if (!CounterAttack())
+                    SceneManager.Instance.OnUpdate -= Tick;
             }
         }
 
-        private void CounterAttack()
+        private bool CounterAttack()
         {
             if (UnityEngine.Random.value < CAChance)
             {
                 // 방해 받지 않는 상태로 전환
-                _enemy.uninterruptibleState = true;
+                _enemy.onUninterruptible = true;
 
                 // Nav Agent 작동 정지
                 _enemy.navAgent.updatePosition = false;
@@ -108,7 +113,7 @@ namespace SK
                 // StateMachine 정지
                 _enemy.stateMachine.StopMachine();
 
-                _enemy.anim.CrossFade(Strings.AnimName_Attack_Jump, 0.15f);
+                _enemy.combat.BeginAttack(counterAttack);
                     
                 _elapsed = 0;
                 _startPos = _transform.position;
@@ -117,7 +122,10 @@ namespace SK
                 _counterAttack = true;
 
                 LookAtTarget();
+                return true;
             }
+
+            return false;
         }
 
         private void AttackJump()
@@ -154,6 +162,7 @@ namespace SK
                 _enemy.navAgent.updatePosition = true;
 
                 _enemy.stateMachine.ChangeState(_enemy.stateMachine.stateAttack);
+                SceneManager.Instance.OnUpdate -= Tick;
             }
         }
         #endregion

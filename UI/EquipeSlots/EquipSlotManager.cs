@@ -50,7 +50,7 @@ namespace SK.UI
                                                             _tempItem.EquipmentType.Equals(EquipmentType.Shield)))
                             {
                                 GameManager.Instance.Player.equipmentHolder
-                                    .AssignEquipment(_tempItem.EquipmentData, _equipSlots[j].isPrimaryWeapon);
+                                    .AssignEquipment(_tempItem.EquipmentData, _equipSlots[j].isPrimaryWeapon, true);
                             }
                         }
                     }
@@ -67,14 +67,14 @@ namespace SK.UI
             for (int i = 0; i < _equipSlots.Length; i++)
             {
                 // 아이템 장비 타입과 동일한 슬롯 탐색
-                if (_equipSlots[i].slotEquipmentType.Equals(item.EquipmentType))
+                if (_equipSlots[i].slotEquipmentType == item.EquipmentType)
                 {
                     // 이미 다른 장비가 할당되어 있는 경우 할당된 장비를 인벤토리 슬롯에서 착용 해제
                     if (_equipSlots[i].IsAssigned)
                     {
                         // 슬롯 아이템 데이터 착용 여부 업데이트
                         GameManager.Instance.DataManager.UpdateItemData(_equipSlots[i].AssignedItem, false);
-
+                        // 인벤토리 착용 해제
                         uiManager.inventoryManager.FindSlotByItem(_equipSlots[i].AssignedItem, true).EquipItem(false); 
                     }
 
@@ -83,6 +83,9 @@ namespace SK.UI
 
                     // 캐릭터 방어력 업데이트
                     CalDefense();
+
+                    // 음향 효과 재생
+                    AudioManager.Instance.PlayAudio(Strings.Audio_FX_Player_Equip);
 
                     // 캐릭터 정보 업데이트_220513
                     uiManager.characterStatusManager.UpdateInformaion();
@@ -97,14 +100,16 @@ namespace SK.UI
             for (int i = 0; i < _equipSlots.Length; i++)
             {
                 // 아이템 장비 타입과 동일한 슬롯 탐색
-                if (_equipSlots[i].IsAssigned && _equipSlots[i].slotEquipmentType.Equals(item.EquipmentType))
+                if (_equipSlots[i].IsAssigned && _equipSlots[i].slotEquipmentType == item.EquipmentType)
                 {
-
                     // 슬롯에 할당된 장비를 착용 해제
                     _equipSlots[i].Unassign();
 
                     // 캐릭터 방어력 업데이트
                     CalDefense();
+
+                    // 음향 효과 재생
+                    AudioManager.Instance.PlayAudio(Strings.Audio_FX_Player_Unequip);
 
                     // 캐릭터 정보 업데이트_220513
                     uiManager.characterStatusManager.UpdateInformaion();

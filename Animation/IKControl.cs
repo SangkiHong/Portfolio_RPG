@@ -5,8 +5,8 @@ namespace SK.Animation
     [RequireComponent(typeof(Animator))]
     public class IKControl : MonoBehaviour
     {
+        public bool ActiveIK;
         [SerializeField] private Animator anim;
-        [SerializeField] private bool ikActive;
         [SerializeField] private LayerMask groundLayerMask;
         [SerializeField] [Range(0f, 1f)] 
         private float distanceToGround = 0.05f;
@@ -16,7 +16,7 @@ namespace SK.Animation
         }
         private void OnAnimatorIK(int layerIndex)
         {
-            if (ikActive)
+            if (ActiveIK)
             {
                 anim.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1);
                 anim.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 1);

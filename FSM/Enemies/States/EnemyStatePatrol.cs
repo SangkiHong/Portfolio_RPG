@@ -7,6 +7,7 @@ namespace SK.FSM
         private readonly Enemy _enemy;
         private readonly EnemyStateMachine _stateMachine;
 
+        public bool isReturnSpawnPoint;
 
         private Vector3 _randomPos;
         private float _seekIdleTimer;
@@ -24,7 +25,7 @@ namespace SK.FSM
             _enemy.navAgent.speed = _enemy.enemyData.Speed * 0.5f; // 절반 속도로 이동
             _enemy.walkAnimSpeed = 0.5f; // 속도에 맞춰 Animation 동기화
 
-            if (!_enemy.isPatrol) return;
+            if (!isReturnSpawnPoint && !_enemy.isPatrol) return;
 
             // NavAgent 재가동
             if (_enemy.navAgent.isOnNavMesh)
@@ -45,11 +46,16 @@ namespace SK.FSM
                 return;
             }
 
-            if (!_enemy.isPatrol) return;
+            if (isReturnSpawnPoint)
+            {
+                _enemy.navAgent.SetDestination(_enemy.RespawnPoint);
+                isReturnSpawnPoint = false;
+                return;
+            }
 
-            // 이동중이면 리턴
-            if (_enemy.navAgent.velocity.magnitude > 0.1f) return;
-            
+            // 순찰하지 않는 유닛이거나 이동중이라면 리턴
+            if (!_enemy.isPatrol || _enemy.navAgent.velocity.magnitude > 0.1f) return;
+
             // 순찰 타이머
             if (_seekIdleTimer < _enemy.searchRadar.idleDuration)            
                 _seekIdleTimer += _enemy.fixedDeltaTime;            

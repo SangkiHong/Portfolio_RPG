@@ -15,14 +15,16 @@ namespace SK.UI
         [SerializeField] internal GameObject highlight;
         [SerializeField] internal GameObject notify;
 
+        // 프로퍼티
         public Item AssignedItem { get; private set; }
         public bool IsEquiped { get; private set; }
+        public int OriginSlotID { get; private set; }
 
         InventorySlot source, tempSlot;
         private uint itemAmount;
 
-        // 슬롯에 아이템 할당(아이템 정보, 수량, 데이터 변경 여부)_220504
-        public void AssignItem(Item item, uint amount, bool isEquiped, bool addData = false)
+        // 슬롯에 아이템 할당(아이템 정보, 수량, 초기화 여부)_220504
+        public void AssignItem(Item item, uint amount, bool isEquiped, bool init = false, int originSlotID = -1)
         {
             this.Unassign(); // 슬롯 초기화
             base.Assign(item.ItemIcon); // 베이스 슬롯 할당(이미지 변경 등)
@@ -35,8 +37,11 @@ namespace SK.UI
             else
                 UpdateAmount(); // 수량 텍스트 표시 업데이트
 
+            // 카테고리 리스팅 시 아이템의 실제 SlotID를 변수에 저장
+            OriginSlotID = originSlotID;
+
             // 슬롯 정보 변경 이벤트 호출
-            if (addData) OnAssignEvent?.Invoke(this, amount); 
+            if (!init) OnAssignEvent?.Invoke(slotID);
         }
 
         // 슬롯 해제하며 아이템 정보 초기화_220503
@@ -48,6 +53,7 @@ namespace SK.UI
             if (amountText.gameObject.activeSelf) 
                 amountText.gameObject.SetActive(false);
             itemAmount = 0;
+            OriginSlotID = -1;
             AssignedItem = null;
             IsEquiped = false;
 
@@ -76,11 +82,13 @@ namespace SK.UI
             if (IsEquiped)
             {
                 amountText.gameObject.SetActive(true);
-                amountText.text = "E";
+                amountText.text = Strings.ETC_EquipSign;
             }
             // 착용 텍스트(E) 표시 해제
             else            
-                amountText.gameObject.SetActive(false);            
+                amountText.gameObject.SetActive(false);
+
+            UI.UIManager.Instance.quickSlotManager.CheckEquipState(AssignedItem, IsEquiped);
         }
 
         // 수량 텍스트 표시를 업데이트_220507
@@ -119,10 +127,8 @@ namespace SK.UI
         {
             base.OnRightClick();
             // 좌클릭 시 장비 아이템인 경우 이벤트 호출
-            if (IsAssigned && AssignedItem.ItemType == ItemType.Equipment)
-            {
+            if (IsAssigned)
                 OnRightClickEvent?.Invoke(slotID);
-            }
         }
 
         // 마우스를 눌렀을 경우 이벤트 호출_220503

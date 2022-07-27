@@ -2,11 +2,18 @@ using UnityEngine;
 
 namespace SK.Data
 {
+    public enum ItemListType: int
+    {
+        Equipment,
+        Weapon,
+        Props
+    }
+
     public class ItemListManager : MonoBehaviour
     {
         public ItemList[] itemLists; // 0: Equipment, 1: Weapon, 2: Props
 
-        // 아이템 id로 아이템 불러오기_220503
+        // 아이템 id로 아이템을 탐색하여 반환_220503
         public Item GetItembyID(int id)
         {
             for (int i = 0; i < itemLists.Length; i++)
@@ -21,19 +28,20 @@ namespace SK.Data
             return null;
         }
 
-        // 아이템 list, id로 아이템 불러오기_220503
-        public Item GetItembyID(ItemList itemList, int id)
+        // 아이템 list, id로 아이템을 탐색하여 반환_220503
+        public Item GetItembyID(ItemListType listType, int id)
         {
-            for (int i = 0; i < itemList.itemList.Count; i++)
+            int listIndex = (int)listType;
+            for (int i = 0; i < itemLists[listIndex].itemList.Count; i++)
             {
-                if (itemList.itemList[i].Id == id) 
-                    return itemList.itemList[i];
+                if (itemLists[listIndex].itemList[i].Id == id) 
+                    return itemLists[listIndex].itemList[i];
             }
 
             return null;
         }
 
-        // 아이템 list 인덱스, id로 아이템 불러오기_220610
+        // 아이템 list 인덱스, id로 아이템을 탐색하여 반환_220610
         public Item GetItembyID(int itemListIndex, int id)
         {
             for (int i = 0; i < itemLists[itemListIndex].itemList.Count; i++)
@@ -45,7 +53,7 @@ namespace SK.Data
             return null;
         }
 
-        // 아이템 id, type 등의 정보로 아이템 불러오기_220504
+        // 아이템 id, type 등의 정보로 아이템을 탐색하여 반환_220504
         public Item GetItem(int id, ItemType itemType, EquipmentType equipType)
         {
             // 기본값으로 장비 아이템 리스트 인덱스 값
@@ -67,6 +75,24 @@ namespace SK.Data
                     return itemLists[selectListIndex].itemList[i];
             }
 
+            return null;
+        }
+
+        // 장비 데이터를 통해 아이템을 탐색하여 반환_220621
+        public Item GetItem(Equipments equipment)
+        {
+            // 무기 아이템 리스트에서 탐색
+            for (int i = 0; i < itemLists[1].itemList.Count; i++)
+            {
+                if (itemLists[1].itemList[i].EquipmentData == equipment)
+                    return itemLists[1].itemList[i];
+            }
+            // 장비 아이템 리스트에서 탐색
+            for (int i = 0; i < itemLists[0].itemList.Count; i++)
+            {
+                if (itemLists[0].itemList[i].EquipmentData == equipment)
+                    return itemLists[0].itemList[i];
+            }
             return null;
         }
     }

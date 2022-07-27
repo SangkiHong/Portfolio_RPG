@@ -11,7 +11,14 @@ namespace SK
         private readonly string _animName_Jumping = "Troll_Jumping"; 
         private readonly string _animName_BattleCry = "BattleCry";
         private bool _isFindTarget;
-        private float _attackElapsed;
+        private float _attackElapsed, _attackDist;
+
+        public override void Awake()
+        {
+            base.Awake();
+            // 거리 비교 연산을 위해 제곱
+            _attackDist = nearAttackDistance * nearAttackDistance;
+        }
 
         public override void FixedTick()
         {
@@ -23,17 +30,15 @@ namespace SK
                 _isFindTarget = true;
                 anim.CrossFade(_animName_BattleCry, 0.1f);
             }
-            else if (!combat.Target && _isFindTarget)
-                _isFindTarget = false;
 
-            if (combat.Target && !isInteracting && !isDead && targetDistance <= nearAttackDistance)
+            if (combat.Target && !isInteracting && !isDead && targetDistance <= _attackDist)
             {
                 if (_attackElapsed >= nearAttackInterval)
                 {
                     _attackElapsed = 0;
 
                     // 방해 받지 않는 상태로 전환
-                    uninterruptibleState = true;
+                    onUninterruptible = true;
 
                     // 공격 젠 초기화
                     stateMachine.stateCombat.ResetElapsed();
@@ -45,6 +50,24 @@ namespace SK
                 else
                     _attackElapsed += fixedDeltaTime;                
             }
+        }
+
+        public override void PlaySoundOnDamage()
+        {
+            int index = Random.Range(0, Strings.Audio_FX_Voice_Troll_Pain.Length);
+            AudioManager.Instance.PlayAudio(Strings.Audio_FX_Voice_Troll_Pain[index], mTransform);
+        }
+
+        public override void PlaySoundOnDeath()
+        {
+            AudioManager.Instance.PlayAudio(Strings.Audio_FX_Voice_Troll_Death, mTransform);
+        }
+
+        // 발걸음 소리 재생
+        public override void FootStepSound()
+        {
+            int index = Random.Range(0, Strings.Audio_FX_Footstep_Heavy.Length);
+            AudioManager.Instance.PlayAudio(Strings.Audio_FX_Footstep_Heavy[index], mTransform);
         }
     }
 }

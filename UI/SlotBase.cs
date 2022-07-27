@@ -12,8 +12,8 @@ namespace SK.UI
 
     public abstract class SlotBase : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        // 슬롯 할당 시 발생 이벤트(슬롯 정보, 아이템 수량)
-        public UnityAction <SlotBase, uint> OnAssignEvent;
+        // 슬롯 할당 시 발생 이벤트(슬롯 ID)
+        public UnityAction <int> OnAssignEvent;
         // 슬롯 교환(교체) 시 발생 이벤트(현재 슬롯 ID, 이동할 슬롯 ID)
         public UnityAction <int, int> OnSwapEvent;
         // 드래그를 시작할 경우 발생할 이벤트
@@ -81,12 +81,18 @@ namespace SK.UI
         public virtual void OnPointerUp(PointerEventData eventData)
         {
             // 드래그 없이 단순 좌클릭 시 함수 실행
-            if (IsOnLeftClick) OnLeftClick();
-            IsOnLeftClick = false;
+            if (IsOnLeftClick)
+            {
+                OnLeftClick();
+                IsOnLeftClick = false;
+            }
 
             // 드래그 없이 단순 우클릭 시 함수 실행
-            if (IsOnRightClick) OnRightClick();
-            IsOnRightClick = false;
+            if (IsOnRightClick)
+            {
+                OnRightClick();
+                IsOnRightClick = false;
+            }
         }
 
         public virtual void OnBeginDrag(PointerEventData eventData)

@@ -20,14 +20,8 @@ namespace SK.Quests
         [SerializeField] private Text questNpcName;
 
         // 보상 슬롯
-        [SerializeField] private RewardSlot[] _rewardSlots;
+        [SerializeField] private RewardSlot[] rewardSlots;
 
-        [SerializeField] private Sprite sprite_Exp;
-        [SerializeField] private Sprite sprite_Gold;
-        [SerializeField] private Sprite sprite_Gem;
-
-        // 아이템리스트매니저
-        private Data.ItemListManager _itemListManager;
         // 할당된 퀘스트
         private Quest _assignedQuest;
 
@@ -35,9 +29,6 @@ namespace SK.Quests
 
         public void DisplayQuestInfo(Quest quest)
         {
-            if (_itemListManager == null)
-                _itemListManager = GameManager.Instance.ItemListManager;
-
             // 이전 할당 퀘스트를 다시 여는 것이 아닌 경우
             if (_assignedQuest != quest)
             {
@@ -51,18 +42,18 @@ namespace SK.Quests
                 int slotIndex = 0;
 
                 // 슬롯 초기화
-                for (int i = 0; i < _rewardSlots.Length; i++)
-                    _rewardSlots[i].Unassign();
+                for (int i = 0; i < rewardSlots.Length; i++)
+                    rewardSlots[i].Unassign();
 
                 // 획득 경험치
                 if (questReward.exp > 0) 
-                    _rewardSlots[slotIndex++].Assign(sprite_Exp, questReward.exp);
+                    rewardSlots[slotIndex++].Assign(UI.UIManager.Instance.sprite_Exp, questReward.exp);
                 // 획득 골드량
                 if (questReward.gold > 0)
-                    _rewardSlots[slotIndex++].Assign(sprite_Gold, questReward.gold);
+                    rewardSlots[slotIndex++].Assign(UI.UIManager.Instance.sprite_Gold, questReward.gold);
                 // 획득 보석량
                 if (questReward.gem > 0) 
-                    _rewardSlots[slotIndex++].Assign(sprite_Gem, questReward.gem);
+                    rewardSlots[slotIndex++].Assign(UI.UIManager.Instance.sprite_Gem, questReward.gem);
 
                 // 획득 아이템
                 Item tempItem;
@@ -77,15 +68,16 @@ namespace SK.Quests
                         for (int i = 0; i < length; i++)
                         {
                             tempRewardItem = questReward.rewardItems[i];
-                            tempItem = _itemListManager.GetItembyID((int)tempRewardItem.itemList, tempRewardItem.itemId);
-                            _rewardSlots[slotIndex++].Assign(tempItem.ItemIcon, tempRewardItem.itemAmount);
+                            tempItem = GameManager.Instance.ItemListManager
+                                .GetItembyID((int)tempRewardItem.itemList, tempRewardItem.itemId);
+                            rewardSlots[slotIndex++].Assign(tempItem, tempRewardItem.itemAmount);
                         }
                     }
                 }
 
                 // 완료 가능 NPC가 있는 경우 이름 표시
                 if (!string.IsNullOrEmpty(_assignedQuest.CompleteNPC))
-                    questNpcName.text = _assignedQuest.CompleteNPC;
+                    questNpcName.text = SceneManager.Instance.GetNPC(_assignedQuest.CompleteNPC).DisplayName;
                 // 완료 가능 NPC가 따로 없이 즉시 완료 표시
                 else
                     questNpcName.text = _string_EmptyNPC;

@@ -11,15 +11,16 @@ namespace SK.Utilities
     //[ExecuteInEditMode]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
-        public List<TKey> g_InspectorKeys;
-        public List<TValue> g_InspectorValues;
+        public List<TKey> inspectorKeys;
+        public List<TValue> inspectorValues;
 
         public SerializableDictionary()
         {
-            g_InspectorKeys = new List<TKey>();
-            g_InspectorValues = new List<TValue>();
+            inspectorKeys = new List<TKey>();
+            inspectorValues = new List<TValue>();
             SyncInspectorFromDictionary();
         }
+
         /// <summary>
         /// 새로운 KeyValuePair을 추가하며, 인스펙터도 업데이트
         /// </summary>
@@ -30,6 +31,7 @@ namespace SK.Utilities
             base.Add(key, value);
             SyncInspectorFromDictionary();
         }
+
         /// <summary>
         /// KeyValuePair을 삭제하며, 인스펙터도 업데이트
         /// </summary>
@@ -40,21 +42,18 @@ namespace SK.Utilities
             SyncInspectorFromDictionary();
         }
 
-        public void OnBeforeSerialize()
-        {
-        }
         /// <summary>
         /// 인스펙터를 딕셔너리로 초기화
         /// </summary>
         public void SyncInspectorFromDictionary()
         {
             //인스펙터 키 밸류 리스트 초기화
-            g_InspectorKeys.Clear();
-            g_InspectorValues.Clear();
+            inspectorKeys.Clear();
+            inspectorValues.Clear();
 
             foreach (KeyValuePair<TKey, TValue> pair in this)
             {
-                g_InspectorKeys.Add(pair.Key); g_InspectorValues.Add(pair.Value);
+                inspectorKeys.Add(pair.Key); inspectorValues.Add(pair.Value);
             }
         }
 
@@ -64,27 +63,29 @@ namespace SK.Utilities
         public void SyncDictionaryFromInspector()
         {
             //딕셔너리 키 밸류 리스트 초기화
-            foreach (var key in Keys.ToList())
-            {
-                base.Remove(key);
-            }
+            this.Clear();
 
-            for (int i = 0; i < g_InspectorKeys.Count; i++)
+            for (int i = 0; i < inspectorKeys.Count; i++)
             {
                 //중복된 키가 있다면 에러 출력
-                if (this.ContainsKey(g_InspectorKeys[i]))
+                if (this.ContainsKey(inspectorKeys[i]))
                 {
                     Debug.LogError("중복된 키가 있습니다.");
                     break;
                 }
-                base.Add(g_InspectorKeys[i], g_InspectorValues[i]);
+                base.Add(inspectorKeys[i], inspectorValues[i]);
             }
+        }
+
+        public void OnBeforeSerialize()
+        {
+            SyncInspectorFromDictionary();
         }
 
         public void OnAfterDeserialize()
         {
             //인스펙터의 Key Value가 KeyValuePair 형태를 띌 경우
-            if (g_InspectorKeys.Count == g_InspectorValues.Count)
+            if (inspectorKeys.Count == inspectorValues.Count)
             {
                 SyncDictionaryFromInspector();
             }

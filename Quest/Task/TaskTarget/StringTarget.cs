@@ -19,11 +19,14 @@ namespace SK.Quests
             // target을 string형으로 캐스팅
             string targetAsString = target as string;
 
+            Debug.Log($"value: {value}, targetAsString: {targetAsString}");
+
             // 같은 타입이 아닌 경우 캐스팅에 실패
             if (targetAsString == null)
                 return false;
 
-            return value == targetAsString;
+            Debug.Log($"Equal Result: {value == targetAsString || targetAsString.Contains(value)}");
+            return value == targetAsString || targetAsString.Contains(value);
         }
     }
 }

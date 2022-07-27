@@ -93,11 +93,12 @@ public class UIPoolManager : MonoBehaviour
 		if (poolObject)
 		{
 			string poolKey = poolObject.poolKey;
+			var instanceID = go.GetInstanceID();
+			ObjectInstance obj = _poolUsedDictionary[poolKey][instanceID];
+			_poolUsedDictionary[poolKey].Remove(instanceID);
+			_poolFreeDictionary[poolKey].Enqueue(obj);
 			go.transform.SetParent(uiCanvas);
 			go.SetActive(false);
-			ObjectInstance obj = _poolUsedDictionary[poolKey][go.GetInstanceID()];
-			_poolUsedDictionary[poolKey].Remove(go.GetInstanceID());
-			_poolFreeDictionary[poolKey].Enqueue(obj);
 		}
 	}
 

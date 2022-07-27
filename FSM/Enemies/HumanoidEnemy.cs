@@ -10,8 +10,10 @@ namespace SK
         {
             base.Tick();
             
-            if (!isInteracting && !dodge.isDodge)
+            if (!isInteracting)
             {
+                if (dodge != null && dodge.isDodge) return;
+
                 AnimateMove(); // 애니메이션 MoveBlend
             
                 Rotate(); // 움직임에 따른 회전
@@ -69,8 +71,8 @@ namespace SK
                 }
                 else
                 {
-                    _moveBlend = stateMachine.stateCombat.moveDirection.normalized.z;
-                    var sideway = -stateMachine.stateCombat.moveDirection.y / 90;
+                    _moveBlend = stateMachine.stateCombat.MoveDirection.normalized.z;
+                    var sideway = -stateMachine.stateCombat.MoveDirection.y / 90;
                     if (sideway > 1) sideway -= (int)sideway; // 정수부 제거
                     _sideways = sideway;
                 }
@@ -79,6 +81,25 @@ namespace SK
             }
 
             anim.SetFloat(Strings.AnimPara_MoveBlend, _moveBlend);
+        }
+
+        public override void PlaySoundOnDamage()
+        {
+            int index = Random.Range(0, Strings.Audio_FX_Voice_Grunt_Male.Length);
+            AudioManager.Instance.PlayAudio(Strings.Audio_FX_Voice_Grunt_Male[index], mTransform);
+        }
+
+        public override void PlaySoundOnDeath()
+        {
+            int index = Random.Range(0, Strings.Audio_FX_Voice_Death.Length);
+            AudioManager.Instance.PlayAudio(Strings.Audio_FX_Voice_Death[index], mTransform);
+        }
+
+        // 발걸음 소리 재생
+        public override void FootStepSound()
+        {
+            int randomindex = Random.Range(0, Strings.Audio_FX_Footstep_Normal.Length);
+            AudioManager.Instance.PlayAudio(Strings.Audio_FX_Footstep_Normal[randomindex], mTransform);
         }
     }
 }

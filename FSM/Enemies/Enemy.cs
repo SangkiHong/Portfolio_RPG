@@ -12,15 +12,14 @@ namespace SK
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(SearchRadar))]
     [RequireComponent(typeof(Behavior.Combat))]
-    [RequireComponent(typeof(Dodge))]
-    [RequireComponent(typeof(Health))]
+    [RequireComponent(typeof(State.Health))]
     #endregion
     public abstract class Enemy : Unit, ITargetable
     {
         // 유닛 상태 디버그용 스트링 변수
         [ReadOnly] public string currentStateName;
-        // 넉백 시 호출될 이벤트
-        internal UnityAction<Transform, float, float> OnKnockBackState;
+        // 넉백 시 호출될 이벤트(공격자 트랜스폼, 넉백 시간, 넉백 강도)
+        public UnityAction<Transform, float, float> OnKnockBackState;
 
         #region Variables
         #region Stats
@@ -63,17 +62,22 @@ namespace SK
         #region etc
         public Transform targetingPoint;
 
-        internal Rigidbody mRigidbody;
-        internal Collider mCollider;
+        public Rigidbody mRigidbody { get; private set; }
         
         internal Player targetState;
         internal EnemyStateMachine stateMachine;
 
+        private Vector3 _respawnPoint;
+        public Vector3 RespawnPoint
+        {
+            get => _respawnPoint;
+            set { _respawnPoint = value; }
+        }
+
         internal float targetDistance;
         internal float walkAnimSpeed = 0.5f;
 
-        [SerializeField]
-        internal bool isDead, isFlee, isInteracting, uninterruptibleState;
+        internal bool isFlee;
         #endregion
         #endregion
 
@@ -83,11 +87,11 @@ namespace SK
             base.Awake();
 
             // 레퍼런스 초기화
-            mRigidbody = GetComponent<Rigidbody>();
-            mCollider = GetComponent<Collider>();
             if (!navAgent) navAgent = GetComponent<NavMeshAgent>();
             if (!searchRadar) searchRadar = GetComponent<SearchRadar>();
             if (!dodge) dodge = GetComponent<Dodge>();
+            mRigidbody = GetComponent<Rigidbody>();
+            navAgent.enabled = false;
 
             // 상태 머신 초기화
             stateMachine = new EnemyStateMachine(this);
@@ -102,28 +106,42 @@ namespace SK
                 _alert = new Behavior.Alert(gameObject, mTransform, alertRange);
             }
             // 유닛 정보 초기화
-            combat.SetUnitInfo(this, enemyData);
+            combat.Initialize(this, enemyData, true);
         }
 
         public override void OnEnable()
         {
             base.OnEnable();
 
+            // 몬스터의 스폰 위치 정보를 가져와 위치 값에 할당
+            mTransform.position = _respawnPoint;
+
             isFlee = false;
+            mCollider.isTrigger = false;
+            mRigidbody.isKinematic = false;
             if (!health.enabled) health.enabled = true;
             if (!mCollider.enabled) mCollider.enabled = true;
-            health.Init(enemyData.Hp); // Initialize Max Hp
+            navAgent.velocity = Vector3.zero;
+            gameObject.layer = LayerMask.NameToLayer(Strings.ETC_Enemy);
+            anim.Rebind();
+
+            // 체력 초기화
+            health.Initialize(enemyData, mTransform);
+            // 상태 머신 초기화
+            stateMachine.ChangeState(stateMachine.statePatrol);
+            // 씬 매니저의 유닛 관리 대상에 추가
+            SceneManager.Instance.AddUnit(this);
         }
 
         private void Start()
         {
-            stateMachine.ChangeState(stateMachine.statePatrol); // 기본 상태로 변경
+            navAgent.enabled = true;
+            navAgent.isStopped = false;
         }
 
         public override void Tick()
         {
             if (isDead) return;
-            base.Tick();
 
             deltaTime = Time.deltaTime;
 
@@ -148,12 +166,15 @@ namespace SK
             }
 
             // Nav Control
-            if (isInteracting && !navAgent.isStopped) navAgent.isStopped = true;
-            else if (!isInteracting && navAgent.isStopped) navAgent.isStopped = false;
+            if (navAgent.isOnNavMesh)
+            {
+                if (isInteracting && !navAgent.isStopped) navAgent.isStopped = true;
+                else if (!isInteracting && navAgent.isStopped) navAgent.isStopped = false;
+            }
         }
         #endregion
 
-        #region About Target Method        
+        #region Target        
         private bool TargetCheck()
         {
             if (targetState != null && targetState.isDead)
@@ -172,20 +193,29 @@ namespace SK
         }
         #endregion
 
-        #region Public Function
-        public void GetAlert(GameObject target)
+        #region ETC
+        public void RecieveAlert(GameObject target)
         {
             combat.SetTarget(target);
             stateMachine.ChangeState(stateMachine.stateCombat);
         }
+
+        internal void RotateToTarget()
+        {
+            Vector3 dir = (combat.Target.transform.position - mTransform.position).normalized;
+            dir.y = 0;
+            mTransform.rotation = Quaternion.Lerp(mTransform.rotation, Quaternion.LookRotation(dir), fixedDeltaTime * LookTargetSpeed);
+        }
         #endregion
 
         #region Event Function
-        public void AbleCombo() { }
 
         public override void OnDamage(Unit attacker, uint damage, bool isStrong)
         {
             if (isDead) return;
+
+            // 크리티컬 여부
+            bool isCritical = combat.IsCriticalHit;
 
             // 전투 타겟 동기화
             if (!combat.Target) combat.SetTarget(attacker.gameObject);
@@ -194,42 +224,57 @@ namespace SK
             if (canAlert) _alert.SendAlert(combat.Target);
 
             // 회피 기동 판정
-            if (dodge && !uninterruptibleState && dodge.dodgeChance > 0 && Random.value < dodge.dodgeChance)
+            if (dodge && !onUninterruptible && dodge.dodgeChance > 0 && Random.value < dodge.dodgeChance)
             {
                 if (dodge.DoDodge())
                 {
-                    health.CanDamage = false; // 회피 시 데미지 판정 없기 때문에 False
+                    health.SetDamagableState(false); // 회피 시 데미지 판정 없기 때문에 False
                     return;
                 }
             }
 
             // 피해량 계산 함수 호출 후 데미지 함수 호출
-            health.OnDamage(damage, combat.isCriticalHit);
+            health.OnDamage(damage, isCritical);
 
             // HP가 0이거나 이하로 내려간 경우 즉시 리턴
-            if (health.CurrentHp <= 0) return;
+            if (health.CurrentHp == 0) return;
 
             // Uninterruptible 상태에서 움직임 정지 없이 리턴
-            if (uninterruptibleState) return;
+            if (onUninterruptible) return;
 
-            // 피격에 의한 움직임 일시 정지
+            // 피격에 의한 NavMeshAgent의 동작을 일시 정지
             navAgent.velocity = Vector3.zero;
             navAgent.isStopped = true;
-            anim.SetBool(Strings.animPara_isInteracting, true);
 
-            // 약 공격 피해
-            if (!isStrong)
-                anim.SetTrigger(Strings.AnimPara_Damaged);
-            else // 강 공격 피해
+            // 강 공격 피해
+            if (isStrong)
             {
+                // 애니메이터 파라미터 상태 변경
+                anim.SetBool(Strings.animPara_isInteracting, true);
+
+                // 강공격 피해 애니메이션 재생
                 anim.SetTrigger(Strings.AnimPara_StrongDamaged);
 
                 // 넉백 효과
-                OnKnockBackState?.Invoke(attacker.transform, 0.25f, 0.1f);
+                OnKnockBackState?.Invoke(attacker.mTransform, 0.25f, 0.2f);
             }
-            
+            // 약 공격 피해
+            else
+                anim.SetTrigger(Strings.AnimPara_Damaged);
+
+            // 피해 이펙트 효과
+            if (isCritical) // 크리티컬
+                EffectManager.Instance.PlayEffect(4008, mCollider.bounds.center, Quaternion.identity);
+            else if (isStrong) // 강 공격
+                EffectManager.Instance.PlayEffect(4004, mCollider.bounds.center, Quaternion.identity);
+            else // 일반 공격
+                EffectManager.Instance.PlayEffect(4005, mCollider.bounds.center, Quaternion.identity);
+
+            // 피격 사운드 효과
+            PlaySoundOnDamage();
+
             // fleeHpPercent 아래로 Hp가 내려갔을 시 일정 확률에 따라 도주 상태로 변경 
-            // fleeHpPercent가 0이면 도주 시도 없음
+            // fleeHpPercent 변수가 0인 경우, 도주 시도 없음
             if (!isFlee && fleeChance > 0 && health.CurrentHp <= enemyData.Hp * fleeHpPercent * 0.01f)
             {
                 isFlee = true; // 1회만 도주 시도
@@ -246,20 +291,97 @@ namespace SK
                 stateMachine.ChangeState(stateMachine.stateCombat);
         }
 
+        public override void OnDamage(Transform damagableObject, uint damage, bool isStrong)
+        {
+            if (isDead) return;
+
+            // 피해량 계산 함수 호출 후 데미지 함수 호출
+            health.OnDamage(damage, false);
+
+            // HP가 0이거나 이하로 내려간 경우 즉시 리턴
+            if (health.CurrentHp == 0) return;
+
+            // Uninterruptible 상태에서 움직임 정지 없이 리턴
+            if (onUninterruptible) return;
+
+            // 피격에 의한 NavMeshAgent의 동작을 일시 정지
+            navAgent.velocity = Vector3.zero;
+            navAgent.isStopped = true;
+
+            // 강 공격 피해
+            if (isStrong)
+            {
+                // 애니메이터 파라미터 상태 변경
+                anim.SetBool(Strings.animPara_isInteracting, true);
+
+                // 강공격 피해 애니메이션 재생
+                anim.SetTrigger(Strings.AnimPara_StrongDamaged);
+
+                // 넉백 효과
+                OnKnockBackState?.Invoke(damagableObject, 0.25f, 0.2f);
+            }
+            // 약 공격 피해
+            else
+                anim.SetTrigger(Strings.AnimPara_Damaged);
+
+            // 피해 이펙트 효과
+            if (isStrong) // 강 공격
+                EffectManager.Instance.PlayEffect(4004, mCollider.bounds.center, Quaternion.identity);
+            else // 일반 공격
+                EffectManager.Instance.PlayEffect(4005, mCollider.bounds.center, Quaternion.identity);
+
+            // 피격 사운드 효과
+            PlaySoundOnDamage();
+        }
+
         public override void OnDead()
         {
             isDead = true;
             gameObject.layer = 0;
             health.enabled = false;
+
             mRigidbody.isKinematic = true;
             mCollider.isTrigger = true;
+
             navAgent.velocity = Vector3.zero;
             navAgent.isStopped = true;
+
+            // 상태 머신 중단
             stateMachine.StopMachine(true);
+
+            // 타겟 해제
             UnassignTarget();
+
+            // 죽음 애니메이션
             anim.Rebind();
             anim.SetTrigger(Strings.AnimPara_Dead);
-            health.PlayDeadFx();
+
+            // Hp 회복 중단
+            health.Recovering(false);
+
+            // 아이템 드랍
+            Loot.LootManager.Instance.DropLoot(enemyData.EnemyId, mTransform.position);
+
+            // 퀘스트 보고
+            SceneManager.Instance.questManager.ReportSuccessCount(enemyData.Name, 1);
+
+            // 죽음 사운드 효과
+            PlaySoundOnDeath();
+        }
+        public void AbleCombo() { }
+
+        public abstract void PlaySoundOnDamage();
+        public abstract void PlaySoundOnDeath();
+
+        public override void OnDisable()
+        {
+            base.OnDisable();
+
+            if (SceneManager.Instance)
+            {
+                // 리스폰 리스트에 추가
+                SceneManager.Instance.AddDeadEnemy(this);
+            }
         }
         #endregion
     }

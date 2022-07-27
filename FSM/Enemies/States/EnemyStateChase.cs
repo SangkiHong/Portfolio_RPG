@@ -5,12 +5,18 @@
         private readonly Enemy _enemy;
         private readonly EnemyStateMachine _stateMachine;
         private float _combatDistance;
+        private float _searchDist;
 
         public EnemyStateChase(Enemy enemyControl, EnemyStateMachine stateMachine)
         {
             _enemy = enemyControl;
             _stateMachine = stateMachine;
             _combatDistance = enemyControl.combat.combatDistance;
+            // 거리 비교 연산을 위해 제곱
+            _combatDistance *= _combatDistance;
+            _searchDist = _enemy.searchRadar.searchDistance + 1.5f;
+            // 거리 비교 연산을 위해 제곱
+            _searchDist *= _searchDist;
         }
 
         public override void StateInit()
@@ -31,8 +37,9 @@
         public override void FixedTick()
         {
             // 타겟이 없거나 타겟이 탐색 범위 밖으로 벗어나면 순찰 상태로 전환
-            if (_enemy.targetDistance > _enemy.searchRadar.searchDistance + 0.5f)
+            if (_enemy.targetDistance > _searchDist)
             {
+                _enemy.stateMachine.statePatrol.isReturnSpawnPoint = true;
                 _enemy.UnassignTarget();
                 return;
             }

@@ -2,7 +2,7 @@
 {
     public abstract class StateMachineBase
     {
-        public StateBase CurrentState;
+        public StateBase CurrentState { get; protected set; }
 
         public virtual void ChangeState(StateBase state)
         {

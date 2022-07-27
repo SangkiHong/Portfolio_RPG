@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,7 +14,8 @@ namespace SK.UI
 
         public void Initialize()
         {
-            _playerData = GameManager.Instance.Player.playerData;
+            _playerData = Data.DataManager.Instance.PlayerData;
+            GameManager.Instance.DataManager.OnChangedCurrency += Sync;
             Sync();
         }
 

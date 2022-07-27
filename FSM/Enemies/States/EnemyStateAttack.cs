@@ -31,6 +31,7 @@ namespace SK.FSM
 
         public override void StateExit()
         {
+            _enemy.onUninterruptible = false;
             _enemy.mRigidbody.constraints = RigidbodyConstraints.FreezeAll;
         }
     }

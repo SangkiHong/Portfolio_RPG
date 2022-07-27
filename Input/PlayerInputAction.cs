@@ -610,45 +610,18 @@ namespace SK
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""GamePlay_Inventory"",
-                    ""type"": ""Button"",
-                    ""id"": ""417ed44e-f67d-4a55-9700-26d437006be9"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": ""Press"",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""GamePlay_CharacterStats"",
-                    ""type"": ""Button"",
-                    ""id"": ""f70792d3-3d76-4a90-93c9-0532fc50eefc"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": ""Press"",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""GamePlay_Quest"",
-                    ""type"": ""Button"",
-                    ""id"": ""4a059088-2eb1-4754-babc-9ed761d14200"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": ""Press"",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""GamePlay_CloseAll"",
-                    ""type"": ""Button"",
-                    ""id"": ""3f7da6c8-f818-433f-9ecf-6acb8016075f"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": ""Press"",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Conversation"",
                     ""type"": ""Button"",
                     ""id"": ""f59f1be8-b9e9-414c-881a-487b1a348092"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Confirm"",
+                    ""type"": ""Button"",
+                    ""id"": ""40a08688-c879-405a-bd2f-82e535ff0553"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -1065,39 +1038,6 @@ namespace SK
                 },
                 {
                     ""name"": """",
-                    ""id"": ""520115c4-5067-4d21-99a7-16f56d6022fd"",
-                    ""path"": ""<Keyboard>/i"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""GamePlay_Inventory"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""f20b8c63-e398-4059-9042-ce7eba4276a0"",
-                    ""path"": ""<Keyboard>/c"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""GamePlay_CharacterStats"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""bbe26568-d14a-491f-ac71-32b039cf63d1"",
-                    ""path"": ""<Keyboard>/escape"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""GamePlay_CloseAll"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""997b421b-e9e3-4a37-8551-6f7294ab2286"",
                     ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": ""Tap(duration=0.3)"",
@@ -1120,23 +1060,23 @@ namespace SK
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9179382d-de39-4b2a-b8a0-fbabe1ab4299"",
-                    ""path"": ""<Keyboard>/j"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""GamePlay_Quest"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""851e662c-75b9-4c02-a998-193ed8bad4c5"",
                     ""path"": ""<Keyboard>/r"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Conversation"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""931f8569-a643-44dd-acb9-d535546a3b9c"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Confirm"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1282,6 +1222,15 @@ namespace SK
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""UI_Skill"",
+                    ""type"": ""Button"",
+                    ""id"": ""994d1e76-5c61-4de2-9f73-26ae8270d954"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press"",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""CloseDialogue"",
                     ""type"": ""Button"",
                     ""id"": ""987f433e-d537-4891-a114-b9ff3ef379a6"",
@@ -1294,6 +1243,24 @@ namespace SK
                     ""name"": ""ContinueDialogue"",
                     ""type"": ""Button"",
                     ""id"": ""db0303f1-1307-4e63-be2a-915069eb3f05"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""UI_ZoomIn"",
+                    ""type"": ""Button"",
+                    ""id"": ""eabec4bc-c412-4ed6-b5f6-3130b0b9040c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""UI_ZoomOut"",
+                    ""type"": ""Button"",
+                    ""id"": ""5be2ce53-d009-458b-985c-401e98a92926"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -1795,6 +1762,425 @@ namespace SK
                     ""action"": ""CloseDialogue"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a8300f93-d30c-4c37-9f4f-6e51da2dd51c"",
+                    ""path"": ""<Keyboard>/k"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""UI_Skill"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5446dfd3-74fa-40d2-aff9-304f0bf8264a"",
+                    ""path"": ""<Keyboard>/equals"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""UI_ZoomIn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e1d813d9-b762-41f5-ba2f-d08371dbe81b"",
+                    ""path"": ""<Keyboard>/numpadPlus"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""UI_ZoomIn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5a9601d6-bd16-472a-aabd-6e1ef409f1ef"",
+                    ""path"": ""<Keyboard>/minus"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""UI_ZoomOut"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""08e6fa7f-d92a-4131-bfba-5260c076b58c"",
+                    ""path"": ""<Keyboard>/numpadMinus"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""UI_ZoomOut"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""QuickSlot"",
+            ""id"": ""01f027ec-0abb-4bf1-9474-1b176f4c2ffe"",
+            ""actions"": [
+                {
+                    ""name"": ""QuickSlot_SkillQ"",
+                    ""type"": ""Button"",
+                    ""id"": ""542dd851-5ebb-415e-b6a8-400c9b8f5f2d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_SkillE"",
+                    ""type"": ""Button"",
+                    ""id"": ""edd0ed1c-56d5-42d2-b2d0-ed25b5261cfd"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_1"",
+                    ""type"": ""Button"",
+                    ""id"": ""cfe38e17-d9e8-448b-927c-4aa3f1b3367f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_2"",
+                    ""type"": ""Button"",
+                    ""id"": ""3832bfc7-0f33-45d3-abf7-618829f1e8cb"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_3"",
+                    ""type"": ""Button"",
+                    ""id"": ""b09847fb-1edc-4c76-b706-e9bbe34720dd"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_4"",
+                    ""type"": ""Button"",
+                    ""id"": ""ea112452-c0da-4787-a691-1ab79797ce37"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_5"",
+                    ""type"": ""Button"",
+                    ""id"": ""176f2365-8a81-46ab-b367-f616c5adabfb"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_6"",
+                    ""type"": ""Button"",
+                    ""id"": ""af2d140f-23ca-4053-b717-46bfb1eb5fce"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_7"",
+                    ""type"": ""Button"",
+                    ""id"": ""90339555-0d44-4d25-9e52-abae733cd228"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_8"",
+                    ""type"": ""Button"",
+                    ""id"": ""401f04fb-4776-4f66-8693-4bd9be3c696d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_9"",
+                    ""type"": ""Button"",
+                    ""id"": ""9b7923b4-cc20-4bf8-bd23-51322b3d9161"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot_0"",
+                    ""type"": ""Button"",
+                    ""id"": ""600641ec-61ac-4abd-9721-11d20b669374"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""4464ab7f-183c-4be2-9d48-c24afde702fe"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1de27a7c-ddb5-4ec7-b6bc-4aa770255ecb"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""35b510bc-4f84-498e-b1fe-6054fc09ea88"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cd41d4f6-0c3e-4004-9591-482d0afe0dcd"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""09f4be44-7448-4dc4-8425-770a1523182c"",
+                    ""path"": ""<Keyboard>/5"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_5"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2269e852-f926-4ae2-b2f0-e1f6467cc3b4"",
+                    ""path"": ""<Keyboard>/6"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_6"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1c259c56-be66-4289-baee-d086438a0866"",
+                    ""path"": ""<Keyboard>/7"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_7"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e3dd84d7-fdca-4f56-83a0-f0cda3859bf2"",
+                    ""path"": ""<Keyboard>/8"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_8"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""59a23c20-1a18-4abd-a13b-c2379b7695b6"",
+                    ""path"": ""<Keyboard>/9"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_9"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1e986efb-00b2-40aa-86c7-fa21c0f298a3"",
+                    ""path"": ""<Keyboard>/0"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_0"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d7b9e70c-c1de-4d53-8ddc-1c663e628edb"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_SkillQ"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""eaa2f25a-aaae-49d6-8e70-5461fdf3dc38"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""QuickSlot_SkillE"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Looting"",
+            ""id"": ""53bfcb64-e79d-4182-bb14-3f225e4a2b27"",
+            ""actions"": [
+                {
+                    ""name"": ""OpenLootItemList"",
+                    ""type"": ""Button"",
+                    ""id"": ""cb7b474a-dba9-4f66-8ac7-547957b3bcb9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LootAllItems"",
+                    ""type"": ""Button"",
+                    ""id"": ""a7a1b077-4662-456c-b0eb-858944252a17"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CloseList"",
+                    ""type"": ""Button"",
+                    ""id"": ""ed6b568b-6cd3-421b-9a94-251ef6d99ff6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""4bccd4bb-2cdc-4b4a-b7aa-7deceecf642c"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""OpenLootItemList"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""04c6a33f-6e10-45b8-a092-8c010f7b130e"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""LootAllItems"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b4b186f4-137a-484f-84c6-530505175bf9"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""CloseList"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Targeting"",
+            ""id"": ""f681ef79-cf6a-4b7b-b3bc-4e61f884909c"",
+            ""actions"": [
+                {
+                    ""name"": ""TargetChange_Left"",
+                    ""type"": ""Button"",
+                    ""id"": ""8a043b04-6fc4-43dd-9597-2b7831a5b802"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TargetChange_Right"",
+                    ""type"": ""Button"",
+                    ""id"": ""5f6732b5-03c4-42cd-a54a-692c97ede90f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""918fe365-8418-47ff-8d2d-5b94f9258225"",
+                    ""path"": ""<Keyboard>/z"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""TargetChange_Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""78eac030-ce8f-4843-b0ac-ad855eabb7d0"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""TargetChange_Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -1855,11 +2241,8 @@ namespace SK
             m_GamePlay_Shield = m_GamePlay.FindAction("Shield", throwIfNotFound: true);
             m_GamePlay_SwitchFightMode = m_GamePlay.FindAction("SwitchFightMode", throwIfNotFound: true);
             m_GamePlay_SwitchMouseMode = m_GamePlay.FindAction("SwitchMouseMode", throwIfNotFound: true);
-            m_GamePlay_GamePlay_Inventory = m_GamePlay.FindAction("GamePlay_Inventory", throwIfNotFound: true);
-            m_GamePlay_GamePlay_CharacterStats = m_GamePlay.FindAction("GamePlay_CharacterStats", throwIfNotFound: true);
-            m_GamePlay_GamePlay_Quest = m_GamePlay.FindAction("GamePlay_Quest", throwIfNotFound: true);
-            m_GamePlay_GamePlay_CloseAll = m_GamePlay.FindAction("GamePlay_CloseAll", throwIfNotFound: true);
             m_GamePlay_Conversation = m_GamePlay.FindAction("Conversation", throwIfNotFound: true);
+            m_GamePlay_Confirm = m_GamePlay.FindAction("Confirm", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1877,8 +2260,34 @@ namespace SK
             m_UI_UI_Quest = m_UI.FindAction("UI_Quest", throwIfNotFound: true);
             m_UI_UI_CharacterStats = m_UI.FindAction("UI_CharacterStats", throwIfNotFound: true);
             m_UI_UI_Inventory = m_UI.FindAction("UI_Inventory", throwIfNotFound: true);
+            m_UI_UI_Skill = m_UI.FindAction("UI_Skill", throwIfNotFound: true);
             m_UI_CloseDialogue = m_UI.FindAction("CloseDialogue", throwIfNotFound: true);
             m_UI_ContinueDialogue = m_UI.FindAction("ContinueDialogue", throwIfNotFound: true);
+            m_UI_UI_ZoomIn = m_UI.FindAction("UI_ZoomIn", throwIfNotFound: true);
+            m_UI_UI_ZoomOut = m_UI.FindAction("UI_ZoomOut", throwIfNotFound: true);
+            // QuickSlot
+            m_QuickSlot = asset.FindActionMap("QuickSlot", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_SkillQ = m_QuickSlot.FindAction("QuickSlot_SkillQ", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_SkillE = m_QuickSlot.FindAction("QuickSlot_SkillE", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_1 = m_QuickSlot.FindAction("QuickSlot_1", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_2 = m_QuickSlot.FindAction("QuickSlot_2", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_3 = m_QuickSlot.FindAction("QuickSlot_3", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_4 = m_QuickSlot.FindAction("QuickSlot_4", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_5 = m_QuickSlot.FindAction("QuickSlot_5", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_6 = m_QuickSlot.FindAction("QuickSlot_6", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_7 = m_QuickSlot.FindAction("QuickSlot_7", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_8 = m_QuickSlot.FindAction("QuickSlot_8", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_9 = m_QuickSlot.FindAction("QuickSlot_9", throwIfNotFound: true);
+            m_QuickSlot_QuickSlot_0 = m_QuickSlot.FindAction("QuickSlot_0", throwIfNotFound: true);
+            // Looting
+            m_Looting = asset.FindActionMap("Looting", throwIfNotFound: true);
+            m_Looting_OpenLootItemList = m_Looting.FindAction("OpenLootItemList", throwIfNotFound: true);
+            m_Looting_LootAllItems = m_Looting.FindAction("LootAllItems", throwIfNotFound: true);
+            m_Looting_CloseList = m_Looting.FindAction("CloseList", throwIfNotFound: true);
+            // Targeting
+            m_Targeting = asset.FindActionMap("Targeting", throwIfNotFound: true);
+            m_Targeting_TargetChange_Left = m_Targeting.FindAction("TargetChange_Left", throwIfNotFound: true);
+            m_Targeting_TargetChange_Right = m_Targeting.FindAction("TargetChange_Right", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -2027,11 +2436,8 @@ namespace SK
         private readonly InputAction m_GamePlay_Shield;
         private readonly InputAction m_GamePlay_SwitchFightMode;
         private readonly InputAction m_GamePlay_SwitchMouseMode;
-        private readonly InputAction m_GamePlay_GamePlay_Inventory;
-        private readonly InputAction m_GamePlay_GamePlay_CharacterStats;
-        private readonly InputAction m_GamePlay_GamePlay_Quest;
-        private readonly InputAction m_GamePlay_GamePlay_CloseAll;
         private readonly InputAction m_GamePlay_Conversation;
+        private readonly InputAction m_GamePlay_Confirm;
         public struct GamePlayActions
         {
             private @PlayerInputAction m_Wrapper;
@@ -2052,11 +2458,8 @@ namespace SK
             public InputAction @Shield => m_Wrapper.m_GamePlay_Shield;
             public InputAction @SwitchFightMode => m_Wrapper.m_GamePlay_SwitchFightMode;
             public InputAction @SwitchMouseMode => m_Wrapper.m_GamePlay_SwitchMouseMode;
-            public InputAction @GamePlay_Inventory => m_Wrapper.m_GamePlay_GamePlay_Inventory;
-            public InputAction @GamePlay_CharacterStats => m_Wrapper.m_GamePlay_GamePlay_CharacterStats;
-            public InputAction @GamePlay_Quest => m_Wrapper.m_GamePlay_GamePlay_Quest;
-            public InputAction @GamePlay_CloseAll => m_Wrapper.m_GamePlay_GamePlay_CloseAll;
             public InputAction @Conversation => m_Wrapper.m_GamePlay_Conversation;
+            public InputAction @Confirm => m_Wrapper.m_GamePlay_Confirm;
             public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -2114,21 +2517,12 @@ namespace SK
                     @SwitchMouseMode.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchMouseMode;
                     @SwitchMouseMode.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchMouseMode;
                     @SwitchMouseMode.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnSwitchMouseMode;
-                    @GamePlay_Inventory.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_Inventory;
-                    @GamePlay_Inventory.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_Inventory;
-                    @GamePlay_Inventory.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_Inventory;
-                    @GamePlay_CharacterStats.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_CharacterStats;
-                    @GamePlay_CharacterStats.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_CharacterStats;
-                    @GamePlay_CharacterStats.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_CharacterStats;
-                    @GamePlay_Quest.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_Quest;
-                    @GamePlay_Quest.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_Quest;
-                    @GamePlay_Quest.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_Quest;
-                    @GamePlay_CloseAll.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_CloseAll;
-                    @GamePlay_CloseAll.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_CloseAll;
-                    @GamePlay_CloseAll.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnGamePlay_CloseAll;
                     @Conversation.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnConversation;
                     @Conversation.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnConversation;
                     @Conversation.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnConversation;
+                    @Confirm.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnConfirm;
+                    @Confirm.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnConfirm;
+                    @Confirm.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnConfirm;
                 }
                 m_Wrapper.m_GamePlayActionsCallbackInterface = instance;
                 if (instance != null)
@@ -2181,21 +2575,12 @@ namespace SK
                     @SwitchMouseMode.started += instance.OnSwitchMouseMode;
                     @SwitchMouseMode.performed += instance.OnSwitchMouseMode;
                     @SwitchMouseMode.canceled += instance.OnSwitchMouseMode;
-                    @GamePlay_Inventory.started += instance.OnGamePlay_Inventory;
-                    @GamePlay_Inventory.performed += instance.OnGamePlay_Inventory;
-                    @GamePlay_Inventory.canceled += instance.OnGamePlay_Inventory;
-                    @GamePlay_CharacterStats.started += instance.OnGamePlay_CharacterStats;
-                    @GamePlay_CharacterStats.performed += instance.OnGamePlay_CharacterStats;
-                    @GamePlay_CharacterStats.canceled += instance.OnGamePlay_CharacterStats;
-                    @GamePlay_Quest.started += instance.OnGamePlay_Quest;
-                    @GamePlay_Quest.performed += instance.OnGamePlay_Quest;
-                    @GamePlay_Quest.canceled += instance.OnGamePlay_Quest;
-                    @GamePlay_CloseAll.started += instance.OnGamePlay_CloseAll;
-                    @GamePlay_CloseAll.performed += instance.OnGamePlay_CloseAll;
-                    @GamePlay_CloseAll.canceled += instance.OnGamePlay_CloseAll;
                     @Conversation.started += instance.OnConversation;
                     @Conversation.performed += instance.OnConversation;
                     @Conversation.canceled += instance.OnConversation;
+                    @Confirm.started += instance.OnConfirm;
+                    @Confirm.performed += instance.OnConfirm;
+                    @Confirm.canceled += instance.OnConfirm;
                 }
             }
         }
@@ -2219,8 +2604,11 @@ namespace SK
         private readonly InputAction m_UI_UI_Quest;
         private readonly InputAction m_UI_UI_CharacterStats;
         private readonly InputAction m_UI_UI_Inventory;
+        private readonly InputAction m_UI_UI_Skill;
         private readonly InputAction m_UI_CloseDialogue;
         private readonly InputAction m_UI_ContinueDialogue;
+        private readonly InputAction m_UI_UI_ZoomIn;
+        private readonly InputAction m_UI_UI_ZoomOut;
         public struct UIActions
         {
             private @PlayerInputAction m_Wrapper;
@@ -2240,8 +2628,11 @@ namespace SK
             public InputAction @UI_Quest => m_Wrapper.m_UI_UI_Quest;
             public InputAction @UI_CharacterStats => m_Wrapper.m_UI_UI_CharacterStats;
             public InputAction @UI_Inventory => m_Wrapper.m_UI_UI_Inventory;
+            public InputAction @UI_Skill => m_Wrapper.m_UI_UI_Skill;
             public InputAction @CloseDialogue => m_Wrapper.m_UI_CloseDialogue;
             public InputAction @ContinueDialogue => m_Wrapper.m_UI_ContinueDialogue;
+            public InputAction @UI_ZoomIn => m_Wrapper.m_UI_UI_ZoomIn;
+            public InputAction @UI_ZoomOut => m_Wrapper.m_UI_UI_ZoomOut;
             public InputActionMap Get() { return m_Wrapper.m_UI; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -2296,12 +2687,21 @@ namespace SK
                     @UI_Inventory.started -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_Inventory;
                     @UI_Inventory.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_Inventory;
                     @UI_Inventory.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_Inventory;
+                    @UI_Skill.started -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_Skill;
+                    @UI_Skill.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_Skill;
+                    @UI_Skill.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_Skill;
                     @CloseDialogue.started -= m_Wrapper.m_UIActionsCallbackInterface.OnCloseDialogue;
                     @CloseDialogue.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnCloseDialogue;
                     @CloseDialogue.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnCloseDialogue;
                     @ContinueDialogue.started -= m_Wrapper.m_UIActionsCallbackInterface.OnContinueDialogue;
                     @ContinueDialogue.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnContinueDialogue;
                     @ContinueDialogue.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnContinueDialogue;
+                    @UI_ZoomIn.started -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_ZoomIn;
+                    @UI_ZoomIn.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_ZoomIn;
+                    @UI_ZoomIn.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_ZoomIn;
+                    @UI_ZoomOut.started -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_ZoomOut;
+                    @UI_ZoomOut.performed -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_ZoomOut;
+                    @UI_ZoomOut.canceled -= m_Wrapper.m_UIActionsCallbackInterface.OnUI_ZoomOut;
                 }
                 m_Wrapper.m_UIActionsCallbackInterface = instance;
                 if (instance != null)
@@ -2351,16 +2751,236 @@ namespace SK
                     @UI_Inventory.started += instance.OnUI_Inventory;
                     @UI_Inventory.performed += instance.OnUI_Inventory;
                     @UI_Inventory.canceled += instance.OnUI_Inventory;
+                    @UI_Skill.started += instance.OnUI_Skill;
+                    @UI_Skill.performed += instance.OnUI_Skill;
+                    @UI_Skill.canceled += instance.OnUI_Skill;
                     @CloseDialogue.started += instance.OnCloseDialogue;
                     @CloseDialogue.performed += instance.OnCloseDialogue;
                     @CloseDialogue.canceled += instance.OnCloseDialogue;
                     @ContinueDialogue.started += instance.OnContinueDialogue;
                     @ContinueDialogue.performed += instance.OnContinueDialogue;
                     @ContinueDialogue.canceled += instance.OnContinueDialogue;
+                    @UI_ZoomIn.started += instance.OnUI_ZoomIn;
+                    @UI_ZoomIn.performed += instance.OnUI_ZoomIn;
+                    @UI_ZoomIn.canceled += instance.OnUI_ZoomIn;
+                    @UI_ZoomOut.started += instance.OnUI_ZoomOut;
+                    @UI_ZoomOut.performed += instance.OnUI_ZoomOut;
+                    @UI_ZoomOut.canceled += instance.OnUI_ZoomOut;
                 }
             }
         }
         public UIActions @UI => new UIActions(this);
+
+        // QuickSlot
+        private readonly InputActionMap m_QuickSlot;
+        private IQuickSlotActions m_QuickSlotActionsCallbackInterface;
+        private readonly InputAction m_QuickSlot_QuickSlot_SkillQ;
+        private readonly InputAction m_QuickSlot_QuickSlot_SkillE;
+        private readonly InputAction m_QuickSlot_QuickSlot_1;
+        private readonly InputAction m_QuickSlot_QuickSlot_2;
+        private readonly InputAction m_QuickSlot_QuickSlot_3;
+        private readonly InputAction m_QuickSlot_QuickSlot_4;
+        private readonly InputAction m_QuickSlot_QuickSlot_5;
+        private readonly InputAction m_QuickSlot_QuickSlot_6;
+        private readonly InputAction m_QuickSlot_QuickSlot_7;
+        private readonly InputAction m_QuickSlot_QuickSlot_8;
+        private readonly InputAction m_QuickSlot_QuickSlot_9;
+        private readonly InputAction m_QuickSlot_QuickSlot_0;
+        public struct QuickSlotActions
+        {
+            private @PlayerInputAction m_Wrapper;
+            public QuickSlotActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
+            public InputAction @QuickSlot_SkillQ => m_Wrapper.m_QuickSlot_QuickSlot_SkillQ;
+            public InputAction @QuickSlot_SkillE => m_Wrapper.m_QuickSlot_QuickSlot_SkillE;
+            public InputAction @QuickSlot_1 => m_Wrapper.m_QuickSlot_QuickSlot_1;
+            public InputAction @QuickSlot_2 => m_Wrapper.m_QuickSlot_QuickSlot_2;
+            public InputAction @QuickSlot_3 => m_Wrapper.m_QuickSlot_QuickSlot_3;
+            public InputAction @QuickSlot_4 => m_Wrapper.m_QuickSlot_QuickSlot_4;
+            public InputAction @QuickSlot_5 => m_Wrapper.m_QuickSlot_QuickSlot_5;
+            public InputAction @QuickSlot_6 => m_Wrapper.m_QuickSlot_QuickSlot_6;
+            public InputAction @QuickSlot_7 => m_Wrapper.m_QuickSlot_QuickSlot_7;
+            public InputAction @QuickSlot_8 => m_Wrapper.m_QuickSlot_QuickSlot_8;
+            public InputAction @QuickSlot_9 => m_Wrapper.m_QuickSlot_QuickSlot_9;
+            public InputAction @QuickSlot_0 => m_Wrapper.m_QuickSlot_QuickSlot_0;
+            public InputActionMap Get() { return m_Wrapper.m_QuickSlot; }
+            public void Enable() { Get().Enable(); }
+            public void Disable() { Get().Disable(); }
+            public bool enabled => Get().enabled;
+            public static implicit operator InputActionMap(QuickSlotActions set) { return set.Get(); }
+            public void SetCallbacks(IQuickSlotActions instance)
+            {
+                if (m_Wrapper.m_QuickSlotActionsCallbackInterface != null)
+                {
+                    @QuickSlot_SkillQ.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_SkillQ;
+                    @QuickSlot_SkillQ.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_SkillQ;
+                    @QuickSlot_SkillQ.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_SkillQ;
+                    @QuickSlot_SkillE.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_SkillE;
+                    @QuickSlot_SkillE.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_SkillE;
+                    @QuickSlot_SkillE.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_SkillE;
+                    @QuickSlot_1.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_1;
+                    @QuickSlot_1.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_1;
+                    @QuickSlot_1.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_1;
+                    @QuickSlot_2.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_2;
+                    @QuickSlot_2.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_2;
+                    @QuickSlot_2.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_2;
+                    @QuickSlot_3.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_3;
+                    @QuickSlot_3.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_3;
+                    @QuickSlot_3.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_3;
+                    @QuickSlot_4.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_4;
+                    @QuickSlot_4.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_4;
+                    @QuickSlot_4.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_4;
+                    @QuickSlot_5.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_5;
+                    @QuickSlot_5.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_5;
+                    @QuickSlot_5.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_5;
+                    @QuickSlot_6.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_6;
+                    @QuickSlot_6.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_6;
+                    @QuickSlot_6.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_6;
+                    @QuickSlot_7.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_7;
+                    @QuickSlot_7.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_7;
+                    @QuickSlot_7.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_7;
+                    @QuickSlot_8.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_8;
+                    @QuickSlot_8.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_8;
+                    @QuickSlot_8.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_8;
+                    @QuickSlot_9.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_9;
+                    @QuickSlot_9.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_9;
+                    @QuickSlot_9.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_9;
+                    @QuickSlot_0.started -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_0;
+                    @QuickSlot_0.performed -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_0;
+                    @QuickSlot_0.canceled -= m_Wrapper.m_QuickSlotActionsCallbackInterface.OnQuickSlot_0;
+                }
+                m_Wrapper.m_QuickSlotActionsCallbackInterface = instance;
+                if (instance != null)
+                {
+                    @QuickSlot_SkillQ.started += instance.OnQuickSlot_SkillQ;
+                    @QuickSlot_SkillQ.performed += instance.OnQuickSlot_SkillQ;
+                    @QuickSlot_SkillQ.canceled += instance.OnQuickSlot_SkillQ;
+                    @QuickSlot_SkillE.started += instance.OnQuickSlot_SkillE;
+                    @QuickSlot_SkillE.performed += instance.OnQuickSlot_SkillE;
+                    @QuickSlot_SkillE.canceled += instance.OnQuickSlot_SkillE;
+                    @QuickSlot_1.started += instance.OnQuickSlot_1;
+                    @QuickSlot_1.performed += instance.OnQuickSlot_1;
+                    @QuickSlot_1.canceled += instance.OnQuickSlot_1;
+                    @QuickSlot_2.started += instance.OnQuickSlot_2;
+                    @QuickSlot_2.performed += instance.OnQuickSlot_2;
+                    @QuickSlot_2.canceled += instance.OnQuickSlot_2;
+                    @QuickSlot_3.started += instance.OnQuickSlot_3;
+                    @QuickSlot_3.performed += instance.OnQuickSlot_3;
+                    @QuickSlot_3.canceled += instance.OnQuickSlot_3;
+                    @QuickSlot_4.started += instance.OnQuickSlot_4;
+                    @QuickSlot_4.performed += instance.OnQuickSlot_4;
+                    @QuickSlot_4.canceled += instance.OnQuickSlot_4;
+                    @QuickSlot_5.started += instance.OnQuickSlot_5;
+                    @QuickSlot_5.performed += instance.OnQuickSlot_5;
+                    @QuickSlot_5.canceled += instance.OnQuickSlot_5;
+                    @QuickSlot_6.started += instance.OnQuickSlot_6;
+                    @QuickSlot_6.performed += instance.OnQuickSlot_6;
+                    @QuickSlot_6.canceled += instance.OnQuickSlot_6;
+                    @QuickSlot_7.started += instance.OnQuickSlot_7;
+                    @QuickSlot_7.performed += instance.OnQuickSlot_7;
+                    @QuickSlot_7.canceled += instance.OnQuickSlot_7;
+                    @QuickSlot_8.started += instance.OnQuickSlot_8;
+                    @QuickSlot_8.performed += instance.OnQuickSlot_8;
+                    @QuickSlot_8.canceled += instance.OnQuickSlot_8;
+                    @QuickSlot_9.started += instance.OnQuickSlot_9;
+                    @QuickSlot_9.performed += instance.OnQuickSlot_9;
+                    @QuickSlot_9.canceled += instance.OnQuickSlot_9;
+                    @QuickSlot_0.started += instance.OnQuickSlot_0;
+                    @QuickSlot_0.performed += instance.OnQuickSlot_0;
+                    @QuickSlot_0.canceled += instance.OnQuickSlot_0;
+                }
+            }
+        }
+        public QuickSlotActions @QuickSlot => new QuickSlotActions(this);
+
+        // Looting
+        private readonly InputActionMap m_Looting;
+        private ILootingActions m_LootingActionsCallbackInterface;
+        private readonly InputAction m_Looting_OpenLootItemList;
+        private readonly InputAction m_Looting_LootAllItems;
+        private readonly InputAction m_Looting_CloseList;
+        public struct LootingActions
+        {
+            private @PlayerInputAction m_Wrapper;
+            public LootingActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
+            public InputAction @OpenLootItemList => m_Wrapper.m_Looting_OpenLootItemList;
+            public InputAction @LootAllItems => m_Wrapper.m_Looting_LootAllItems;
+            public InputAction @CloseList => m_Wrapper.m_Looting_CloseList;
+            public InputActionMap Get() { return m_Wrapper.m_Looting; }
+            public void Enable() { Get().Enable(); }
+            public void Disable() { Get().Disable(); }
+            public bool enabled => Get().enabled;
+            public static implicit operator InputActionMap(LootingActions set) { return set.Get(); }
+            public void SetCallbacks(ILootingActions instance)
+            {
+                if (m_Wrapper.m_LootingActionsCallbackInterface != null)
+                {
+                    @OpenLootItemList.started -= m_Wrapper.m_LootingActionsCallbackInterface.OnOpenLootItemList;
+                    @OpenLootItemList.performed -= m_Wrapper.m_LootingActionsCallbackInterface.OnOpenLootItemList;
+                    @OpenLootItemList.canceled -= m_Wrapper.m_LootingActionsCallbackInterface.OnOpenLootItemList;
+                    @LootAllItems.started -= m_Wrapper.m_LootingActionsCallbackInterface.OnLootAllItems;
+                    @LootAllItems.performed -= m_Wrapper.m_LootingActionsCallbackInterface.OnLootAllItems;
+                    @LootAllItems.canceled -= m_Wrapper.m_LootingActionsCallbackInterface.OnLootAllItems;
+                    @CloseList.started -= m_Wrapper.m_LootingActionsCallbackInterface.OnCloseList;
+                    @CloseList.performed -= m_Wrapper.m_LootingActionsCallbackInterface.OnCloseList;
+                    @CloseList.canceled -= m_Wrapper.m_LootingActionsCallbackInterface.OnCloseList;
+                }
+                m_Wrapper.m_LootingActionsCallbackInterface = instance;
+                if (instance != null)
+                {
+                    @OpenLootItemList.started += instance.OnOpenLootItemList;
+                    @OpenLootItemList.performed += instance.OnOpenLootItemList;
+                    @OpenLootItemList.canceled += instance.OnOpenLootItemList;
+                    @LootAllItems.started += instance.OnLootAllItems;
+                    @LootAllItems.performed += instance.OnLootAllItems;
+                    @LootAllItems.canceled += instance.OnLootAllItems;
+                    @CloseList.started += instance.OnCloseList;
+                    @CloseList.performed += instance.OnCloseList;
+                    @CloseList.canceled += instance.OnCloseList;
+                }
+            }
+        }
+        public LootingActions @Looting => new LootingActions(this);
+
+        // Targeting
+        private readonly InputActionMap m_Targeting;
+        private ITargetingActions m_TargetingActionsCallbackInterface;
+        private readonly InputAction m_Targeting_TargetChange_Left;
+        private readonly InputAction m_Targeting_TargetChange_Right;
+        public struct TargetingActions
+        {
+            private @PlayerInputAction m_Wrapper;
+            public TargetingActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
+            public InputAction @TargetChange_Left => m_Wrapper.m_Targeting_TargetChange_Left;
+            public InputAction @TargetChange_Right => m_Wrapper.m_Targeting_TargetChange_Right;
+            public InputActionMap Get() { return m_Wrapper.m_Targeting; }
+            public void Enable() { Get().Enable(); }
+            public void Disable() { Get().Disable(); }
+            public bool enabled => Get().enabled;
+            public static implicit operator InputActionMap(TargetingActions set) { return set.Get(); }
+            public void SetCallbacks(ITargetingActions instance)
+            {
+                if (m_Wrapper.m_TargetingActionsCallbackInterface != null)
+                {
+                    @TargetChange_Left.started -= m_Wrapper.m_TargetingActionsCallbackInterface.OnTargetChange_Left;
+                    @TargetChange_Left.performed -= m_Wrapper.m_TargetingActionsCallbackInterface.OnTargetChange_Left;
+                    @TargetChange_Left.canceled -= m_Wrapper.m_TargetingActionsCallbackInterface.OnTargetChange_Left;
+                    @TargetChange_Right.started -= m_Wrapper.m_TargetingActionsCallbackInterface.OnTargetChange_Right;
+                    @TargetChange_Right.performed -= m_Wrapper.m_TargetingActionsCallbackInterface.OnTargetChange_Right;
+                    @TargetChange_Right.canceled -= m_Wrapper.m_TargetingActionsCallbackInterface.OnTargetChange_Right;
+                }
+                m_Wrapper.m_TargetingActionsCallbackInterface = instance;
+                if (instance != null)
+                {
+                    @TargetChange_Left.started += instance.OnTargetChange_Left;
+                    @TargetChange_Left.performed += instance.OnTargetChange_Left;
+                    @TargetChange_Left.canceled += instance.OnTargetChange_Left;
+                    @TargetChange_Right.started += instance.OnTargetChange_Right;
+                    @TargetChange_Right.performed += instance.OnTargetChange_Right;
+                    @TargetChange_Right.canceled += instance.OnTargetChange_Right;
+                }
+            }
+        }
+        public TargetingActions @Targeting => new TargetingActions(this);
         private int m_KeyboardMouseSchemeIndex = -1;
         public InputControlScheme KeyboardMouseScheme
         {
@@ -2406,11 +3026,8 @@ namespace SK
             void OnShield(InputAction.CallbackContext context);
             void OnSwitchFightMode(InputAction.CallbackContext context);
             void OnSwitchMouseMode(InputAction.CallbackContext context);
-            void OnGamePlay_Inventory(InputAction.CallbackContext context);
-            void OnGamePlay_CharacterStats(InputAction.CallbackContext context);
-            void OnGamePlay_Quest(InputAction.CallbackContext context);
-            void OnGamePlay_CloseAll(InputAction.CallbackContext context);
             void OnConversation(InputAction.CallbackContext context);
+            void OnConfirm(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {
@@ -2429,8 +3046,37 @@ namespace SK
             void OnUI_Quest(InputAction.CallbackContext context);
             void OnUI_CharacterStats(InputAction.CallbackContext context);
             void OnUI_Inventory(InputAction.CallbackContext context);
+            void OnUI_Skill(InputAction.CallbackContext context);
             void OnCloseDialogue(InputAction.CallbackContext context);
             void OnContinueDialogue(InputAction.CallbackContext context);
+            void OnUI_ZoomIn(InputAction.CallbackContext context);
+            void OnUI_ZoomOut(InputAction.CallbackContext context);
+        }
+        public interface IQuickSlotActions
+        {
+            void OnQuickSlot_SkillQ(InputAction.CallbackContext context);
+            void OnQuickSlot_SkillE(InputAction.CallbackContext context);
+            void OnQuickSlot_1(InputAction.CallbackContext context);
+            void OnQuickSlot_2(InputAction.CallbackContext context);
+            void OnQuickSlot_3(InputAction.CallbackContext context);
+            void OnQuickSlot_4(InputAction.CallbackContext context);
+            void OnQuickSlot_5(InputAction.CallbackContext context);
+            void OnQuickSlot_6(InputAction.CallbackContext context);
+            void OnQuickSlot_7(InputAction.CallbackContext context);
+            void OnQuickSlot_8(InputAction.CallbackContext context);
+            void OnQuickSlot_9(InputAction.CallbackContext context);
+            void OnQuickSlot_0(InputAction.CallbackContext context);
+        }
+        public interface ILootingActions
+        {
+            void OnOpenLootItemList(InputAction.CallbackContext context);
+            void OnLootAllItems(InputAction.CallbackContext context);
+            void OnCloseList(InputAction.CallbackContext context);
+        }
+        public interface ITargetingActions
+        {
+            void OnTargetChange_Left(InputAction.CallbackContext context);
+            void OnTargetChange_Right(InputAction.CallbackContext context);
         }
     }
 }

@@ -6,11 +6,13 @@ namespace SK.FSM
     {
         private Player _states;
 
+        private Animator _anim;
         private Vector3 _animDelta;
 
         public void Init(Player stateManager)
         {
             _states = stateManager;
+            _anim = _states.anim;
         }
 
         public void OnAnimatorMove() => OnAnimatorMoveOverride();
@@ -19,9 +21,9 @@ namespace SK.FSM
         {
             if (!_states.useRootMotion) return;
             
-            if (_states.isGrounded && _states.fixedDeltaTime > 0)
+            if (_states.isGrounded)
             {
-                _animDelta = _states.anim.deltaPosition / _states.fixedDeltaTime;               
+                _animDelta = _anim.deltaPosition / Time.deltaTime;
                 _states.characterController.SimpleMove(_animDelta);
             }
         }

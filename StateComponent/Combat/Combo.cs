@@ -53,9 +53,6 @@ namespace SK.Behavior
         private ComboTreeNode _currentCombo;
 
         private readonly string _methodName = "CancelCombo";
-        private readonly string aKey = "A";
-        private readonly string bKey = "B";
-        private readonly char _comma = ',';
 
         private void Awake()
         {
@@ -72,7 +69,9 @@ namespace SK.Behavior
         {
             ComboTreeNode targetComboNode = _rootNode;
 
-            string[] combo = comboList.combo.Split(_comma);
+            string[] combo = comboList.combo.Split(',');
+            string aKey = "A";
+            string bKey = "B";
 
             // Å¸°Ù ÄÞº¸ ³ëµå¸¦ Å½»ö
             for (int i = 0; i < combo.Length; i++)
