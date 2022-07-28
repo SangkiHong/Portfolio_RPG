@@ -25,3 +25,6 @@
 12.	멀티 텍스쳐 노멀맵 보간 구현
 13.	마나, 스테미나 시스템 구현
 etc.
+
+영상
+<iframe width="560" height="315" src="https://www.youtube.com/embed/RTpPyCCJJXY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
